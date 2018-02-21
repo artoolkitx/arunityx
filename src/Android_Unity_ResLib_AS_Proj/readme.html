@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="format" content="complete">
+</head>
+<body>
+
+<h1>Generating the Android Resource Library File for Unity 5 Android Platform Build Process</h1>
+
+<h4>Written by John Wolf</h4>
+
+<hr>
+
+<p>As of Unity 5, when building a Unity app for the Android platform, the Unity IDE build process no longer supports having an Android resources laid out in directories under the &#8220;res&#8221; directory in the Unity &#8220;Assets/Plugins/Android/&#8221; directory. Instead, the Android resources are required to be built into a &#8220;.aar&#8221; file; a binary distribution of an Android Library Project. A &#8220;.aar&#8221; file can contain the following entries:</p>
+
+<ul>
+<li>/AndroidManifest.xml (mandatory)</li>
+<li>/classes.jar (mandatory)</li>
+<li>/res/ (mandatory)</li>
+<li>/R.txt (mandatory)</li>
+<li>/assets/ (optional)</li>
+<li>/libs/*.jar (optional)</li>
+<li>/jni/<abi>/*.so (optional)</li>
+<li>/proguard.txt (optional)</li>
+<li>/lint.jar (optional)</li>
+</ul>
+
+<p>A Unity forum question somewhat explains the requirement <a href="http://forum.unity3d.com/threads/obsolete-providing-android-resources-in-assets-plugins-android-res-is-deprecated.315889/">here</a>.</p>
+
+<h3>Edit and Build the &#8220;.aar&#8221; Android Resource Library File</h3>
+
+<p>To edit and build the Android resource library, first open the Android Studio project of [ARTK_for_Unity5 repo]/src/Android_Unity_ResLib_AS_Proj with the latest available version of the Android Studio IDE. As of this writing, version 1.5.1 was used. In the IDE, in the &#8220;Project&#8221; tab, &#8220;Android&#8221; view, twirl open the &#8220;ResLib&#8221; folder icon. Under this icon are the AndroidManifest.xml file and &#8220;res&#8221; Android resource folder. Update the .xml files under the &#8220;ResLib&#8221; folder icon as required.</p>
+
+<p>When the edits are complete and the resource library is ready to be built, first select the build variant , &#8220;debug&#8221; or &#8220;release,&#8221; to build. The Unity Android platform build process will consume a debug or release variant &#8220;.aar&#8221; library file, however, there is probably no need to build a debug variant of the resource library so select the &#8220;release&#8221; variant. After opening the &#8220;Build Variants&#8221; tab, in the &#8220;Build Variants&#8221; window under the &#8220;Build Variant&#8221; heading, click to select &#8220;release&#8221;.</p>
+
+<p>As of Android Studio 1.5.1, simply switching the build variant to &#8220;release&#8221; and doing a &#8220;Build&#8221;/&#8220;Make Project&#8221; or &#8220;Build&#8221;/&#8220;Rebuild Project&#8221; does not generate the release version of the &#8220;.aar&#8221; library file. (If you know how to fix this, please let me know). To get around this, click and open the &#8220;Gradle&#8221; tab located in the left margin of the Android Studio IDE main window. In the opened &#8220;Gradle projects&#8221; window, twirl open &#8220;Android_Unity_ResLib_AS_Proj&#8221; icon and the &#8220;Android_Unity_ResLib_AS_Proj&#8221; sub-icon. Then twirl open the &#8220;Tasks&#8221; icon followed by twirling open the &#8220;build&#8221; icon. Under the open &#8220;build&#8221; icon, double click to execute the &#8220;assembleRelease&#8221; gradle task. This will generate the release version of the &#8220;.aar&#8221; library named: &#8220;ResLib-release.aar.&#8221;</p>
+
+<p>The full path of the generated Android resource library file is:</p>
+
+<pre>
+[ARTK_for_Unity5 repo]/src/Android_Unity_ResLib_AS_Proj/
+    ResLib/build/outputs/aar/ResLib-release.aar
+</pre>
+
+<h3>Deploy the .aar Android Resource Library File</h3>
+
+<p>After generating the &#8220;.aar&#8221; file, copy the just generated &#8220;ResLib-release.aar&#8221; file from the path specified above and paste the file in the following directory and overwrite the previous version of the file:</p>
+
+<pre>
+[ARTK_for_Unity5 repo]/src/Unity/Assets/Plugins/Android/
+</pre>
+
+<p>The &#8220;ResLib-release.aar&#8221; file in the above directory is git tracked so git add/commit/push the updated &#8220;.aar&#8221; library file.</p>
+
+<p>Task completed.</p>
+
+</body>
+</html>
