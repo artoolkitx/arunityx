@@ -77,11 +77,33 @@ public static class PluginFunctions
 	public static bool arwInitialiseAR(int pattSize = 16, int pattCountMax = 25)
 	{
 		bool ok;
-		if (Application.platform == RuntimePlatform.IPhonePlayer) ok = ARNativePluginStatic.arwInitialiseARWithOptions(pattSize, pattCountMax);
-		else ok = ARNativePlugin.arwInitialiseARWithOptions(pattSize, pattCountMax);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) {
+            ok = ARNativePluginStatic.arwInitialiseAR ();
+            PluginFunctions.arwSetPatternSize(pattSize);
+            PluginFunctions.arwSetPatternCountMax(pattCountMax);
+//            ok = ARNativePluginStatic.arwInitialiseARWithOptions (pattSize, pattCountMax);
+        } else {
+            ok = ARNativePlugin.arwInitialiseAR();
+            PluginFunctions.arwSetPatternSize(pattSize);
+            PluginFunctions.arwSetPatternCountMax(pattCountMax);
+        }
 		if (ok) PluginFunctions.inited = true;
 		return ok;
 	}
+
+    public static void arwSetPatternSize(int size) {
+        if (Application.platform == RuntimePlatform.IPhonePlayer)
+            ARNativePluginStatic.arwSetTrackerOptionInt (PluginFunctions.ARW_TRACKER_OPTION_SQUARE_PATTERN_SIZE, size);
+        else
+            ARNativePlugin.arwSetTrackerOptionInt (PluginFunctions.ARW_TRACKER_OPTION_SQUARE_PATTERN_SIZE, size);
+    }
+
+    public static void arwSetPatternCountMax(int count) {
+        if (Application.platform == RuntimePlatform.IPhonePlayer)
+            ARNativePluginStatic.arwSetTrackerOptionInt (PluginFunctions.ARW_TRACKER_OPTION_SQUARE_PATTERN_COUNT_MAX, count);
+        else
+            ARNativePlugin.arwSetTrackerOptionInt (PluginFunctions.ARW_TRACKER_OPTION_SQUARE_PATTERN_COUNT_MAX, count);
+    }
 	
 	public static string arwGetARToolKitVersion()
 	{

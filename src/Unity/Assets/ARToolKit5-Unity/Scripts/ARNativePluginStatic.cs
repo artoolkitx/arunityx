@@ -62,10 +62,6 @@ public static class ARNativePluginStatic
 	
 	[DllImport("__Internal")]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwInitialiseARWithOptions(int pattSize, int pattCountMax);
-	
-	[DllImport("__Internal")]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
 	public static extern bool arwGetARToolKitVersion([MarshalAs(UnmanagedType.LPStr)]StringBuilder buffer, int length);
 	
 	[DllImport("__Internal")]

@@ -45,7 +45,7 @@ using UnityEngine;
 public static class ARNativePlugin
 {
 	// The name of the external library containing the native functions
-	private const string LIBRARY_NAME = "ARWrapper";
+	private const string LIBRARY_NAME = "ARX";
 
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	public static extern void arwRegisterLogCallback(PluginFunctions.LogCallback callback);
@@ -56,10 +56,6 @@ public static class ARNativePlugin
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
 	public static extern bool arwInitialiseAR();
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwInitialiseARWithOptions(int pattSize, int pattCountMax);
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -242,11 +238,6 @@ public static class ARNativePlugin
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	public static extern int arwRemoveAllMarkers();
-	
-	
-	// [DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	// [return: MarshalAsAttribute(UnmanagedType.I1)]
-	// public static extern bool arwQueryMarkerVisibility(int markerID);
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
