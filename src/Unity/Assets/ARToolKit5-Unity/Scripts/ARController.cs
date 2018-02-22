@@ -741,12 +741,12 @@ public class ARController : MonoBehaviour
 
                 // On platforms with multithreaded OpenGL rendering, we need to
                 // tell the native plugin the texture ID in advance, so do that now.
-                if (_useNativeGLTexturing) {
-                    if (Application.platform != RuntimePlatform.IPhonePlayer && Application.platform != RuntimePlatform.Android) {
-                        if (!VideoIsStereo) PluginFunctions.arwSetUnityRenderEventUpdateTextureGLTextureID((int)_videoTexture0.GetNativeTexturePtr());
-                        else PluginFunctions.arwSetUnityRenderEventUpdateTextureGLStereoTextureIDs((int)_videoTexture0.GetNativeTexturePtr(), (int)_videoTexture1.GetNativeTexturePtr());
-                    }
-                }
+//                if (_useNativeGLTexturing) {
+//                    if (Application.platform != RuntimePlatform.IPhonePlayer && Application.platform != RuntimePlatform.Android) {
+//                        if (!VideoIsStereo) PluginFunctions.arwSetUnityRenderEventUpdateTextureGLTextureID((int)_videoTexture0.GetNativeTexturePtr());
+//                        else PluginFunctions.arwSetUnityRenderEventUpdateTextureGLStereoTextureIDs((int)_videoTexture0.GetNativeTexturePtr(), (int)_videoTexture1.GetNativeTexturePtr());
+//                    }
+//                }
 
                 Log (LogTag + "Scene configured for video.");
                 _sceneConfiguredForVideo = true;     
@@ -1101,134 +1101,42 @@ public class ARController : MonoBehaviour
         // Only update the texture when running
         if (!_running) return;
 
-
         if (!VideoIsStereo) {
-
             // Mono.
             if (_videoTexture0 == null) {
                 Log(LogTag + "Error: No video texture to update.");
             } else {
-
-                if (_useNativeGLTexturing) {
-                    
-                    // As of 2013-09-23, mobile platforms don't support GL.IssuePluginEvent().
-                    // See http://docs.unity3d.com/Documentation/Manual/NativePluginInterface.html.
-                    if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.Android) {
-                        PluginFunctions.arwUpdateTextureGL((int)_videoTexture0.GetNativeTexturePtr());
-                    } else {
-                        //Log(LogTag + "Calling GL.IssuePluginEvent");
-#pragma warning disable 618
-                        GL.IssuePluginEvent((int)ARW_UNITY_RENDER_EVENTID.UPDATE_TEXTURE_GL);
-#pragma warning restore 618
+                if (_videoColor32Array0 != null) {
+                    bool updatedTexture = PluginFunctions.arwUpdateTexture32(_videoColor32Array0);
+                    if (updatedTexture) {
+                        _videoTexture0.SetPixels32(_videoColor32Array0);
+                        _videoTexture0.Apply(false);
                     }
-                    
                 } else {
-                    
-                    //float st0, st1, st2, st3;
-
-                    if (_videoColor32Array0 != null) {
-
-                        //st0 = Time.realtimeSinceStartup;
-                
-                        bool updatedTexture = PluginFunctions.arwUpdateTexture32(_videoColor32Array0);
-                        if (updatedTexture) {
-                            //st1 = Time.realtimeSinceStartup;                   
-                            //_frameStatsTimeUpdateTexture += (st1 - st0);
-
-                            _videoTexture0.SetPixels32(_videoColor32Array0);
-                            //st2 = Time.realtimeSinceStartup;
-                            //_frameStatsTimeSetPixels += (st2 - st1);
-
-                            _videoTexture0.Apply(false);
-                            //st3 = Time.realtimeSinceStartup;
-                            //_frameStatsTimeApply += (st3 - st2);
-                        }
-                    } else if (_videoColorArray0 != null) {
-
-                        //st0 = Time.realtimeSinceStartup;
-
-                        bool updatedTexture = PluginFunctions.arwUpdateTexture(_videoColorArray0);
-                        if (updatedTexture) {
-                            //st1 = Time.realtimeSinceStartup;                   
-                            //_frameStatsTimeUpdateTexture += (st1 - st0);
-
-                            _videoTexture0.SetPixels(0, 0, _videoWidth0, _videoHeight0, _videoColorArray0);
-                            //st2 = Time.realtimeSinceStartup;
-                            //_frameStatsTimeSetPixels += (st2 - st1);
-
-                            _videoTexture0.Apply(false);
-                            //st3 = Time.realtimeSinceStartup;
-                            //_frameStatsTimeApply += (st3 - st2);
-                        }
-                    } else {
-                        Log(LogTag + "Error: No video color array to update.");
-                    }
-
-                    //_frameStatsCount++;
-                    //if (_frameStatsCount % 150 == 0) {
-                    //    float total = _frameStatsTimeUpdateTexture + _frameStatsTimeSetPixels + _frameStatsTimeApply;
-                    //    Log(LogTag + "Update time:     " + _frameStatsTimeUpdateTexture + " (" + (_frameStatsTimeUpdateTexture * 100.0f / total) + ")");
-                    //    Log(LogTag + "SetPixels time:  " + _frameStatsTimeSetPixels + " (" + (_frameStatsTimeSetPixels * 100.0f / total) + ")");
-                    //    Log(LogTag + "Apply time:      " + _frameStatsTimeApply + " (" + (_frameStatsTimeApply * 100.0f / total) + ")");
-                    //    Log(LogTag + "Total time:      " + total + ", per frame: " + (total/_frameStatsCount));
-                    //}
+                    Log(LogTag + "Error: No video color array to update.");
                 }
             }
-
-        } else {
-
+        }
+        else {
             // Stereo.
             if (_videoTexture0 == null || _videoTexture1 == null) {
                 Log(LogTag + "Error: No video textures to update.");
             } else {
+                if (_videoColor32Array0 != null && _videoColor32Array1 != null) {
                 
-                if (_useNativeGLTexturing) {
-                    
-                    // As of 2013-09-23, mobile platforms don't support GL.IssuePluginEvent().
-                    // See http://docs.unity3d.com/Documentation/Manual/NativePluginInterface.html.
-                    if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.Android) {
-                        PluginFunctions.arwUpdateTextureGLStereo((int)_videoTexture0.GetNativeTexturePtr(), (int)_videoTexture1.GetNativeTexturePtr());
-                    } else {
-                        //Log(LogTag + "Calling GL.IssuePluginEvent");
-#pragma warning disable 618
-                        GL.IssuePluginEvent((int)ARW_UNITY_RENDER_EVENTID.UPDATE_TEXTURE_GL_STEREO);
-#pragma warning restore 618
-                    }
-
-                } else {
-                    
-                    if (_videoColor32Array0 != null && _videoColor32Array1 != null) {
-                    
-                        bool updatedTexture = PluginFunctions.arwUpdateTexture32Stereo(_videoColor32Array0, _videoColor32Array1);
-                        if (updatedTexture) {
-                        
-                            _videoTexture0.SetPixels32(_videoColor32Array0);
-                            _videoTexture1.SetPixels32(_videoColor32Array1);
-
-                            _videoTexture0.Apply(false);
-                            _videoTexture1.Apply(false);
-                        }
-                    } else if (_videoColorArray0 != null && _videoColorArray1 != null) {
-                    
-                        bool updatedTexture = PluginFunctions.arwUpdateTextureStereo(_videoColorArray0, _videoColorArray1);
-                        if (updatedTexture) {
-                        
-                            _videoTexture0.SetPixels(0, 0, _videoWidth0, _videoHeight0, _videoColorArray0);
-                            _videoTexture1.SetPixels(0, 0, _videoWidth1, _videoHeight1, _videoColorArray1);
-
-                            _videoTexture0.Apply(false);
-                            _videoTexture1.Apply(false);
-                        }
-                    } else {
-                        Log(LogTag + "Error: No video color array to update.");
+                    bool updatedTexture = PluginFunctions.arwUpdateTexture32Stereo(_videoColor32Array0, _videoColor32Array1);
+                    if (updatedTexture) {
+                        _videoTexture0.SetPixels32(_videoColor32Array0);
+                        _videoTexture1.SetPixels32(_videoColor32Array1);
+                        _videoTexture0.Apply(false);
+                        _videoTexture1.Apply(false);
                     }
                 }
+                else {
+                    Log(LogTag + "Error: No video color array to update.");
+                }
             }
-
-
-        }
-
-
+         }
     }
 
     private bool CreateClearCamera()
