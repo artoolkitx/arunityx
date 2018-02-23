@@ -185,6 +185,13 @@ public class ARController : MonoBehaviour
     public bool ContentFlipV = false;
     public ContentAlign ContentAlign = ContentAlign.Center;
 
+    #if UNITY_ANDROID
+    //
+    //Android Plugin
+    //
+    private AndroidJavaObject androidPlugin = null;
+    #endif
+
     //private int _frameStatsCount = 0;
     //private float _frameStatsTimeUpdateTexture = 0.0f;
     //private float _frameStatsTimeSetPixels = 0.0f;
@@ -319,13 +326,31 @@ public class ARController : MonoBehaviour
     
     void Awake()
     {
-        //Log(LogTag + "ARController.Awake())");
+        Log(LogTag + "ARController.Awake())");
         #if UNITY_IOS && !UNITY_EDITOR
-        ARNativePluginStatic.aruRequestCamera();
-        Thread.Sleep(2000);
+            ARNativePluginStatic.aruRequestCamera();
+            Thread.Sleep(2000);
         #endif
 
-        InitializeAR ();
+        #if UNITY_ANDROID && !UNITY_EDITOR
+            Log (LogTag + "About to initialize the Android Plugin");
+                using( AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer")){
+                    if(jc != null){
+                        using(AndroidJavaObject activity = jc.GetStatic<AndroidJavaObject>("currentActivity")){
+                        androidPlugin = activity.Call<AndroidJavaObject>("getARToolKitPlugin");
+                        if (null == androidPlugin) {
+                            Log(LogTag + "ERROR: Failed to connect to artoolkitX-Android plugin! We might be missing arxjUnity.jar?");
+                        }
+                        else { 
+                            androidPlugin.Call("unityIsUp",new object[]{true});
+                            activity.Call("startCamera");
+                        }
+                    }
+                }
+            }
+        #endif
+
+//        InitializeAR ();
     }
 
     void OnEnable()
@@ -603,11 +628,9 @@ public class ARController : MonoBehaviour
         // Begin video capture and marker detection.
         if (!VideoIsStereo) {
             Log(LogTag + "Starting ARToolKit video with vconf '" + videoConfiguration0 + "'.");
-            //_running = PluginFunctions.arwStartRunning(videoConfiguration, cparaName, nearPlane, farPlane);
             _running = PluginFunctions.arwStartRunningB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0));
         } else {
             Log(LogTag + "Starting ARToolKit video with vconfL '" + videoConfiguration0 + "', vconfR '" + videoConfiguration1 + "'.");
-            //_running = PluginFunctions.arwStartRunningStereo(vconfL, cparaNameL, vconfR, cparaNameR, transL2RName, nearPlane, farPlane);
             _running = PluginFunctions.arwStartRunningStereoB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0), videoConfiguration1, cparam1, (cparam1 != null ? cparam1.Length : 0), transL2R, (transL2R != null ? transL2R.Length : 0));
 
         }
@@ -638,13 +661,30 @@ public class ARController : MonoBehaviour
         // Remaining Unity setup happens in UpdateAR().
         return true;
     }
+
+    #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+        private ScreenOrientation screenOrientation = ScreenOrientation.Unknown;
+        #if UNITY_ANDROID
+            private int screenWidth = 0;
+            private int screenHeight = 0;
+        #endif
+    #endif
+
     
     bool UpdateAR()
     {
         if (!_running) {
             return false;
         }
-        
+
+        #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+            screenOrientation = Screen.orientation;
+            #if UNITY_ANDROID
+                screenWidth = Screen.width;
+                screenHeight = Screen.height;
+            #endif
+        #endif
+
         if (!_sceneConfiguredForVideo) {
             
             // Wait for the wrapper to confirm video frames have arrived before configuring our video-dependent stuff.
@@ -739,6 +779,10 @@ public class ARController : MonoBehaviour
                 // Adjust viewports of both background and foreground cameras.
                 ConfigureViewports();
 
+                #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+                    UpdateVideoTexture();
+                #endif
+
                 // On platforms with multithreaded OpenGL rendering, we need to
                 // tell the native plugin the texture ID in advance, so do that now.
 //                if (_useNativeGLTexturing) {
@@ -752,7 +796,21 @@ public class ARController : MonoBehaviour
                 _sceneConfiguredForVideo = true;     
             } // !running
         } // !sceneConfiguredForVideo
-        
+
+        #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+            #if UNITY_IOS
+                if (Screen.orientation != screenOrientation) {
+                UpdateVideoTexture();
+                }
+            #elif UNITY_ANDROID
+                if ((Screen.width != screenWidth) || (Screen.height != screenHeight)) {
+                    UpdateVideoTexture();
+                } else if (Screen.orientation != screenOrientation) {
+                    screenWidth = screenHeight = 0;  // Force video texture update on next pass.
+                }
+            #endif
+        #endif
+
         bool gotFrame = PluginFunctions.arwCapture();
         bool ok = PluginFunctions.arwUpdateAR();
         if (!ok) return false;
@@ -812,6 +870,61 @@ public class ARController : MonoBehaviour
             ContentFlipH = (!cameraIsFrontFacing);
         }
     }
+
+    #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+    public void UpdateVideoTexture()
+    {
+        ScreenOrientation screenOrientation = Screen.orientation;
+
+        #if UNITY_ANDROID
+            screenWidth = Screen.width;
+            screenHeight = Screen.height;
+        #endif
+        Matrix4x4 deviceRotation;
+
+        switch (screenOrientation) {
+        case ScreenOrientation.Portrait:
+            Log(LogTag + "ScreenOrientation.Portrait");
+            deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one);
+            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(-90.0f, Vector3.back);
+            break;
+
+        case ScreenOrientation.PortraitUpsideDown:
+            Log(LogTag + "ScreenOrientation.PortraitUpsideDown");
+            deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(-90.0f, Vector3.back), Vector3.one);
+            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(90.0f, Vector3.back);
+            break;
+
+        case ScreenOrientation.LandscapeRight:
+            Log(LogTag + "ScreenOrientation.LandscapeRight");
+            deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(180.0f, Vector3.back), Vector3.one);
+            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(180.0f, Vector3.back);
+            break;
+
+        case ScreenOrientation.LandscapeLeft:
+            Log(LogTag + "ScreenOrientation.LandscapeLeft");
+            deviceRotation = Matrix4x4.identity;
+            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.identity;
+            break;
+
+        case ScreenOrientation.Unknown:
+        default:
+            Log(LogTag + "ScreenOrientation.Unknown");
+            deviceRotation = Matrix4x4.identity;
+            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.identity;
+            break;
+        }
+
+        bool optical;
+        ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
+        foreach (ARCamera arCamera in arCameras) {
+            bool success = arCamera.SetupCamera(NearPlane, FarPlane, deviceRotation * _videoProjectionMatrix0, out optical);
+            if(!success){
+                Log(LogTag + "Error setting up ARCamera.");
+            }
+        }
+    }
+    #endif
 
     public void SetVideoAlpha(float a)
     {
@@ -1380,6 +1493,14 @@ public class ARController : MonoBehaviour
             } else {
                 int contentWidthFinalOrientation = (ContentRotate90 ? contentHeight : contentWidth);
                 int contentHeightFinalOrientation = (ContentRotate90 ? contentWidth : contentHeight);
+                #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+                    if ((screenOrientation == ScreenOrientation.Portrait) || (screenOrientation == ScreenOrientation.PortraitUpsideDown)) {
+                        // Swap width and height.
+                        int temp = contentWidthFinalOrientation;
+                        contentWidthFinalOrientation = contentHeightFinalOrientation;
+                        contentHeightFinalOrientation = temp;
+                    }
+                #endif
                 if (ContentMode == ContentMode.Fit || ContentMode == ContentMode.Fill) {
                     float scaleRatioWidth, scaleRatioHeight, scaleRatio;
                     scaleRatioWidth = (float)backingWidth / (float)contentWidthFinalOrientation;
@@ -1442,17 +1563,16 @@ public class ARController : MonoBehaviour
         
         ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
         foreach (ARCamera arc in arCameras) {
-            
             bool ok;
             if (!arc.Stereo) {
                 // A mono display.
-                ok = arc.SetupCamera(NearPlane, FarPlane, _videoProjectionMatrix0, ref optical);
+                ok = arc.SetupCamera(NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
             } else {
                 // One eye of a stereo display.
                 if (arc.StereoEye == ARCamera.ViewEye.Left) {
-                    ok = arc.SetupCamera(NearPlane, FarPlane, _videoProjectionMatrix0, ref optical);
+                    ok = arc.SetupCamera(NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
                 } else {
-                    ok = arc.SetupCamera(NearPlane, FarPlane, (VideoIsStereo ? _videoProjectionMatrix1 : _videoProjectionMatrix0), ref optical);
+                    ok = arc.SetupCamera(NearPlane, FarPlane, (VideoIsStereo ? _videoProjectionMatrix1 : _videoProjectionMatrix0), out optical);
                 }
             }
             if (!ok) {
@@ -1501,10 +1621,7 @@ public class ARController : MonoBehaviour
         // Special feature: on Android, call the UnityARPlayer.setStereo(haveStereoARCamera) Java method.
         // This allows Android-based devices (e.g. the Epson Moverio BT-200) to support hardware switching between mono/stereo display modes.
         if (Application.platform == RuntimePlatform.Android) {
-            using (AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
-                AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-                jo.Call("setStereo", new object[] {haveStereoARCamera});
-            }
+            androidPlugin.Call("setStereo",new object[]{true});
         }        
 #endif
         return true;
@@ -1627,14 +1744,11 @@ public class ARController : MonoBehaviour
 
             if (GUI.Button(new Rect(570, 390, 150, 50), "Content mode: " + ContentModeNames[ContentMode])) CycleContentMode();
 #if UNITY_ANDROID
-            if (Application.platform == RuntimePlatform.Android) {
-                if (GUI.Button(new Rect(400, 250, 150, 50), "Camera preferences")) {
-                    using (AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
-                        AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-                        jo.Call("launchPreferencesActivity");
-                    }
-                }
+        if (Application.platform == RuntimePlatform.Android) {
+            if (GUI.Button(new Rect(400, 250, 150, 50), "Camera preferences")) {
+                androidPlugin.Call("launchPreferencesActivity");
             }
+        }
 #endif
             if (GUI.Button(new Rect(400, 320, 150, 50), "Video background: " + UseVideoBackground)) UseVideoBackground = !UseVideoBackground;
             if (GUI.Button(new Rect(400, 390, 150, 50), "Debug mode: " + DebugVideo)) DebugVideo = !DebugVideo;

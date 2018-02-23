@@ -1,9 +1,8 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "org.artoolkitx.arx.unity"
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
@@ -19,12 +18,11 @@ android {
 }
 
 /**
- * If you want to link the app to a central AR6J.aar instead of integrating the AR6J project into
- * your project you can do so with the specified repository below and by uncommenting the compile
- * of the .aar file in the dependencies.
- * You can see if the linking works by looking into the build directory of the app:
- * build/intermediates/exploded-aar in this directory you should see AR6J-release.
+ * To link against the pre-build arxjUnity plugin use the defined file system repository below
+ * If you would instead like to link against the actual ARXJ project uncomment the ARXJ project
+ * compilation inside the dependencies section.
  */
+
 allprojects {
     repositories {
         jcenter()
@@ -38,5 +36,9 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     compile(name: 'unity-classes', ext: 'jar')
     compile(name: 'arxjUnity', ext: 'jar')
-    implementation 'com.android.support:appcompat-v7:27.0.2'
+    //IMPORTANT: read the settings.gradle file before changing the below comment.
+    //When using the setting below uncommet the compilation of arxUnity.jar!
+//    compile project(':arxj')
+    //This version is needed because it is the latest stable for Unity3D
+    compile 'com.android.support:support-compat:27.0.2'
 }

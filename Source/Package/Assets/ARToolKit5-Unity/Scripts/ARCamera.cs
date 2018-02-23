@@ -111,9 +111,10 @@ public class ARCamera : MonoBehaviour
 	private Matrix4x4 opticalViewMatrix; // This transform expresses the position and orientation of the physical camera in eye coordinates.
 	
 
-	public bool SetupCamera(float nearClipPlane, float farClipPlane, Matrix4x4 projectionMatrix, ref bool opticalOut)
+	public bool SetupCamera(float nearClipPlane, float farClipPlane, Matrix4x4 projectionMatrix, out bool opticalOut)
 	{
 		Camera c = this.gameObject.GetComponent<Camera>();
+        opticalOut = false;
 		
 		// A perspective projection matrix from the tracker
 		c.orthographic = false;

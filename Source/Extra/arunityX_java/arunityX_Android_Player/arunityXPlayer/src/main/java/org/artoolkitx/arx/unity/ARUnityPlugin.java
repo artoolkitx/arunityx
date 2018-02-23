@@ -41,7 +41,8 @@ import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 
 /**
- * This interface contains all functions that can be called from the Unity3D plugin.
+ * The intention of this interface is to contain all functions that Unity3D calls to instruct
+ * the Android plugin
  * See ARController.cs#Awake() function in ARUnity6 plugin
  */
 interface ARUnityPlugin {
@@ -54,7 +55,7 @@ interface ARUnityPlugin {
     /**
      * Gets the number of the Android (SDK) version running on the current device.
      *
-     * @return number of the Android version (e.g., 23 for Android 6.0)
+     * @return number of the Android version (e.g., 21 for Android 5.0)
      */
     int getAndroidVersion();
 

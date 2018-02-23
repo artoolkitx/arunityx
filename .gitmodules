@@ -1,0 +1,3 @@
+[submodule "Source/Extra/artoolkitx"]
+	path = Source/Extra/artoolkitx
+	url = git@realmaxdemos.com:artoolkitx/artoolkitx.git

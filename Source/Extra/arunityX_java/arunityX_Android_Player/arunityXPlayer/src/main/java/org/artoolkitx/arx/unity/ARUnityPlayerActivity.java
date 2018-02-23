@@ -197,16 +197,14 @@ public class ARUnityPlayerActivity extends UnityPlayerActivity {
                 decorView.removeView(unityView); // We must remove the root view from its parent before we can add it somewhere else.
                 decorView.addView(frameLayout);
 
-                //API Level: 22 use camera2API
                 CameraEventListener cameraEventListener = new UnityCameraEventListener();
                 mCameraAccessHandler = AndroidUtils.createCameraAccessHandler(activity, cameraEventListener);
                 if (mCameraAccessHandler.getCameraAccessPermissions()) {
                     return;
                 }
 
-                ((CameraSurface) mCameraAccessHandler).surfaceCreated();
-                ((CameraSurface) mCameraAccessHandler).surfaceChanged();
-
+                mCameraAccessHandler.getCameraSurfaceView().surfaceCreated();
+                mCameraAccessHandler.getCameraSurfaceView().surfaceChanged();
 
                 // Now add Unity view back in.
                 // In order to ensure that Unity's view covers the camera preview each time onResume
