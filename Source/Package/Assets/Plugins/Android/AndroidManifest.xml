@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.Company.ProductName">
     <application android:icon="@drawable/app_icon" android:label="@string/app_name">
-        <activity android:name="org.artoolkitx.arx.unity.ARUnityPlayerActivity"
+        <activity android:name="org.artoolkitx.arx.unity.ARUnityXPlayerActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="landscape"
                   android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen">

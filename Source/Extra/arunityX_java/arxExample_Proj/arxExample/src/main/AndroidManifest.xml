@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="org.artoolkitx.arx.example" android:versionName="1.0" android:versionCode="1" android:installLocation="preferExternal">
   <application android:icon="@drawable/app_icon" android:label="@string/app_name" android:isGame="true" android:banner="@drawable/app_banner">
-    <activity android:name="org.artoolkitx.arx.unity.ARUnityPlayerActivity" android:label="@string/app_name" android:screenOrientation="landscape" android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen">
+    <activity android:name="org.artoolkitx.arx.unity.ARUnityXPlayerActivity" android:label="@string/app_name" android:screenOrientation="landscape" android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

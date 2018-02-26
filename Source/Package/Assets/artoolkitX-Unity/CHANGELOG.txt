@@ -1,0 +1,192 @@
+Release Notes
+-------------
+
+== ARToolKit for Unity v5.3.2 ==
+- Updated to ARToolKit v5.3.2, including many enhancements and bug fixes. 
+- Linux support is now included.
+- The bug affecting multi-NFT mode has been corrected.
+- ARWrapper video initialization on iOS now uses ar2VideoOpenAsync. This should fix errors when switching scenes in ARToolKit for Unity on iOS.
+- See https://github.com/artoolkit/artoolkit5/blob/ff220716feb14d8e48d565b114493dd6b2d41198/ChangeLog.txt for more details.
+- Dropped support for Android versions prior to 4.0.3 (ICS_MR1, API level 15), iOS versions prior to 7.0, OS X versions prior to 7.0.
+
+== ARToolKit for Unity v5.3.1r2 ==
+- Fixed import on latest Unity (5.3.2).
+- Corrected ARWrapper for SSL support on Android.
+- Runtime control of native log level.
+
+== ARToolKit for Unity v5.3.1 ==
+- Updated to ARToolKit v5.3.1, including addition of new threshold mode, "Bracketing".
+- Inclusion of new demo "Fisticuffs"
+    - Uses 4 barcode markers (0-3).
+    - Any two figures will fight, swipe down on them to duck.
+    - Special thanks to: Michael French, Creator, Designer, & Modeler; Dan Creech, Sound Designer; Steven Schkolne, Update Engineering
+
+== ARToolKit for Unity v5.3r1 ==
+- Copied missing utilities from ARToolKit 5.3 release.
+- Added camera request dialog and access time delay to beginning of ARController for iOS.
+
+== ARToolKit for Unity v5.3 ==
+- Based on ARToolKit v5.3.
+- The NFT dataset format has changed due to the changeover in ARToolKit's libKPM from SURF to FREAK features. A new file format with extension '.fset3' replaces the  previous '.fset2' format. Datasets will need to be regenerated using the genTexData tool from ARToolKit v5.3 utilities.
+- The native plugin no longer depends on OpenCV, and for those platforms that previously required libopencv-flann and libopencv-core DLLs to be deployed alongside the app, this requirement is removed.
+- On Android, the C++ runtime has changed to libc++_shared.
+- Windows Phone 8.1 and Windows Store 8.1 support has been added. When deploying, choose "Metro" as the deployment target. 
+
+
+== ARToolKit for Unity v5.2.2r2 ==
+- src directory for Unity plugin and Android player source.
+- Updated packaging scripts. Bundling is done through shell.
+- Prepared ARToolKit for Unity for Asset Store distribution.
+- Modified post process build script for Windows to move DLLs to correct directory.
+- Added menu to top bar of Unity to download ARToolKit tools.
+- Added warning to first run on Windows for VS2013 runtimes.
+- Fixed 5.2.1 tools.
+
+== ARToolKit for Unity v5.2.2 ==
+- Re-added .unitypackage for easier usage.
+
+== ARToolKit for Unity v5.2.1 ==
+
+Enhancements:
+- Added a new option "Allow non-RGB video internally" on ARController. This allows platforms where bi-planar YUV video offers higher-performance (including iOS and Android) to be used. Note that this option cannot be used if native OpenGL texturing is used. Additionally, with this method, a conversion to RGB for Unity's use is necessary. Profiling of performance is recommended if you use this option.
+
+== ARToolKit for Unity v5.2 ==
+
+New features:
+- ARToolKit for Unity is now open source for the first time! Full source for the ARToolKit for Unity C# scripts is provided, along with the required native plugin binaries for each platform.
+
+
+== ARToolKit for Unity v5.1.7 ==
+
+New features:
+- New dynamic AR scene system allows much greater flexibility in operation. New script components AROrigin, ARTrackedObject, and reworked ARCamera. See http://www.artoolworks.com/support/library/ARToolKit_for_Unity_-_Dynamic_AR_scenes.
+- Tracking of more than one NFT target at a time is now supported. To enable this mode, check the NFT multi-page checkbox on the ARController object.
+
+Enhancements:
+- Help on using the scripts is available at http://www.artoolworks.com/support/library/ARToolKit_for_Unity_-_Scripting_and_low-level_API
+- ARMarkers can now be added and removed after tracking has begun.
+- On Windows, or on other platforms when OpenGL texturing is disabled, texture upload to Unity is now much faster (uses UnityEngine.Color32 type instead of UnityEngine.Color).
+
+Bug fixes:
+- An issue where changing ARCamera's marker tag wouldn't immediately change the referred-to marker has been fixed.
+- In ARTransitionalCamera, changed to use SystemInfo.deviceType == DeviceType.Handheld to identify touch-capable devices.
+- For NFT Markers, ARMarker.NFTWidth and ARMarker.NFTHeight are now correctly in Unity units.
+- The pthreads library on Windows 64-bit builds was linking to the wrong VC runtime. This has been fixed.
+- Native functions that return boolean values will now be correctly interpreted when compiling ARToolKit for Unity's C# scripts with Microsoft's compilers rather than Mono. This fixes a bug affecting Windows Store apps.
+
+
+== ARToolKit for Unity v5.1.6 ==
+
+Bug fixes:
+- Corrects an issue when using the new Windows Media Foundation video module under Unity on Windows 8.
+
+
+== ARToolKit for Unity v5.1.5 ==
+
+Enhancements:
+- Brings ARToolKits support for stereo video sources and stereo tracking to ARToolKit for Unity.
+- When using a single video source with a stereo display, the video background now renders in both eyes.
+- A new video module is available on Windows. It uses the Microsoft Media Foundation framework, and is supported on Windows 7 or later. This module provides better support for built-in cameras on tablet devices running Windows 8. to use this new module, use a video configuration string of "-device=WinMF -format=BGRA". See http://www.artoolworks.com/support/library/Configuring_video_capture_in_ARToolKit_Professional#AR_VIDEO_DEVICE_WINDOWS_MEDIA_FOUNDATION for more information on format and frame size options. 
+
+Bug fixes:
+- Corrects an issue introduced in version 5.1.3R2 which affected AOT compilation on non-Android platforms.
+
+== ARToolKit for Unity v5.1.4 ==
+
+Enhancements:
+- Automatically switches to stereo mode on Epson Moverio BT-200.
+
+Bug fixes:
+- Android: Fixes a crashing bug which occurred sometimes when switching between AR scenes in a single Unity project.
+
+== ARToolKit for Unity v5.1.3R3 ==
+
+Major changes:
+This release introduces a change in the way that AR scenes are initially arranged. By default, a new marker placed in a scene will appear vertically in the Unity environment. This is the same relationship between the marker and the camera's axes as in other ARToolKit SDKs; the marker left/right axis is aligned with camera -x/+x axis, and the marker down/up axis is aligned with the camera -y/+y axis. The one difference is that Unity uses a left-hand coordinate system, with the camera +z pointing into the marker, whereas on other ARToolKit SDKs, the +z axis points out from the marker.
+
+It is simple to produce a scene in Unity where the marker lies on the ground plane (the X-Z plane); just apply a rotation about X of 90 degrees to the AR scene's root object. The supplied examples all implement this technique.
+
+Enhancements:
+- The ARTransitionalCamera, which allows the viewer to move between exocentric (AR) and egocentric (VR) mode in a scene has been improved. "Mouselook" mode should be more reliable. Additionally, on desktop platforms, the user may navigate using Unity's predefined movement controls (e.g. keys W, A, S, D) and the rate at which the user moves is configurable by the user.  
+
+
+== ARToolKit for Unity v5.1.3R2 ==
+
+Bug fixes:
+- Fixed a bug which caused markers to not load in the player in the rare case where Unity loaded ARMarker objects before it loaded the ARController.
+- Fixed a bug which caused multimarkers to be drawn incorrectly in the Unity Editor when the marker origin was not at the world origin.
+
+
+== ARToolKit for Unity v5.1.3 ==
+
+Includes ARToolKit Professional v5.1.3. Changes relevant to ARToolKit for Unity are listed below:
+
+New features:
+- Support for mono and stereo optical see-through displays has been added. At present, only half-width side-by-side stereo mode is supported, as used in e.g. the Epson Moverio BT-200 display. See http://www.artoolworks.com/support/library/Using_an_optical_see-through_display#ARToolKit_for_Unity. A new example Unity scene named StereoOpticalScene is included in Assets/Example Scenes folder. It displays how to set up a project for stereo optical.
+- Android: Access to the CameraPreferences window is now provided via a button on the onscreen GUI. (Press the [Menu] key to bring up the onscreen GUI). This is the supported means of changing the preferred camera resolution on Android.
+
+Enhacements:
+- The runtime ARToolKit for Unity classes have been renamed for clarity. ARToolKit class becomes ARController, Marker becomes ARMarker, and TrackedCamera becomes ARCamera. See http://www.artoolworks.com/support/library/ARToolKit_for_Unity_-_Upgrading_to_the_latest_version for instructions on how to update existing projects.
+
+Bug fixes
+- A bug affecting calls to StopAR() followed by StartAR() has been corrected.
+
+
+== ARToolKit for Unity v5.1.2 ==
+
+
+Includes ARToolKit Professional v5.1.2.
+
+- This release corrects in-Editor display of marker gizmos for multimarker sets.
+- Added preliminary support for optical see-through display.
+
+
+== ARToolKit for Unity v5.1.1 ==
+
+
+Android: ARToolKit 5.1 introduces a significant new feature on Android, fetching of camera calibration data from an ARToolworks-provided server. On request, ARToolworks provides developers access to an on-device version of calib_camera which submits calibration data to ARToolworks' server, making it available to all users of that device. For ARToolKit for Unity on Android, the underlying changes to support this are incorporated into the native plugin. Your app will link against libARWrapper.so and its additional dependencies libcurl.so, libssl.so and libcrypto.so. Please see http://www.artoolworks.com/support/library/Using_automatic_online_camera_calibration_retrieval for details on this feature.
+
+Android: this release also corrects some inconsistencies in the example AndroidManifest.xml (screen size, uses-feature). Added requirement for android.hardware.camera.any and made android.hardware.camera.autofocus and android.hardware.camera optional. This should fix reported issues with Android market not making apps available to devices with only a front camera or to devices without an autofocus camera.
+
+iOS: An error whereby the correct camera parameters were not being selected for most recent iOS devices when using a video configuration of "-preset=high" has been corrected
+
+
+== ARToolKit for Unity v5.0.8 ==
+
+Includes ARToolKit Professional v5.0.8.
+
+- Adds support for ARToolKit multi-marker sets. At present, barcode (matrix) and pattern-based (template) multi-marker sets are supported, with the exception of Android, where pattern-based markers are not currently supported. The multimarker config. file and any dependent pattern files should be placed in the "StreamingAssets" folder, and the path to the multimarker config. file entered into the "Marker" script object. The appropriate tracking mode must be manually (template vs matrix) must be selected in the "ARToolKit" script object. The in-editor display of the position and size of the marker is not currently operational but will be corrected in a subsequent release.
+- Source for the Android UnityARPlayer class is now included in the "extras" directory. See also http://www.artoolworks.com/support/library/ARToolKit_for_Unity_on_Android#Using_ARToolKit_for_Unity_in_a_larger_Android_project.
+
+
+== ARToolKit for Unity v5.0.7 ==
+
+Includes ARToolKit Professional v5.0.7, with one Unity-relevant fix for the default Windows video module (WinDS). This module should now re-open correctly after multiple runs in the Unity Editor.
+
+
+== ARToolKit for Unity v5.0.6 ==
+
+- Separated the call to capture a frame and the call to update AR tracking to improve timing in some cases.
+- Fixes an issue which could lead to frame stutter in some heavily patterned visual environments.
+- Adds a user-visible error dialog in case where camera cannot be found or initialised.
+- Improved shuto
+- Fix for memory leaks on shutdown (observed when repeatedly starting/stopping AR or running inside the Unity Editor).
+- Improved handling of buffer clearing.
+
+
+== ARToolKit for Unity v5.0.5 UPDATE2 ==
+
+- This is an update which corrects an issue in ARToolKit for Unity v5.0.5 UPDATE1 affecting NFT dataset generation.
+- mscvp71.dll or msvcr71.dll have been removed from the "redist" folder as they no longer need to be included with apps which use ARToolKit for Unity.
+
+
+== ARToolKit for Unity v5.0.5 UPDATE1 ==
+
+N.B. This is an update which corrects an issue in ARToolKit for Unity v5.0.5 affecting NFT tracking.
+
+This release incorporates ARToolKit Professional v5.0.5. The numbering of ARToolKit for Unity releases has been changed to match the version of ARToolKit for desktop and mobile platforms.
+
+ARToolKit version 5.0 introduces a new (non-backwards compatible) improved NFT dataset format. While most of the APIs and tools for NFT tracking remain identical, performance has been improved and dataset sizes have been dramatically reduced, typically by more than 90%. As an example, the gibraltar sample NFT dataset (high-resolution A4 size) included with ARToolKit for Unity v2.1.x has shrunk from a total of 1.7B to 229KB. An A5-size dataset at lower resolution can be shrunk to under 100KB. This change comes with the same level of tracking performance. We believe this will make both local storage and over-the-air transmission of NFT datasets far more comfortable for developers.
+
+--
+EOF

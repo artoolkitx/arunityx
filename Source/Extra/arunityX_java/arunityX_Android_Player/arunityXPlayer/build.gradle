@@ -27,7 +27,7 @@ allprojects {
     repositories {
         jcenter()
         flatDir {
-            dirs '../arxjUnity', '../unity-classes'
+            dirs 'arxjUnity', '../unity-classes'
         }
     }
 }
@@ -37,7 +37,7 @@ dependencies {
     compile(name: 'unity-classes', ext: 'jar')
     compile(name: 'arxjUnity', ext: 'jar')
     //IMPORTANT: read the settings.gradle file before changing the below comment.
-    //When using the setting below uncommet the compilation of arxUnity.jar!
+    //When using the setting below uncomment the compilation of arxUnity.jar!
 //    compile project(':arxj')
     //This version is needed because it is the latest stable for Unity3D
     compile 'com.android.support:support-compat:27.0.2'
