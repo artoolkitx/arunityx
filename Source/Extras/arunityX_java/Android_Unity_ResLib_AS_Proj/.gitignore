@@ -1,7 +1,0 @@
-# Android Studio projects
-*.iml
-.gradle
-/local.properties
-/**/.idea
-/**/build
-/captures
