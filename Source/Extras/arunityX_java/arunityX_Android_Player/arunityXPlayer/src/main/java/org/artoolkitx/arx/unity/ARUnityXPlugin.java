@@ -38,7 +38,6 @@ package org.artoolkitx.arx.unity;
  */
 
 import android.content.res.Configuration;
-import android.support.annotation.NonNull;
 
 /**
  * The intention of this interface is to contain all functions that Unity3D calls to instruct
@@ -77,4 +76,18 @@ interface ARUnityXPlugin {
      * @param running true if Unity3D has been started otherwise false
      */
     void setUnityRunning(boolean running);
+
+    /**
+     * This is the place where the listener added in {@link #setConfigurationChangeListener(String)}
+     * is called with the new configuration
+     * @param config
+     */
+    void onConfigurationChanged(Configuration config);
+
+    /**
+     * Unity3D can add a listener which will be informed about configuration changes. (Basically
+     * screen orientation changes)
+     * @param listener name of the Unity3D object which will be the listener
+     */
+    void setConfigurationChangeListener(String listener);
 }

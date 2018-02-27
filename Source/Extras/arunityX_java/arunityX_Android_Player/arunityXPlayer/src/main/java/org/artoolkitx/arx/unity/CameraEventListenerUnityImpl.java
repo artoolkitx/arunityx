@@ -74,8 +74,6 @@ class CameraEventListenerUnityImpl implements CameraEventListener {
 
     @Override
     public void cameraStreamFrame(byte[] frame, int frameSize) {
-        Log.d(TAG, "cameraStreamFrame: firstUpdate: " + firstUpdate);
-
         if (firstUpdate) {
             if (ARController.getInstance().onlyPushVideo(width, height, pixelFormat, cameraIndex, cameraIsFrontFacing)) {
                 Log.e(TAG, "arwAndroidVideoPushInit failed");

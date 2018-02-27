@@ -607,7 +607,7 @@ MonoBehaviour:
   AutoStartAR: 1
   videoCParamName0: 
   videoConfigurationWindows0: -showDialog -flipV
-  videoConfigurationMacOSX0: -width=640 -height=480
+  videoConfigurationMacOSX0: 
   videoConfigurationiOS0: 
   videoConfigurationAndroid0: -format=0
   videoConfigurationWindowsStore0: -device=WinMC -format=BGRA -position=rear
@@ -624,7 +624,7 @@ MonoBehaviour:
   videoConfigurationLinux1: 
   BackgroundLayer1: 9
   NearPlane: 0.01
-  FarPlane: 5
+  FarPlane: 1000
   ContentRotate90: 0
   ContentFlipH: 0
   ContentFlipV: 0
@@ -641,7 +641,7 @@ MonoBehaviour:
   currentImageProcMode: 0
   currentUseVideoBackground: 1
   currentNFTMultiMode: 0
-  currentLogLevel: 1
+  currentLogLevel: 0
   scrollPosition: {x: 0, y: 0}
 --- !u!4 &1192976671
 Transform:
@@ -650,7 +650,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1192976668}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.02, z: 0.000000007450581}
+  m_LocalPosition: {x: 0, y: 0.02, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

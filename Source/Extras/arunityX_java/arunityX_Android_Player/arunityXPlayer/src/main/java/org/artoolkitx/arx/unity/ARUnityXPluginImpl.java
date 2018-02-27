@@ -58,7 +58,7 @@ public final class ARUnityXPluginImpl implements ARUnityXPlugin {
 
     private static final String TAG = ARUnityXPluginImpl.class.getSimpleName();
     private final Activity mActivity;
-    private String mOrientationNotificationObject = null;
+    private String mConfigurationChangeListener = null;
     private String mCameraPermissionNotificationObject;
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
@@ -99,5 +99,16 @@ public final class ARUnityXPluginImpl implements ARUnityXPlugin {
     @Override
     public void setUnityRunning(boolean running) {
         this.mUnityRunning = running;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration config) {
+        throw new UnsupportedOperationException("Function not implemented yet");
+        // TODO: Implement
+    }
+
+    @Override
+    public void setConfigurationChangeListener(String listener) {
+        this.mConfigurationChangeListener = listener;
     }
 }

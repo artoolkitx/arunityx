@@ -112,6 +112,7 @@ public class ARUnityXPlayerActivity extends UnityPlayerActivity {
     @Override
     public void onConfigurationChanged(Configuration config) {
         Log.i(TAG, "onConfigurationChanged()");
+        this.mArtoolkitXPlugin.onConfigurationChanged(config);
         super.onConfigurationChanged(config);
     }
 

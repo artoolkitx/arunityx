@@ -1535,7 +1535,7 @@ public class ARController : MonoBehaviour
             else bottom = (backingHeight - h) / 2;
         }
 
-        //Log(LogTag + "For " + backingWidth + "x" + backingHeight + " screen, calculated viewport " + w + "x" + h + " at (" + left + ", " + bottom + ").");
+        Log(LogTag + "For " + backingWidth + "x" + backingHeight + " screen, calculated viewport " + w + "x" + h + " at (" + left + ", " + bottom + ").");
         return new Rect(left, bottom, w, h);
     }
 
@@ -1624,7 +1624,7 @@ public class ARController : MonoBehaviour
         // Special feature: on Android, call the UnityARPlayer.setStereo(haveStereoARCamera) Java method.
         // This allows Android-based devices (e.g. the Epson Moverio BT-200) to support hardware switching between mono/stereo display modes.
         if (Application.platform == RuntimePlatform.Android) {
-            androidPlugin.Call("setStereo",new object[]{true});
+            androidPlugin.Call("setStereo",new object[]{haveStereoARCamera});
         }        
 #endif
         return true;

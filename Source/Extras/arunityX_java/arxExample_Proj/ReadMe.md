@@ -10,6 +10,7 @@ Whenever changes are made to the Unity3D part of the plugin or to the Unity3D pr
 - libARX.so (armeabi-v7a and x86)
 - libc++_shared.so (armeabi-v7a and x86)
 - libmain.so, libunity.so, libmono.so (armeabi-v7a and x86)
+- assets/bin
 
 ## Where to find those files
 To get access to **libmain.so, libunity.so, libmono.so** one needs to export the Unity3D project into an
