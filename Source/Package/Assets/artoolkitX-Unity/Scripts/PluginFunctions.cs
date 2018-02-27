@@ -205,33 +205,7 @@ public static class PluginFunctions
 		if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwUpdateAR();
 		else return ARNativePlugin.arwUpdateAR();
 	}
-	
-    // public static bool arwUpdateTexture([In, Out]Color[] colors)
-	// {
-	// 	bool ok;
-	// 	GCHandle handle = GCHandle.Alloc(colors, GCHandleType.Pinned);
-	// 	IntPtr address = handle.AddrOfPinnedObject();
-	// 	if (Application.platform == RuntimePlatform.IPhonePlayer) ok = ARNativePluginStatic.arwUpdateTexture(address);
-	// 	else ok = ARNativePlugin.arwUpdateTexture(address);
-	// 	handle.Free();
-	// 	return ok;
-	// }
-
-	// public static bool arwUpdateTextureStereo([In, Out]Color[] colorsL, [In, Out]Color[] colorsR)
-	// {
-	// 	bool ok;
-	// 	GCHandle handle0 = GCHandle.Alloc(colorsL, GCHandleType.Pinned);
-	// 	GCHandle handle1 = GCHandle.Alloc(colorsR, GCHandleType.Pinned);
-	// 	IntPtr address0 = handle0.AddrOfPinnedObject();
-	// 	IntPtr address1 = handle1.AddrOfPinnedObject();
-	// 	if (Application.platform == RuntimePlatform.IPhonePlayer) ok = ARNativePluginStatic.arwUpdateTextureStereo(address0, address1);
-	// 	else ok = ARNativePlugin.arwUpdateTextureStereo(address0, address1);
-	// 	handle0.Free();
-	// 	handle1.Free();
-	// 	return ok;
-	// }
-	
-	public static bool arwUpdateTexture32([In, Out]Color32[] colors32)
+		public static bool arwUpdateTexture32([In, Out]Color32[] colors32)
 	{
 		bool ok;
 		GCHandle handle = GCHandle.Alloc(colors32, GCHandleType.Pinned);
@@ -255,31 +229,7 @@ public static class PluginFunctions
 		handle1.Free();
 		return ok;
 	}
-	
-	// public static bool arwUpdateTextureGL(int textureID)
-	// {
-	// 	if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwUpdateTextureGL(textureID);
-	// 	else return ARNativePlugin.arwUpdateTextureGL(textureID);
-	// }
-	
-	// public static bool arwUpdateTextureGLStereo(int textureID_L, int textureID_R)
-	// {
-	// 	if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwUpdateTextureGLStereo(textureID_L, textureID_R);
-	// 	else return ARNativePlugin.arwUpdateTextureGLStereo(textureID_L, textureID_R);
-	// }
 
-	// public static void arwSetUnityRenderEventUpdateTextureGLTextureID(int textureID)
-	// {
-	// 	if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwSetUnityRenderEventUpdateTextureGLTextureID(textureID);
-	// 	else ARNativePlugin.arwSetUnityRenderEventUpdateTextureGLTextureID(textureID);
-	// }
-
-	// public static void arwSetUnityRenderEventUpdateTextureGLStereoTextureIDs(int textureID_L, int textureID_R)
-	// {
-	// 	if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwSetUnityRenderEventUpdateTextureGLStereoTextureIDs(textureID_L, textureID_R);
-	// 	else ARNativePlugin.arwSetUnityRenderEventUpdateTextureGLStereoTextureIDs(textureID_L, textureID_R);
-	// }
-	
 	public static int arwGetMarkerPatternCount(int markerID)
 	{
 		if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetMarkerPatternCount(markerID);
@@ -474,13 +424,6 @@ public static class PluginFunctions
 		if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwRemoveAllMarkers();
 		else return ARNativePlugin.arwRemoveAllMarkers();
 	}
-
-
-	// public static bool arwQueryMarkerVisibility(int markerID)
-	// {
-	// 	if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwQueryMarkerVisibility(markerID);
-	// 	else return ARNativePlugin.arwQueryMarkerVisibility(markerID);
-	// }
 
 	public static bool arwQueryMarkerVisibilityAndTransformation(int markerID, float[] matrix)
 	{

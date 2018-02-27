@@ -110,16 +110,6 @@ public static class ARNativePlugin
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	//public static extern bool arwUpdateTexture([In, Out]Color[] colors);
-	public static extern bool arwUpdateTexture(IntPtr colors);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	//public static extern bool arwUpdateTextureStereo([In, Out]Color[] colorsL, [In, Out]Color[] colorsR);
-	public static extern bool arwUpdateTextureStereo(IntPtr colorsL, IntPtr colorsR);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
 	//public static extern bool arwUpdateTexture32([In, Out]Color32[] colors32);
 	public static extern bool arwUpdateTexture32(IntPtr colors32);
 	
@@ -127,20 +117,6 @@ public static class ARNativePlugin
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
 	//public static extern bool arwUpdateTexture32Stereo([In, Out]Color32[] colors32L, [In, Out]Color32[] colors32R);
 	public static extern bool arwUpdateTexture32Stereo(IntPtr colors32L, IntPtr colors32R);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwUpdateTextureGL(int textureID);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwUpdateTextureGLStereo(int textureID_L, int textureID_R);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwSetUnityRenderEventUpdateTextureGLTextureID(int textureID);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwSetUnityRenderEventUpdateTextureGLStereoTextureIDs(int textureID_L, int textureID_R);
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	public static extern int arwGetMarkerPatternCount(int markerID);
@@ -152,6 +128,8 @@ public static class ARNativePlugin
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
 	public static extern bool arwGetMarkerPatternImage(int markerID, int patternID, [In, Out]Color[] colors);
+
+
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
@@ -180,24 +158,6 @@ public static class ARNativePlugin
 	public static extern bool arwGetTrackerOptionBool(int option);
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwSetVideoThreshold(int threshold);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern int arwGetVideoThreshold();
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwSetVideoThresholdMode(int mode);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern int arwGetVideoThresholdMode();
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwSetLabelingMode(int mode);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern int arwGetLabelingMode();
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	public static extern void arwSetTrackerOptionFloat(int option, float mode);
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
@@ -208,25 +168,8 @@ public static class ARNativePlugin
 	
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	public static extern int arwGetTrackerOptionInt(int option);
+
 	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwSetMatrixCodeType(int type);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern int arwGetMatrixCodeType();
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwSetImageProcMode(int mode);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern int arwGetImageProcMode();
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwSetNFTMultiMode(bool on);
-	
-	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwGetNFTMultiMode();
 	
 
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl, CharSet = CharSet.Ansi)]

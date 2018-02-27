@@ -113,16 +113,6 @@ public static class ARNativePluginStatic
 	
 	[DllImport("__Internal")]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	//public static extern bool arwUpdateTexture([In, Out]Color[] colors);
-	public static extern bool arwUpdateTexture(IntPtr colors);
-	
-	[DllImport("__Internal")]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	//public static extern bool arwUpdateTextureStereo([In, Out]Color[] colorsL, [In, Out]Color[] colorsR);
-	public static extern bool arwUpdateTextureStereo(IntPtr colorsL, IntPtr colorsR);
-	
-	[DllImport("__Internal")]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
 	//public static extern bool arwUpdateTexture32([In, Out]Color32[] colors32);
 	public static extern bool arwUpdateTexture32(IntPtr colors32);
 	
@@ -130,20 +120,6 @@ public static class ARNativePluginStatic
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
 	//public static extern bool arwUpdateTexture32Stereo([In, Out]Color32[] colors32L, [In, Out]Color32[] colors32R);
 	public static extern bool arwUpdateTexture32Stereo(IntPtr colors32L, IntPtr colors32R);
-	
-	[DllImport("__Internal")]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwUpdateTextureGL(int textureID);
-	
-	[DllImport("__Internal")]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwUpdateTextureGLStereo(int textureID_L, int textureID_R);
-	
-	[DllImport("__Internal")]
-	public static extern void arwSetUnityRenderEventUpdateTextureGLTextureID(int textureID);
-	
-	[DllImport("__Internal")]
-	public static extern void arwSetUnityRenderEventUpdateTextureGLStereoTextureIDs(int textureID_L, int textureID_R);
 	
 	[DllImport("__Internal")]
 	public static extern int arwGetMarkerPatternCount(int markerID);
@@ -183,24 +159,6 @@ public static class ARNativePluginStatic
 	public static extern bool arwGetTrackerOptionBool(int option);
 	
 	[DllImport("__Internal")]
-	public static extern void arwSetVideoThreshold(int threshold);
-	
-	[DllImport("__Internal")]
-	public static extern int arwGetVideoThreshold();
-	
-	[DllImport("__Internal")]
-	public static extern void arwSetVideoThresholdMode(int mode);
-	
-	[DllImport("__Internal")]
-	public static extern int arwGetVideoThresholdMode();
-	
-	[DllImport("__Internal")]
-	public static extern void arwSetLabelingMode(int mode);
-	
-	[DllImport("__Internal")]
-	public static extern int arwGetLabelingMode();
-	
-	[DllImport("__Internal")]
 	public static extern void arwSetTrackerOptionFloat(int option ,float size);
 	
 	[DllImport("__Internal")]
@@ -212,24 +170,8 @@ public static class ARNativePluginStatic
 	[DllImport("__Internal")]
 	public static extern int arwGetTrackerOptionInt(int option);
 	
-	[DllImport("__Internal")]
-	public static extern void arwSetMatrixCodeType(int type);
+
 	
-	[DllImport("__Internal")]
-	public static extern int arwGetMatrixCodeType();
-	
-	[DllImport("__Internal")]
-	public static extern void arwSetImageProcMode(int mode);
-	
-	[DllImport("__Internal")]
-	public static extern int arwGetImageProcMode();
-	
-	[DllImport("__Internal")]
-	public static extern void arwSetNFTMultiMode(bool on);
-	
-	[DllImport("__Internal")]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwGetNFTMultiMode();
 	
 
 	[DllImport("__Internal", CharSet = CharSet.Ansi)]
@@ -241,11 +183,6 @@ public static class ARNativePluginStatic
 	
 	[DllImport("__Internal")]
 	public static extern int arwRemoveAllMarkers();
-	
-	
-	// [DllImport("__Internal")]
-	// [return: MarshalAsAttribute(UnmanagedType.I1)]
-	// public static extern bool arwQueryMarkerVisibility(int markerID);
 	
 	[DllImport("__Internal")]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
