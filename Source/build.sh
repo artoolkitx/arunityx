@@ -142,5 +142,14 @@ if [ "$OS" = "Darwin" ] ; then
         rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
         cp -rf $ARTOOLKITX_HOME/SDK/Plugins/ARX.bundle $ARUNITYX_HOME/Source/Package/Assets/Plugins/
     fi
+
+    if [ $BUILD_IOS ] ; then
+        #Start ARToolKitX macOS build
+        cd $ARTOOLKITX_HOME/Source
+        ./build.sh ios
+
+        #Make sure we remove the AR6.bundle first and then copy the new one in
+        rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
+        cp -rf $ARTOOLKITX_HOME/SDK/lib/libARX.a $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/
+    fi
 fi
-            
