@@ -12,7 +12,7 @@ OURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ARUNITYX_HOME=$OURDIR/..
 
 if [ $# -eq 0 ]; then
-    echo "Must specify platform to build. One or more of: macos, ios, linux, android."
+    echo "Must specify platform to build. One or more of: macos, ios, windows, android."
     exit 1
 fi
 
@@ -76,13 +76,8 @@ else
     CPUS=1
 fi
 
-if [ "$OS" = "Darwin" ] ; then
-# ======================================================================
-#  Build platforms hosted by macOS
-# ======================================================================
-
-# macOS
 # Locate ARTOOLKITX_HOME or clone into submodule
+locate_artkX() {
     if [ ! -f "$OURDIR/Extras/artoolkitx/LICENSE.txt" ] && [ -z $ARTOOLKITX_HOME ]; then
         echo "artoolkitX not found. Please set ARTOOLKITX_HOME or clone submodule"
 
@@ -102,9 +97,10 @@ if [ "$OS" = "Darwin" ] ; then
     if [  -f "$OURDIR/Extras/artoolkitx/LICENSE.txt" ] && [ -z $ARTOOLKITX_HOME ]; then
         ARTOOLKITX_HOME=$OURDIR/Extras/artoolkitx
     fi
+}
 
-    #Android
-    if [ $BUILD_ANDROID ] ; then 
+#function build_android()
+build_android() {
         #Empty the existing plugin directory
         rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libc++_shared.so
         rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libARX.so
@@ -131,6 +127,19 @@ if [ "$OS" = "Darwin" ] ; then
         ./gradlew :arunityXPlayer:assembleRelease
         #Copy to plugins directory
         cp $ARUNITYX_HOME/Source/Extras/arunityx_java/arunityX_Android_Player/arunityXPlayer/build/outputs/aar/arunityXPlayer-release.aar $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/
+}
+
+if [ "$OS" = "Darwin" ] ; then
+# ======================================================================
+#  Build platforms hosted by macOS
+# ======================================================================
+
+# macOS
+    locate_artkX()
+
+    #Android
+    if [ $BUILD_ANDROID ] ; then 
+        build_android
     fi
 
     if [ $BUILD_MACOS ] ; then
@@ -138,7 +147,7 @@ if [ "$OS" = "Darwin" ] ; then
         cd $ARTOOLKITX_HOME/Source
         ./build.sh macos
 
-        #Make sure we remove the AR6.bundle first and then copy the new one in
+        #Make sure we remove the ARX.bundle first and then copy the new one in
         rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
         cp -rf $ARTOOLKITX_HOME/SDK/Plugins/ARX.bundle $ARUNITYX_HOME/Source/Package/Assets/Plugins/
     fi
@@ -148,8 +157,32 @@ if [ "$OS" = "Darwin" ] ; then
         cd $ARTOOLKITX_HOME/Source
         ./build.sh ios
 
-        #Make sure we remove the AR6.bundle first and then copy the new one in
+        #Make sure we remove the ARX.bundle first and then copy the new one in
         rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
         cp -rf $ARTOOLKITX_HOME/SDK/lib/libARX.a $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/
     fi
+fi
+if [ "$OS" = "Windows" ] ; then 
+
+# ======================================================================
+#  Build platforms hosted by windows
+# ======================================================================
+
+    locate_artkX
+
+    if [ $BUILD_WINDOWS ] ; then
+        #Start artoolkitX windows build
+        cd $ARTOOLKITX_HOME/Source
+        ./build.sh windows
+
+        #Make sure we remove the ARX.dll first and then copy the new one in
+        rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/ARX.dll
+        cp -rf $ARTOOLKITX_HOME/SDK/bin/ARX.dll $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/
+    fi
+
+    #Android
+    if [ $BUILD_ANDROID ] ; then 
+        build_android
+    fi
+
 fi
