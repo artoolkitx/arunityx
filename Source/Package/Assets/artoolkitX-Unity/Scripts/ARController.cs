@@ -109,11 +109,11 @@ public class ARController : MonoBehaviour
 
     // Config. in.
     public string videoCParamName0 = "";
-    public string videoConfigurationWindows0 = "-showDialog -flipV";
+    public string videoConfigurationWindows0 = "-showDialog";
     public string videoConfigurationMacOSX0 = "-width=640 -height=480";
     public string videoConfigurationiOS0 = "";
     public string videoConfigurationAndroid0 = "";
-    public string videoConfigurationWindowsStore0 = "-device=WinMC -format=BGRA -position=rear";
+    // public string videoConfigurationWindowsStore0 = "-device=WinMC -format=BGRA -position=rear";
     public string videoConfigurationLinux0="";
     public int BackgroundLayer0 = 8;
 
@@ -141,11 +141,11 @@ public class ARController : MonoBehaviour
     
     // Config. in.
     public string videoCParamName1 = "";
-    public string videoConfigurationWindows1 = "-devNum=2 -showDialog -flipV";
+    public string videoConfigurationWindows1 = "-devNum=2 -showDialog";
     public string videoConfigurationMacOSX1 = "-source=1 -width=640 -height=480";
     public string videoConfigurationiOS1 = "";
     public string videoConfigurationAndroid1 = "";
-    public string videoConfigurationWindowsStore1 = "-device=WinMC -format=BGRA";
+    //public string videoConfigurationWindowsStore1 = "-device=WinMC -format=BGRA";
     public string videoConfigurationLinux1="";
     public int BackgroundLayer1 = 9;
 
@@ -579,12 +579,12 @@ public class ARController : MonoBehaviour
                 videoConfiguration0 = videoConfigurationiOS0 + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
                 videoConfiguration1 = videoConfigurationiOS1 + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
                 break;
-            case RuntimePlatform.WSAPlayerX86:
-            case RuntimePlatform.WSAPlayerX64:
-            case RuntimePlatform.WSAPlayerARM:
-                videoConfiguration0 = videoConfigurationWindowsStore0;
-                videoConfiguration1 = videoConfigurationWindowsStore1;
-                break;
+//            case RuntimePlatform.WSAPlayerX86:
+//            case RuntimePlatform.WSAPlayerX64:
+//            case RuntimePlatform.WSAPlayerARM:
+//                videoConfiguration0 = videoConfigurationWindowsStore0;
+//                videoConfiguration1 = videoConfigurationWindowsStore1;
+//                break;
             //case RuntimePlatform.LinuxEditor:
             case RuntimePlatform.LinuxPlayer:
                 videoConfiguration0 = videoConfigurationLinux0;

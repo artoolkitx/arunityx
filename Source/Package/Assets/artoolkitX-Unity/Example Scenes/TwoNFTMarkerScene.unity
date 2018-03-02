@@ -808,7 +808,7 @@ MonoBehaviour:
   QuitOnEscOrBack: 1
   AutoStartAR: 1
   videoCParamName0: 
-  videoConfigurationWindows0: -showDialog -flipV
+  videoConfigurationWindows0: -showDialog
   videoConfigurationMacOSX0: -width=640 -height=480
   videoConfigurationiOS0: 
   videoConfigurationAndroid0: 
@@ -818,7 +818,7 @@ MonoBehaviour:
   VideoIsStereo: 0
   transL2RName: transL2R
   videoCParamName1: 
-  videoConfigurationWindows1: -devNum=2 -showDialog -flipV
+  videoConfigurationWindows1: -devNum=2 -showDialog
   videoConfigurationMacOSX1: -source=1 -width=640 -height=480
   videoConfigurationiOS1: 
   videoConfigurationAndroid1: 
