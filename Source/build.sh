@@ -135,10 +135,11 @@ if [ "$OS" = "Darwin" ] ; then
 # ======================================================================
 
 # macOS
-    locate_artkX()
+    locate_artkX
 
     #Android
     if [ $BUILD_ANDROID ] ; then 
+        echo "Hello"
         build_android
     fi
 
