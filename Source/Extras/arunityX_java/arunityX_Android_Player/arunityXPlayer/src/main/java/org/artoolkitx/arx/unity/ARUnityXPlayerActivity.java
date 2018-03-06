@@ -2,14 +2,19 @@ package org.artoolkitx.arx.unity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
+import android.view.OrientationEventListener;
+import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.unity3d.player.UnityPlayerActivity;
@@ -59,16 +64,21 @@ public class ARUnityXPlayerActivity extends UnityPlayerActivity {
 
     protected final static String TAG = ARUnityXPlayerActivity.class.getSimpleName();
 
-    private FrameLayout frameLayout = null;
-    private ViewGroup unityView = null;
-
     private CameraAccessHandler mCameraAccessHandler;
-    private ViewGroup decorView;
     private ARUnityXPlugin mArtoolkitXPlugin;
+    private Context mContext;
+    private int mOrientation;
+    private int mRotation;
+
+    private static int LANDSCAPE_LEFT = 3;
+    private static int LANDSCAPE_RIGHT = 1;
+    private static int PORTRAIT = 0;
+    private static int PORTRAIT_180 = 2;
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        mContext = this.getApplicationContext();
 
         // Loading the resource names for the settings screen. This is only needs to be done
         // one time and whenever new settings are added to arxj
@@ -76,6 +86,7 @@ public class ARUnityXPlayerActivity extends UnityPlayerActivity {
         PreferenceManager.setDefaultValues(this, resId, false);
 
         mArtoolkitXPlugin = new ARUnityXPluginImpl(this);
+
     }
 
     @Override
@@ -100,20 +111,43 @@ public class ARUnityXPlayerActivity extends UnityPlayerActivity {
         super.onPause();
     }
 
-    public ARUnityXPlugin getArtoolkitXPlugin() {
-        return this.mArtoolkitXPlugin;
+    @Override
+    public void onConfigurationChanged(Configuration configuration) {
+        super.onConfigurationChanged(configuration);
+
+        Display display = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int rotation = display.getRotation();
+        //Return without doing anything because the configuration change wasn't about device orientation
+        if(configuration.orientation == mOrientation || rotation == mRotation) {
+            return;
+        }
+
+        // configuration.orientation is only returning landscape or portrait but not left or right landscape
+        mOrientation = configuration.orientation;
+        // display.getRotation knows which side was rotated to
+        mRotation = rotation;
+
+        //Depending on device Rotation 0 might be portrait or landscape
+        int returnRotation = mRotation;
+        if(configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            returnRotation = ARUnityXPlayerActivity.PORTRAIT;
+            // Upside-down portrait
+            if ( mRotation == Surface.ROTATION_180) {
+                returnRotation = ARUnityXPlayerActivity.PORTRAIT_180;
+            }
+        } else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            returnRotation = ARUnityXPlayerActivity.LANDSCAPE_RIGHT;
+            if( mRotation == Surface.ROTATION_180) {
+                returnRotation = ARUnityXPlayerActivity.LANDSCAPE_LEFT;
+            }
+        }
+        mArtoolkitXPlugin.onOrientationChanged(returnRotation);
     }
 
-    /**
-     * Android informs us that the device configuration has changed. This is called when the device
-     * orientation changes for example
-     * @param config object containing the new device settings
-     */
-    @Override
-    public void onConfigurationChanged(Configuration config) {
-        Log.i(TAG, "onConfigurationChanged()");
-        this.mArtoolkitXPlugin.onConfigurationChanged(config);
-        super.onConfigurationChanged(config);
+    //Called from Unity3D ARController.cs
+    @SuppressWarnings("unused")
+    public ARUnityXPlugin getArtoolkitXPlugin() {
+        return this.mArtoolkitXPlugin;
     }
 
     protected void startCamera() {

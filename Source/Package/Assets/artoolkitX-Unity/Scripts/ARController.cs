@@ -320,13 +320,28 @@ public class ARController : MonoBehaviour
     [SerializeField]
     private AR_LOG_LEVEL currentLogLevel = AR_LOG_LEVEL.AR_LOG_LEVEL_INFO;
 
+    #if UNITY_ANDROID && !UNITY_EDITOR
+    
+    class OrientationChangeCallback : AndroidJavaProxy
+    {
+        ARController mARController;
+        public OrientationChangeCallback(ARController arController) : base("org.artoolkitx.arx.unity.OrientationChangeListener") { 
+            this.mARController = arController;
+        }
+
+        void onOrientationChanged(int orientation)
+        {
+            Log(LogTag + "INFO: Orientation= " + orientation);
+            // mARController.SetContentForScreenOrientation(true);
+        }
+    }
+    #endif
+
     //
     // MonoBehavior methods.
     //
     void Awake()
     {
-
-
         Log(LogTag + "ARController.Awake())");
         #if UNITY_IOS && !UNITY_EDITOR
             ARNativePluginStatic.aruRequestCamera();
@@ -335,21 +350,24 @@ public class ARController : MonoBehaviour
 
 
         #if UNITY_ANDROID && !UNITY_EDITOR
+
             Log (LogTag + "About to initialize the Android Plugin");
                 using( AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer")){
                     if(jc != null){
-                        using(AndroidJavaObject activity = jc.GetStatic<AndroidJavaObject>("currentActivity")){
-                        androidPlugin = activity.Call<AndroidJavaObject>("getArtoolkitXPlugin");
-                        if (null == androidPlugin) {
-                            Log(LogTag + "ERROR: Failed to connect to artoolkitX-Android plugin! We might be missing arxjUnity.jar?");
-                        }
-                        else { 
-                            androidPlugin.Call("setUnityRunning",new object[]{true});
-                            activity.Call("startCamera");
-                        }
+                        using(AndroidJavaObject activity = jc.GetStatic<AndroidJavaObject>("currentActivity")) {
+                            androidPlugin = activity.Call<AndroidJavaObject>("getArtoolkitXPlugin");
+                            if (null == androidPlugin) {
+                                Log(LogTag + "ERROR: Failed to connect to artoolkitX-Android plugin! We might be missing arxjUnity.jar?");
+                            }
+                            else { 
+                                androidPlugin.Call("setUnityRunning",new object[]{true});
+                                activity.Call("startCamera");
+                            }
                     }
                 }
             }
+            androidPlugin.Call("setOrientationChangedListener", new OrientationChangeCallback(this));
+
         #endif
 
 //        InitializeAR ();
@@ -536,6 +554,7 @@ public class ARController : MonoBehaviour
         Log(LogTag + "Starting AR.");
 
         _sceneConfiguredForVideo = _sceneConfiguredForVideoWaitingMessageLogged = false;
+        // SetContentForScreenOrientation(true);
         
         // Check rendering device.
         string renderDevice = SystemInfo.graphicsDeviceVersion;
@@ -786,15 +805,6 @@ public class ARController : MonoBehaviour
                     UpdateVideoTexture();
                 #endif
 
-                // On platforms with multithreaded OpenGL rendering, we need to
-                // tell the native plugin the texture ID in advance, so do that now.
-//                if (_useNativeGLTexturing) {
-//                    if (Application.platform != RuntimePlatform.IPhonePlayer && Application.platform != RuntimePlatform.Android) {
-//                        if (!VideoIsStereo) PluginFunctions.arwSetUnityRenderEventUpdateTextureGLTextureID((int)_videoTexture0.GetNativeTexturePtr());
-//                        else PluginFunctions.arwSetUnityRenderEventUpdateTextureGLStereoTextureIDs((int)_videoTexture0.GetNativeTexturePtr(), (int)_videoTexture1.GetNativeTexturePtr());
-//                    }
-//                }
-
                 Log (LogTag + "Scene configured for video.");
                 _sceneConfiguredForVideo = true;     
             } // !running
@@ -918,6 +928,8 @@ public class ARController : MonoBehaviour
             break;
         }
 
+        // _videoBackgroundCamera0.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
+
         bool optical;
         ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
         foreach (ARCamera arCamera in arCameras) {
@@ -925,6 +937,13 @@ public class ARController : MonoBehaviour
             if(!success){
                 Log(LogTag + "Error setting up ARCamera.");
             }
+            
+            // Camera camera = arCamera.GetComponent<Camera>();
+            // if ( camera == null )
+            //     break;
+
+            // camera.projectionMatrix = deviceRotation * _videoProjectionMatrix0;
+            // camera.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
         }
     }
     #endif
@@ -1536,6 +1555,10 @@ public class ARController : MonoBehaviour
         }
 
         Log(LogTag + "For " + backingWidth + "x" + backingHeight + " screen, calculated viewport " + w + "x" + h + " at (" + left + ", " + bottom + ").");
+        #if !UNITY_EDITOR && UNITY_ANDROID
+            androidPlugin.Call("logUnityMessage", LogTag + "For " + backingWidth + "x" + backingHeight + " screen, calculated viewport " + w + "x" + h + " at (" + left + ", " + bottom + ").");
+        #endif
+
         return new Rect(left, bottom, w, h);
     }
 
