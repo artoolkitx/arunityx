@@ -699,15 +699,15 @@ public class ARController : MonoBehaviour
             return false;
         }
 
-        #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-            screenOrientation = Screen.orientation;
-            #if UNITY_ANDROID
-                screenWidth = Screen.width;
-                screenHeight = Screen.height;
-            #endif
-        #endif
-
         if (!_sceneConfiguredForVideo) {
+
+            #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+                screenOrientation = Screen.orientation;
+                #if UNITY_ANDROID
+                    screenWidth = Screen.width;
+                    screenHeight = Screen.height;
+                #endif
+            #endif
             
             // Wait for the wrapper to confirm video frames have arrived before configuring our video-dependent stuff.
             if (!PluginFunctions.arwIsRunning()) {
@@ -928,7 +928,7 @@ public class ARController : MonoBehaviour
             break;
         }
 
-        // _videoBackgroundCamera0.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
+        _videoBackgroundCamera0.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
 
         bool optical;
         ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
@@ -938,12 +938,10 @@ public class ARController : MonoBehaviour
                 Log(LogTag + "Error setting up ARCamera.");
             }
             
-            // Camera camera = arCamera.GetComponent<Camera>();
-            // if ( camera == null )
-            //     break;
-
-            // camera.projectionMatrix = deviceRotation * _videoProjectionMatrix0;
-            // camera.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
+            Camera camera = arCamera.GetComponent<Camera>();
+            if ( camera == null )
+                break;
+            camera.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
         }
     }
     #endif
