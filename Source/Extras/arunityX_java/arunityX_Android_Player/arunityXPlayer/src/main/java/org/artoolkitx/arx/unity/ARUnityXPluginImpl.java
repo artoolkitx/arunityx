@@ -103,7 +103,7 @@ public final class ARUnityXPluginImpl implements ARUnityXPlugin {
 
     @Override
     public void onConfigurationChanged(Configuration config) {
-        throw new UnsupportedOperationException("Function not implemented yet");
+//        throw new UnsupportedOperationException("Function not implemented yet");
         // TODO: Implement
     }
 
