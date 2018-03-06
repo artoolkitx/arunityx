@@ -58,10 +58,6 @@ public final class ARUnityXPluginImpl implements ARUnityXPlugin {
 
     private static final String TAG = ARUnityXPluginImpl.class.getSimpleName();
     private final Activity mActivity;
-    private OrientationChangeListener mOrientationChangeListener = null;
-    private String mCameraPermissionNotificationObject;
-
-
     private boolean mUnityRunning = false;
 
     public ARUnityXPluginImpl(Activity activity) {

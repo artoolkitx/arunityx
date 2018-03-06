@@ -77,20 +77,6 @@ interface ARUnityXPlugin {
      */
     void setUnityRunning(boolean running);
 
-    /**
-     * This is the place where the listener added in {@link #setOrientationChangedListener(OrientationChangeListener)}
-     * is called with the new configuration
-     * @param orientation
-     */
-    void onOrientationChanged(int orientation);
-
-    /**
-     * Unity3D can add a listener which will be informed about configuration changes. (Basically
-     * screen orientation changes)
-     * @param listener name of the Unity3D object which will be the listener the Unity object is of class AndroidJavaProxy
-     */
-    void setOrientationChangedListener(OrientationChangeListener listener);
-
     void logUnityMessage(String message);
 
 }

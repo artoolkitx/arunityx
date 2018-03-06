@@ -111,39 +111,6 @@ public class ARUnityXPlayerActivity extends UnityPlayerActivity {
         super.onPause();
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration configuration) {
-        super.onConfigurationChanged(configuration);
-
-        Display display = ((WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        int rotation = display.getRotation();
-        //Return without doing anything because the configuration change wasn't about device orientation
-        if(configuration.orientation == mOrientation || rotation == mRotation) {
-            return;
-        }
-
-        // configuration.orientation is only returning landscape or portrait but not left or right landscape
-        mOrientation = configuration.orientation;
-        // display.getRotation knows which side was rotated to
-        mRotation = rotation;
-
-        //Depending on device Rotation 0 might be portrait or landscape
-        int returnRotation = mRotation;
-        if(configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            returnRotation = ARUnityXPlayerActivity.PORTRAIT;
-            // Upside-down portrait
-            if ( mRotation == Surface.ROTATION_180) {
-                returnRotation = ARUnityXPlayerActivity.PORTRAIT_180;
-            }
-        } else if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            returnRotation = ARUnityXPlayerActivity.LANDSCAPE_RIGHT;
-            if( mRotation == Surface.ROTATION_180) {
-                returnRotation = ARUnityXPlayerActivity.LANDSCAPE_LEFT;
-            }
-        }
-        mArtoolkitXPlugin.onOrientationChanged(returnRotation);
-    }
-
     //Called from Unity3D ARController.cs
     @SuppressWarnings("unused")
     public ARUnityXPlugin getArtoolkitXPlugin() {

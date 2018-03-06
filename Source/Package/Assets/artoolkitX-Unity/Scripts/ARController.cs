@@ -320,23 +320,6 @@ public class ARController : MonoBehaviour
     [SerializeField]
     private AR_LOG_LEVEL currentLogLevel = AR_LOG_LEVEL.AR_LOG_LEVEL_INFO;
 
-    #if UNITY_ANDROID && !UNITY_EDITOR
-    
-    class OrientationChangeCallback : AndroidJavaProxy
-    {
-        ARController mARController;
-        public OrientationChangeCallback(ARController arController) : base("org.artoolkitx.arx.unity.OrientationChangeListener") { 
-            this.mARController = arController;
-        }
-
-        void onOrientationChanged(int orientation)
-        {
-            Log(LogTag + "INFO: Orientation= " + orientation);
-            // mARController.SetContentForScreenOrientation(true);
-        }
-    }
-    #endif
-
     //
     // MonoBehavior methods.
     //
@@ -366,11 +349,7 @@ public class ARController : MonoBehaviour
                     }
                 }
             }
-            androidPlugin.Call("setOrientationChangedListener", new OrientationChangeCallback(this));
-
         #endif
-
-//        InitializeAR ();
     }
 
     void OnEnable()
@@ -545,7 +524,6 @@ public class ARController : MonoBehaviour
     
     public bool StartAR()
     {
-        // SetContentForScreenOrientation(false);
         // Catch attempts to inadvertently call StartAR() twice.
         if (_running) {
             Log(LogTag + "WARNING: StartAR() called while already running. Ignoring.\n");
@@ -813,7 +791,7 @@ public class ARController : MonoBehaviour
         #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
             #if UNITY_IOS
                 if (Screen.orientation != screenOrientation) {
-                UpdateVideoTexture();
+                    UpdateVideoTexture();
                 }
             #elif UNITY_ANDROID
                 if ((Screen.width != screenWidth) || (Screen.height != screenHeight)) {
@@ -861,29 +839,6 @@ public class ARController : MonoBehaviour
     // User-callable configuration methods.
     //
 
-    // At present, you must call this before calling StartAR(), or after calling StopAR().
-    public void SetContentForScreenOrientation(bool cameraIsFrontFacing)
-    {
-        ScreenOrientation orientation = Screen.orientation;
-        if (orientation == ScreenOrientation.Portrait) { // Portait
-            ContentRotate90 = true;
-            ContentFlipV = false;
-            ContentFlipH = cameraIsFrontFacing;
-        } else if (orientation == ScreenOrientation.LandscapeLeft) { // Landscape with top of device at left.
-            ContentRotate90 = false;
-            ContentFlipV = false;
-            ContentFlipH = cameraIsFrontFacing;
-        } else if (orientation == ScreenOrientation.PortraitUpsideDown) { // Portrait upside-down.
-            ContentRotate90 = true;
-            ContentFlipV = true;
-            ContentFlipH = (!cameraIsFrontFacing);
-        } else if (orientation == ScreenOrientation.LandscapeRight) { // Landscape with top of device at right.
-            ContentRotate90 = false;
-            ContentFlipV = true;
-            ContentFlipH = (!cameraIsFrontFacing);
-        }
-    }
-
     #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
     public void UpdateVideoTexture()
     {
@@ -908,7 +863,6 @@ public class ARController : MonoBehaviour
             Log(LogTag + "ScreenOrientation.PortraitUpsideDown");
             deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(-90.0f, Vector3.back), Vector3.one);
             _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(90.0f, Vector3.back);
-            _videoBackgroundCamera0.pixelRect = getViewport(_videoHeight0, _videoWidth0, false, ARCamera.ViewEye.Left);
             break;
 
         case ScreenOrientation.LandscapeRight:
@@ -923,7 +877,6 @@ public class ARController : MonoBehaviour
             Log(LogTag + "ScreenOrientation.LandscapeLeft");
             deviceRotation = Matrix4x4.identity;
             _videoBackgroundCameraGO0.transform.localRotation = Quaternion.identity;
-            _videoBackgroundCamera0.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
             height = _videoWidth0;
             width = _videoHeight0;
             break;
@@ -938,7 +891,6 @@ public class ARController : MonoBehaviour
 
         _videoBackgroundCamera0.pixelRect = getViewport(height, width, false, ARCamera.ViewEye.Left);
 
-
         bool optical;
         ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
         foreach (ARCamera arCamera in arCameras) {
@@ -946,7 +898,7 @@ public class ARController : MonoBehaviour
             if(!success){
                 Log(LogTag + "Error setting up ARCamera.");
             }
-            
+
             Camera camera = arCamera.GetComponent<Camera>();
             if ( camera == null )
                 break;
