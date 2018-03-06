@@ -545,6 +545,7 @@ public class ARController : MonoBehaviour
     
     public bool StartAR()
     {
+        // SetContentForScreenOrientation(false);
         // Catch attempts to inadvertently call StartAR() twice.
         if (_running) {
             Log(LogTag + "WARNING: StartAR() called while already running. Ignoring.\n");
@@ -554,7 +555,6 @@ public class ARController : MonoBehaviour
         Log(LogTag + "Starting AR.");
 
         _sceneConfiguredForVideo = _sceneConfiguredForVideoWaitingMessageLogged = false;
-        // SetContentForScreenOrientation(true);
         
         // Check rendering device.
         string renderDevice = SystemInfo.graphicsDeviceVersion;
@@ -894,6 +894,8 @@ public class ARController : MonoBehaviour
             screenHeight = Screen.height;
         #endif
         Matrix4x4 deviceRotation;
+        int height = _videoHeight0;
+        int width = _videoWidth0;
 
         switch (screenOrientation) {
         case ScreenOrientation.Portrait:
@@ -906,18 +908,24 @@ public class ARController : MonoBehaviour
             Log(LogTag + "ScreenOrientation.PortraitUpsideDown");
             deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(-90.0f, Vector3.back), Vector3.one);
             _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(90.0f, Vector3.back);
+            _videoBackgroundCamera0.pixelRect = getViewport(_videoHeight0, _videoWidth0, false, ARCamera.ViewEye.Left);
             break;
 
         case ScreenOrientation.LandscapeRight:
             Log(LogTag + "ScreenOrientation.LandscapeRight");
             deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(180.0f, Vector3.back), Vector3.one);
             _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(180.0f, Vector3.back);
+            height = _videoWidth0;
+            width = _videoHeight0;
             break;
 
         case ScreenOrientation.LandscapeLeft:
             Log(LogTag + "ScreenOrientation.LandscapeLeft");
             deviceRotation = Matrix4x4.identity;
             _videoBackgroundCameraGO0.transform.localRotation = Quaternion.identity;
+            _videoBackgroundCamera0.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
+            height = _videoWidth0;
+            width = _videoHeight0;
             break;
 
         case ScreenOrientation.Unknown:
@@ -928,7 +936,8 @@ public class ARController : MonoBehaviour
             break;
         }
 
-        _videoBackgroundCamera0.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
+        _videoBackgroundCamera0.pixelRect = getViewport(height, width, false, ARCamera.ViewEye.Left);
+
 
         bool optical;
         ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
@@ -941,7 +950,7 @@ public class ARController : MonoBehaviour
             Camera camera = arCamera.GetComponent<Camera>();
             if ( camera == null )
                 break;
-            camera.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
+            camera.pixelRect = getViewport(height, width, false, ARCamera.ViewEye.Left);
         }
     }
     #endif
@@ -1513,14 +1522,7 @@ public class ARController : MonoBehaviour
             } else {
                 int contentWidthFinalOrientation = (ContentRotate90 ? contentHeight : contentWidth);
                 int contentHeightFinalOrientation = (ContentRotate90 ? contentWidth : contentHeight);
-                #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-                    if ((screenOrientation == ScreenOrientation.Portrait) || (screenOrientation == ScreenOrientation.PortraitUpsideDown)) {
-                        // Swap width and height.
-                        int temp = contentWidthFinalOrientation;
-                        contentWidthFinalOrientation = contentHeightFinalOrientation;
-                        contentHeightFinalOrientation = temp;
-                    }
-                #endif
+
                 if (ContentMode == ContentMode.Fit || ContentMode == ContentMode.Fill) {
                     float scaleRatioWidth, scaleRatioHeight, scaleRatio;
                     scaleRatioWidth = (float)backingWidth / (float)contentWidthFinalOrientation;
