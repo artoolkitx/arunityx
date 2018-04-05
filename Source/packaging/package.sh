@@ -1,10 +1,10 @@
 #! /bin/bash
 
 #
-# Package ARUnity for all platforms.
+# Package arunityX for all platforms.
 #
-# Copyright 2016, ARToolKit Contributors.
-# Author(s): Thorsten Bux <thor_artk@outlook.com> , Philip Lamb <phil@artoolkit.org>
+# Copyright 2018, Realmax, Inc.
+# Author(s): Thorsten Bux <thor_artk@outlook.com> , Philip Lamb <phil@artoolkitx.org>
 #
 
 # -e = exit on errors
