@@ -52,17 +52,19 @@ public class ARMarkerEditor : Editor
 	private static int PatternAssetCount;
 	private static string[] PatternFilenames;
 	
-	/*private static Dictionary<ARController.ARToolKitMatrixCodeType, int> barcodeCounts = new Dictionary<ARController.ARToolKitMatrixCodeType, int>() {
+    private static Dictionary<ARController.ARToolKitMatrixCodeType, long> barcodeCounts = new Dictionary<ARController.ARToolKitMatrixCodeType, long>() {
 		{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3, 64},
     	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_PARITY65, 32},
     	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_HAMMING63, 8},
     	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4, 8192},
     	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4_BCH_13_9_3, 512},
-		{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4_BCH_13_5_5, 32}
-//    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5, 4194304},
-//    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592},
+		{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4_BCH_13_5_5, 32},
+    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5, 4194304},
+    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_12_5, 4096},
+    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_7_7, 128},
+    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592}
 //    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 18446744073709551616}
-	};*/
+	};
 	
 	void OnDestroy()
 	{
@@ -142,8 +144,14 @@ public class ARMarkerEditor : Editor
 				} else {
 				
 					// For barcode markers, allow the user to specify the barcode ID.
-					int BarcodeID = EditorGUILayout.IntField("Barcode ID", m.BarcodeID);
-					//EditorGUILayout.LabelField("(in range 0 to " + barcodeCounts[ARController.MatrixCodeType] + ")");
+                    long BarcodeID = EditorGUILayout.LongField("Barcode ID", m.BarcodeID);
+                    if (BarcodeID < 0) BarcodeID = 0;
+                    ARController arcontroller = Component.FindObjectOfType(typeof(ARController)) as ARController;
+                    if (arcontroller != null) {
+                        long maxBarcodeID = barcodeCounts[arcontroller.MatrixCodeType] - 1;
+                        if (BarcodeID > maxBarcodeID) BarcodeID = maxBarcodeID;
+                        EditorGUILayout.LabelField("(in range 0 to " + (barcodeCounts[arcontroller.MatrixCodeType] - 1) + ")");
+                    }
 	 				if (BarcodeID != m.BarcodeID) {
 						m.Unload();
 						m.BarcodeID = BarcodeID;

@@ -104,7 +104,7 @@ public class ARMarker : MonoBehaviour
     public float PatternWidth = 0.08f;
 	
 	// Barcode markers have a user-selected ID.
-	public int BarcodeID = 0;
+	public long BarcodeID = 0;
 	
     // If the marker is multi, it just has a config filename
     public string MultiConfigFile = "";

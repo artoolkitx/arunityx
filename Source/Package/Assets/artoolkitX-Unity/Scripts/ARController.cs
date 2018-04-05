@@ -250,9 +250,11 @@ public class ARController : MonoBehaviour
         AR_MATRIX_CODE_3x3_HAMMING63 = 0x03 | 0x200,
         AR_MATRIX_CODE_4x4 = 0x04,
         AR_MATRIX_CODE_4x4_BCH_13_9_3 = 0x04 | 0x300,
-        AR_MATRIX_CODE_4x4_BCH_13_5_5 = 0x04 | 0x400//,
-//        AR_MATRIX_CODE_5x5 = 0x05,
-//        AR_MATRIX_CODE_6x6 = 0x06,
+        AR_MATRIX_CODE_4x4_BCH_13_5_5 = 0x04 | 0x400,
+        AR_MATRIX_CODE_5x5 = 0x05,
+        AR_MATRIX_CODE_5x5_BCH_22_12_5 =  0x05 | 0x400,
+        AR_MATRIX_CODE_5x5_BCH_22_7_7 =  0x05 | 0x500,
+        AR_MATRIX_CODE_6x6 = 0x06,
 //        AR_MATRIX_CODE_GLOBAL_ID = 0x0e | 0xb00
     };
     
