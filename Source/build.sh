@@ -35,6 +35,8 @@ do
             ;;
         --debug) DEBUG=
             ;;
+        --dev) DEV=1
+            ;;
         --*) echo "bad option $1"
             usage
             ;;
@@ -129,61 +131,115 @@ build_android() {
         cp $ARUNITYX_HOME/Source/Extras/arunityx_java/arunityX_Android_Player/arunityXPlayer/build/outputs/aar/arunityXPlayer-release.aar $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/
 }
 
-if [ "$OS" = "Darwin" ] ; then
-# ======================================================================
-#  Build platforms hosted by macOS
-# ======================================================================
-
-# macOS
-    locate_artkX
-
-    #Android
-    if [ $BUILD_ANDROID ] ; then 
-        echo "Hello"
-        build_android
+install_plugin() {
+    TYPE=$1
+    VERSION=`cat ../version.txt`
+    echo "Download plugin: $TYPE"
+    
+    curl --location "https://github.com/artoolkitx/artoolkitx/releases/download/$VERSION/$TYPE-unity.zip" -o plugin.zip
+    if [ "$TYPE" = "macOS" ]; then 
+        unzip -o plugin.zip -d Package/Assets/Plugins/
+    elif [ "$TYPE" = "Windows" ]; then 
+        unzip -o plugin.zip -d Package/Assets/Plugins/x86_64/
+    else
+        unzip -o plugin.zip -d Package/Assets/Plugins/$TYPE/
     fi
+    rm plugin.zip
+}
 
-    if [ $BUILD_MACOS ] ; then
-        #Start ARToolKitX macOS build
-        cd $ARTOOLKITX_HOME/Source
-        ./build.sh macos
+#### If a DEV build is running the script uses the path to artoolkitX source to build artoolkitX plugin-libraries from there
+#### If no dev build is running (default) the artoolkitX plugin-libraries are downloaded from GitHub release using the version provided 
 
-        #Make sure we remove the ARX.bundle first and then copy the new one in
-        rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
-        cp -rf $ARTOOLKITX_HOME/SDK/Plugins/ARX.bundle $ARUNITYX_HOME/Source/Package/Assets/Plugins/
+if [ $DEV ] ; then 
+
+    if [ "$OS" = "Darwin" ] ; then
+    # ======================================================================
+    #  Build platforms hosted by macOS
+    # ======================================================================
+
+    # macOS
+        locate_artkX
+
+        #Android
+        if [ $BUILD_ANDROID ] ; then 
+            echo "Hello"
+            build_android
+        fi
+
+        if [ $BUILD_MACOS ] ; then
+            #Start ARToolKitX macOS build
+            cd $ARTOOLKITX_HOME/Source
+            ./build.sh macos
+
+            #Make sure we remove the ARX.bundle first and then copy the new one in
+            rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
+            cp -rf $ARTOOLKITX_HOME/SDK/Plugins/ARX.bundle $ARUNITYX_HOME/Source/Package/Assets/Plugins/
+        fi
+
+        if [ $BUILD_IOS ] ; then
+            #Start ARToolKitX macOS build
+            cd $ARTOOLKITX_HOME/Source
+            ./build.sh ios
+
+            #Make sure we remove the ARX.bundle first and then copy the new one in
+            rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
+            cp -rf $ARTOOLKITX_HOME/SDK/lib/libARX.a $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/
+        fi
     fi
+    if [ "$OS" = "Windows" ] ; then 
 
-    if [ $BUILD_IOS ] ; then
-        #Start ARToolKitX macOS build
-        cd $ARTOOLKITX_HOME/Source
-        ./build.sh ios
+    # ======================================================================
+    #  Build platforms hosted by windows
+    # ======================================================================
 
-        #Make sure we remove the ARX.bundle first and then copy the new one in
-        rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
-        cp -rf $ARTOOLKITX_HOME/SDK/lib/libARX.a $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/
+        locate_artkX
+
+        if [ $BUILD_WINDOWS ] ; then
+            #Start artoolkitX windows build
+            cd $ARTOOLKITX_HOME/Source
+            ./build.sh windows
+
+            #Make sure we remove the ARX.dll first and then copy the new one in
+            rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/ARX.dll
+            cp -rf $ARTOOLKITX_HOME/SDK/bin/ARX.dll $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/
+        fi
+
+        #Android
+        if [ $BUILD_ANDROID ] ; then 
+            build_android
+        fi
+
     fi
-fi
-if [ "$OS" = "Windows" ] ; then 
+else 
+    echo "start download of libs"
 
-# ======================================================================
-#  Build platforms hosted by windows
-# ======================================================================
+    if [ "$OS" = "Darwin" ] ; then
+        # ======================================================================
+        #  Download plugins hosted by macOS (iOS, macOS, Android)
+        # ======================================================================
 
-    locate_artkX
-
-    if [ $BUILD_WINDOWS ] ; then
-        #Start artoolkitX windows build
-        cd $ARTOOLKITX_HOME/Source
-        ./build.sh windows
-
-        #Make sure we remove the ARX.dll first and then copy the new one in
-        rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/ARX.dll
-        cp -rf $ARTOOLKITX_HOME/SDK/bin/ARX.dll $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/
+        if [ $BUILD_IOS ] ; then 
+            install_plugin iOS
+        fi
+        if [ $BUILD_MACOS ] ; then 
+            install_plugin macOS
+        fi
+        if [ $BUILD_ANDROID ] ; then
+            install_plugin Android
+        fi
     fi
+    if [ "$OS" = "Windows" ] ; then 
 
-    #Android
-    if [ $BUILD_ANDROID ] ; then 
-        build_android
+    # ======================================================================
+    #  Download plugins hosted by Windows (Windows, Android)
+    # ======================================================================
+        if [ $BUILD_WINDOWS ] ; then
+            install_plugin Windows
+        fi
+
+        if [ $BUILD_ANDROID ] ; then
+            install_plugin Android
+        fi
+
     fi
-
 fi
