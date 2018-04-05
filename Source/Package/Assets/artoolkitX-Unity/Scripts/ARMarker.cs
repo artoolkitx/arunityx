@@ -190,11 +190,12 @@ public class ARMarker : MonoBehaviour
 
 		//ARController.Log(LogTag + "ARMarker.Load()");
         if (UID != NO_ID) {
-			//ARController.Log(LogTag + "Marker already loaded.");
 			return;
 		}
 
 		if (!PluginFunctions.inited) {
+            // If arwInitialiseAR() has not yet been called, we can't load the native trackable yet.
+            // ARController.InitialiseAR() will call this again when arwInitialiseAR() has been called.
 			return;
 		}
 
@@ -351,12 +352,11 @@ public class ARMarker : MonoBehaviour
 		//ARController.Log(LogTag + "ARMarker.Unload()");
 		
 		if (UID == NO_ID) {
-			//ARController.Log(LogTag + "Marker already unloaded.");
 			return;
 		}
 		
-		if (PluginFunctions.inited) {
-			// Remove any currently loaded ARToolKit marker.
+        // Remove the native trackable, unless arwShutdownAR() has already been called (as it will already have been removed.)
+        if (PluginFunctions.inited) {
         	PluginFunctions.arwRemoveMarker(UID);
 		}
 

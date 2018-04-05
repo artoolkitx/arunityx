@@ -380,23 +380,31 @@ public class ARController : MonoBehaviour
                 break;
         }
 
-        //After switching the Player from Unity to Android or Android to Unity PluginFunctions is not inited anymore
-        //So we need to initialize it again
+        // ARController is up, so init.
         if (PluginFunctions.inited == false) {
-            InitializeAR ();
+            InitializeAR();
         }
-        Log(LogTag + "PluginFunctions initialized: " + PluginFunctions.inited);
-
     }
 
-    private void InitializeAR(){
-       if (PluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax)) {
-            // ARToolKit version number
+    private void InitializeAR()
+    {
+        if (PluginFunctions.inited) {
+            Log(LogTag + "artoolkitX already inited.");
+            return;
+        }
+
+        if (PluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax)) {
+            // artoolkitX version number
             _version = PluginFunctions.arwGetARToolKitVersion();
-            Log(LogTag + "ARToolKit version " + _version + " initialised.");
-        } 
-        else {
+            Log(LogTag + "artoolkitX version " + _version + " initialised.");
+        } else {
             Log(LogTag + "Error initialising ARToolKit");
+        }
+
+        // Ensure ARMarker objects that were instantiated/deserialized before the native interface came up are all loaded.
+        ARMarker[] markers = FindObjectsOfType<ARMarker>();
+        foreach (ARMarker m in markers) {
+            m.Load();
         }
     }
     
