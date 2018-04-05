@@ -56,14 +56,13 @@ public static class PluginFunctions
 
 	public static void arwRegisterLogCallback(LogCallback lcb)
 	{
+		logCallback = lcb;
 		if (lcb != null) {
-			logCallback = lcb;
 			logCallbackGCH = GCHandle.Alloc(logCallback); // Does not need to be pinned, see http://stackoverflow.com/a/19866119/316487 
 		}
 		if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwRegisterLogCallback(logCallback);
 		else ARNativePlugin.arwRegisterLogCallback(logCallback);
 		if (lcb == null) {
-			logCallback = null;
 			logCallbackGCH.Free();
 		}
 	}

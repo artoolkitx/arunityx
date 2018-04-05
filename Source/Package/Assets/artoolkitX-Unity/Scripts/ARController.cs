@@ -356,7 +356,7 @@ public class ARController : MonoBehaviour
     {
         //Log(LogTag + "ARController.OnEnable()");
 
-        // Register the log callback.
+        // Register the log callback. This can be set irrespective of whether PluginFunctions.inited is true or false.
         switch (Application.platform) {
             case RuntimePlatform.OSXEditor:                        // Unity Editor on OS X.
             case RuntimePlatform.OSXPlayer:                        // Unity Player on OS X.
