@@ -1248,8 +1248,7 @@ public class ARController : MonoBehaviour
         
          // Clear color to black.
         clearCamera.clearFlags = CameraClearFlags.SolidColor;
-        if (UseVideoBackground) clearCamera.backgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
-        else clearCamera.backgroundColor = new Color(0.0f, 0.0f, 0.0f, 0.0f);
+        clearCamera.backgroundColor = new Color(0.0f, 0.0f, 0.0f, (currentUseVideoBackground ? 1.0f : 0.0f));
 
         return true;
     }
@@ -1367,11 +1366,16 @@ public class ARController : MonoBehaviour
         vbc.transform.rotation = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
         vbc.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         
-        // Clear everything as the video is the background.
-        //vbc.clearFlags = CameraClearFlags.SolidColor;
-        //vbc.backgroundColor = Color.black;
+        // Unity 5.6 regression: Unity 5.6 combines cameras, which seems to result in the ClearCamera
+        // we create being merged with this video background camera, resulting in the ClearCamera having
+        // no effect. So a workaround (but not a viable fix) is to make this camera also clear the background.
+        #if UNITY_5_6_OR_NEWER
+        vbc.clearFlags = CameraClearFlags.SolidColor;
+        vbc.backgroundColor = Color.black;
+        #else
         vbc.clearFlags = CameraClearFlags.Nothing;
-        
+        #endif
+
         // The background camera displays only the background layer
         vbc.cullingMask = 1 << layer;
         
