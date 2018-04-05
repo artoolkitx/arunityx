@@ -43,7 +43,8 @@ using System.Text.RegularExpressions;
 [InitializeOnLoad]
 public class ARToolKitMenuEditor : MonoBehaviour {
     private const  string FIRST_RUN             = "artoolkit_first_run";
-    private const  string TOOLS_MENU_PATH       = "artoolkitX/Download Tools";
+    private const  string MENU_PATH_BASE       = "artoolkitX";
+    private const  string TOOLS_MENU_PATH       = MENU_PATH_BASE + "/Download Tools";
     private const  string TOOLS_UNITY_MESSAGE   = "To use artoolkitX, you will need tools to generate markers and calibrate your camera.\n" +
             "please select \"{0}\" from the menu to download those tools.";
     private const  string HOME_PAGE_URL         = "http://www.artoolkitx.org/";
@@ -52,7 +53,7 @@ public class ARToolKitMenuEditor : MonoBehaviour {
     private const  string SOURCE_URL            = "https://github.com/artoolkitx/artoolkitx";
     private const  string PLUGIN_SOURCE_URL     = "https://github.com/artoolkitx/arunityx";
 	//private const  string TOOLS_URL             = "http://artoolkit.org/download-artoolkit-sdk#unity";
-    private const  string VERSION               = "artoolkitX/artoolkitX for Unity Version 1.0";
+    private const  string VERSION               = MENU_PATH_BASE + "/artoolkitX for Unity Version 1.0";
     private const  string WINDOWS_UNITY_MESSAGE = "Thank you for choosing artoolkitX for Unity! " +
             "<b>artoolkitX requires the Microsoft C++ Redistributables to be installed on your system.</b>\n" +
             "Please select \"{0}\" from the menu above, and install the required packages.";
@@ -82,30 +83,30 @@ public class ARToolKitMenuEditor : MonoBehaviour {
 //        Application.OpenURL(TOOLS_URL);
 //    }
 
-    [MenuItem ("ARToolKit/Support/Home Page", false, 50)]
+    [MenuItem (MENU_PATH_BASE + "/Support/Home Page", false, 50)]
 	private static void HomePage() {
         Application.OpenURL(HOME_PAGE_URL);
     }
     
-    [MenuItem ("ARToolKit/Support/Documentation", false, 51)]
+    [MenuItem (MENU_PATH_BASE + "/Support/Documentation", false, 51)]
 	private static void Documentation() {
         Application.OpenURL(DOCUMENTATION_URL);
     }
-	[MenuItem ("ARToolKit/Build", false, 41)]
+	[MenuItem (MENU_PATH_BASE + "/Build", false, 41)]
 	private static void Documentdation() {
 		ARToolKitPackager.CreatePackage();
 	}
-	[MenuItem ("ARToolKit/Support/Community Forums", false, 52)]
+	[MenuItem (MENU_PATH_BASE + "/Support/Community Forums", false, 52)]
 	private static void Community() {
         Application.OpenURL(COMMUNITY_URL);
     }
     
-    [MenuItem ("ARToolKit/Source Code/View ARToolKit Source", false, 53)]
+    [MenuItem (MENU_PATH_BASE + "/Source Code/View ARToolKit Source", false, 53)]
 	private static void Source() {
         Application.OpenURL(SOURCE_URL);
     }
     
-    [MenuItem ("ARToolKit/Source Code/View Unity Plugin Source", false, 54)]
+    [MenuItem (MENU_PATH_BASE + "/Source Code/View Unity Plugin Source", false, 54)]
 	private static void PluginSource() {
         Application.OpenURL(PLUGIN_SOURCE_URL);
     }
