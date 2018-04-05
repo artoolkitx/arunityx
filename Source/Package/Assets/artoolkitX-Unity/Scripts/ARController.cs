@@ -1,21 +1,21 @@
 /*
  *  ARController.cs
- *  ARToolKit for Unity
+ *  artoolkitX for Unity
  *
- *  This file is part of ARToolKit for Unity.
+ *  This file is part of artoolkitX for Unity.
  *
- *  ARToolKit for Unity is free software: you can redistribute it and/or modify
+ *  artoolkitX for Unity is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  ARToolKit for Unity is distributed in the hope that it will be useful,
+ *  artoolkitX for Unity is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with ARToolKit for Unity.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with artoolkitX for Unity.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  As a special exception, the copyright holders of this library give you
  *  permission to link this library with independent modules to produce an
@@ -398,7 +398,7 @@ public class ARController : MonoBehaviour
             _version = PluginFunctions.arwGetARToolKitVersion();
             Log(LogTag + "artoolkitX version " + _version + " initialised.");
         } else {
-            Log(LogTag + "Error initialising ARToolKit");
+            Log(LogTag + "Error initialising artoolkitX");
         }
 
         // Ensure ARMarker objects that were instantiated/deserialized before the native interface came up are all loaded.
@@ -517,10 +517,10 @@ public class ARController : MonoBehaviour
     {
         //Log(LogTag + "ARController.OnDestroy()");
 
-        Log(LogTag + "Shutting down ARToolKit");
-        // arwShutdownAR() causes everything ARToolKit holds to be unloaded.
+        Log(LogTag + "Shutting down artoolkitX");
+        // arwShutdownAR() causes everything artoolkitX holds to be unloaded.
         if (!PluginFunctions.arwShutdownAR ()) {
-            Log(LogTag + "Error shutting down ARToolKit.");
+            Log(LogTag + "Error shutting down artoolkitX.");
         }
 
         // Classes inheriting from MonoBehavior should set all static member variables to null on unload.
@@ -635,10 +635,10 @@ public class ARController : MonoBehaviour
         
         // Begin video capture and marker detection.
         if (!VideoIsStereo) {
-            Log(LogTag + "Starting ARToolKit video with vconf '" + videoConfiguration0 + "'.");
+            Log(LogTag + "Starting artoolkitX video with vconf '" + videoConfiguration0 + "'.");
             _running = PluginFunctions.arwStartRunningB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0));
         } else {
-            Log(LogTag + "Starting ARToolKit video with vconfL '" + videoConfiguration0 + "', vconfR '" + videoConfiguration1 + "'.");
+            Log(LogTag + "Starting artoolkitX video with vconfL '" + videoConfiguration0 + "', vconfR '" + videoConfiguration1 + "'.");
             _running = PluginFunctions.arwStartRunningStereoB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0), videoConfiguration1, cparam1, (cparam1 != null ? cparam1.Length : 0), transL2R, (transL2R != null ? transL2R.Length : 0));
 
         }
@@ -655,8 +655,8 @@ public class ARController : MonoBehaviour
             return false;
         }
         
-        // After calling arwStartRunningB/arwStartRunningStereoB, set ARToolKit configuration.
-        Log(LogTag + "Setting ARToolKit tracking settings.");
+        // After calling arwStartRunningB/arwStartRunningStereoB, set artoolkitX configuration.
+        Log(LogTag + "Setting artoolkitX tracking settings.");
         VideoThreshold = currentThreshold;
         VideoThresholdMode = currentThresholdMode;
         LabelingMode = currentLabelingMode;
@@ -698,24 +698,24 @@ public class ARController : MonoBehaviour
             // Wait for the wrapper to confirm video frames have arrived before configuring our video-dependent stuff.
             if (!PluginFunctions.arwIsRunning()) {
                 if (!_sceneConfiguredForVideoWaitingMessageLogged) {
-                    Log(LogTag + "UpdateAR: Waiting for ARToolKit video.");
+                    Log(LogTag + "UpdateAR: Waiting for artoolkitX video.");
                     _sceneConfiguredForVideoWaitingMessageLogged = true;
                 }
             } else {
-                Log(LogTag + "UpdateAR: ARToolKit video is running. Configuring Unity scene for video.");
+                Log(LogTag + "UpdateAR: artoolkitX video is running. Configuring Unity scene for video.");
         
-                // Retrieve ARToolKit video source(s) frame size and format, and projection matrix, and store globally.
+                // Retrieve artoolkitX video source(s) frame size and format, and projection matrix, and store globally.
                 // Then create the required object(s) to instantiate a mesh/meshes with the frame texture(s).
                 // Each mesh lives in a separate "video background" layer.
                 if (!VideoIsStereo) {
 
-                    // ARToolKit video size and format.
+                    // artoolkitX video size and format.
                  
                     bool ok1 = PluginFunctions.arwGetVideoParams(out _videoWidth0, out _videoHeight0, out _videoPixelSize0, out _videoPixelFormatString0);
                     if (!ok1) return false;
                     Log(LogTag + "Video " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + ")");
                     
-                    // ARToolKit projection matrix adjusted for Unity
+                    // artoolkitX projection matrix adjusted for Unity
                     float[] projRaw = new float[16];
                     PluginFunctions.arwGetProjectionMatrix(NearPlane, FarPlane, projRaw);
                     _videoProjectionMatrix0 = ARUtilityFunctions.MatrixFromFloatArray(projRaw);
@@ -731,12 +731,12 @@ public class ARController : MonoBehaviour
 
                 } else {
 
-                    // ARToolKit stereo video size and format.
+                    // artoolkitX stereo video size and format.
                     bool ok1 = PluginFunctions.arwGetVideoParamsStereo(out _videoWidth0, out _videoHeight0, out _videoPixelSize0, out _videoPixelFormatString0, out _videoWidth1, out _videoHeight1, out _videoPixelSize1, out _videoPixelFormatString1);
                     if (!ok1) return false;
                     Log(LogTag + "Video left " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + "), right " + _videoWidth1 + "x" + _videoHeight1 + "@" + _videoPixelSize1 + "Bpp (" + _videoPixelFormatString1 + ")");
                     
-                    // ARToolKit projection matrices, adjusted for Unity
+                    // artoolkitX projection matrices, adjusted for Unity
                     float[] projRaw0 = new float[16];
                     float[] projRaw1 = new float[16];
                     PluginFunctions.arwGetProjectionMatrixStereo(NearPlane, FarPlane, projRaw0, projRaw1);
@@ -1330,7 +1330,7 @@ public class ARController : MonoBehaviour
 
         // Create a material tied to the texture.
         Shader shaderSource = Shader.Find("VideoPlaneNoLight");
-        vbm = new Material(shaderSource); //ARToolKit5-Unity.Properties.Resources.VideoPlaneShader;
+        vbm = new Material(shaderSource); //arunityX.Properties.Resources.VideoPlaneShader;
         vbm.hideFlags = HideFlags.HideAndDontSave;
         vbm.mainTexture = vbt;
         //Log(LogTag + "Created video background material");
@@ -1338,7 +1338,7 @@ public class ARController : MonoBehaviour
         // Now create a mesh appropriate for displaying the video, a mesh filter to instantiate that mesh,
         // and a mesh renderer to render the material on the instantiated mesh.
         MeshFilter filter = vbmgo.AddComponent<MeshFilter>();
-        filter.mesh = newVideoMesh(ContentFlipH, !ContentFlipV, textureScaleU, textureScaleV); // Invert flipV because ARToolKit video frame is top-down, Unity's is bottom-up.
+        filter.mesh = newVideoMesh(ContentFlipH, !ContentFlipV, textureScaleU, textureScaleV); // Invert flipV because artoolkitX video frame is top-down, Unity's is bottom-up.
         MeshRenderer meshRenderer = vbmgo.AddComponent<MeshRenderer>();
         meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         meshRenderer.receiveShadows = false;
@@ -1773,7 +1773,7 @@ public class ARController : MonoBehaviour
     private void DrawInfoGUI()
     {
         // Basic ARToolKit information
-        GUI.Label(new Rect(10, 10, 500, 25), "ARToolKit " + Version);
+        GUI.Label(new Rect(10, 10, 500, 25), "artoolkitX " + Version);
         GUI.Label(new Rect(10, 30, 500, 25), "Video " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + ")");
 
         // Some system information

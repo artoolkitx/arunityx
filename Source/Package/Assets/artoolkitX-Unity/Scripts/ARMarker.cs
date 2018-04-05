@@ -1,21 +1,21 @@
 /*
  *  ARMarker.cs
- *  ARToolKit for Unity
+ *  artoolkitX for Unity
  *
- *  This file is part of ARToolKit for Unity.
+ *  This file is part of artoolkitX for Unity.
  *
- *  ARToolKit for Unity is free software: you can redistribute it and/or modify
+ *  artoolkitX for Unity is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  ARToolKit for Unity is distributed in the hope that it will be useful,
+ *  artoolkitX for Unity is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with ARToolKit for Unity.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with artoolkitX for Unity.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  As a special exception, the copyright holders of this library give you
  *  permission to link this library with independent modules to produce an
@@ -44,9 +44,9 @@ using UnityEngine;
 
 public enum MarkerType
 {
-    Square,      		// A standard ARToolKit template (pattern) marker.
-    SquareBarcode,      // A standard ARToolKit matrix (barcode) marker.
-    Multimarker,        // Multiple markers treated as a single target.
+    Square,      		// A square template (pattern) marker.
+    SquareBarcode,      // A square matrix (2D barcode) marker.
+    Multimarker,        // Multiple square markers treated as a single marker.
     NFT,                // A legacy NFT marker.
     TwoD                // An artoolkitX 2D textured trackable.
 }
@@ -62,7 +62,7 @@ public enum ARWMarkerOption : int {
 }
 
 /// <summary>
-/// ARMarker objects represent an ARToolKit marker, even when ARToolKit is not
+/// ARMarker objects represent a native ARTrackable, even when the native artoolkitX is not
 /// initialised.
 /// To find markers from elsewhere in the Unity environment:
 ///   ARMarker[] markers = FindObjectsOfType<ARMarker>(); // (or FindObjectsOfType(typeof(ARMarker)) as ARMarker[]);
@@ -87,7 +87,7 @@ public class ARMarker : MonoBehaviour
     // Quaternion to rotate from ART to Unity
     //public static Quaternion RotationCorrection = Quaternion.AngleAxis(90.0f, new Vector3(1.0f, 0.0f, 0.0f));
 
-    // Value used when no underlying ARToolKit marker is assigned
+    // Value used when no underlying native ARTrackable is assigned
     public const int NO_ID = -1;
 
     [NonSerialized]       // UID is not serialized because its value is only meaningful during a specific run.
@@ -187,7 +187,7 @@ public class ARMarker : MonoBehaviour
 	}
 	#endif
 
-	// Load the underlying ARToolKit marker structure(s) and set the UID.
+	// Load the native ARTrackable structure(s) and set the UID.
     public void Load() 
     {
 		if (this.enabled == false) {
@@ -205,19 +205,19 @@ public class ARMarker : MonoBehaviour
 			return;
 		}
 
-		// Work out the configuration string to pass to ARToolKit.
+		// Work out the configuration string to pass to the native side.
         string dir = Application.streamingAssetsPath;
         string cfg = "";
 		
         switch (MarkerType) {
 
 			case MarkerType.Square:
-				// Multiply width by 1000 to convert from metres to ARToolKit's millimetres.
+				// Multiply width by 1000 to convert from metres to artoolkitX's millimetres.
 				cfg = "single_buffer;" + PatternWidth*1000.0f + ";buffer=" + PatternContents;
 				break;
 			
 			case MarkerType.SquareBarcode:
-				// Multiply width by 1000 to convert from metres to ARToolKit's millimetres.
+				// Multiply width by 1000 to convert from metres to artoolkitX's millimetres.
 				cfg = "single_barcode;" + BarcodeID + ";" + PatternWidth*1000.0f;
 				break;
 			
@@ -291,7 +291,7 @@ public class ARMarker : MonoBehaviour
 
         }
 		
-		// If a valid config. could be assembled, get ARToolKit to process it, and assign the resulting ARMarker UID.
+		// If a valid config. could be assembled, get the native side to process it, and assign the resulting ARMarker UID.
 		if (!string.IsNullOrEmpty(cfg)) {
         	UID = PluginFunctions.arwAddMarker(cfg);
 			if (UID == NO_ID) {
@@ -306,7 +306,7 @@ public class ARMarker : MonoBehaviour
 				FilterSampleRate = currentFilterSampleRate;
 				FilterCutoffFreq = currentFilterCutoffFreq;
 
-				// Retrieve any required information from the configured ARToolKit ARMarker.
+				// Retrieve any required information from the configured native ARTrackable.
                 if (MarkerType == MarkerType.NFT || MarkerType == MarkerType.TwoD) {
                     if (MarkerType == MarkerType.NFT) NFTScale = currentNFTScale;
 
@@ -353,14 +353,14 @@ public class ARMarker : MonoBehaviour
 			//ARController.Log(LogTag + "ARMarker.Update() UID=" + UID + ", visible=" + visible);
 			
             if (visible) {
-				matrixRawArray[12] *= 0.001f; // Scale the position from ARToolKit units (mm) into Unity units (m).
+				matrixRawArray[12] *= 0.001f; // Scale the position from artoolkitX units (mm) into Unity units (m).
 				matrixRawArray[13] *= 0.001f;
 				matrixRawArray[14] *= 0.001f;
 
 				Matrix4x4 matrixRaw = ARUtilityFunctions.MatrixFromFloatArray(matrixRawArray);
 				//ARController.Log("arwQueryMarkerTransformation(" + UID + ") got matrix: [" + Environment.NewLine + matrixRaw.ToString("F3").Trim() + "]");
 
-				// ARToolKit uses right-hand coordinate system where the marker lies in x-y plane with right in direction of +x,
+				// artoolkitX uses right-hand coordinate system where the marker lies in x-y plane with right in direction of +x,
 				// up in direction of +y, and forward (towards viewer) in direction of +z.
 				// Need to convert to Unity's left-hand coordinate system where marker lies in x-y plane with right in direction of +x,
 				// up in direction of +y, and forward (towards viewer) in direction of -z.
@@ -369,7 +369,7 @@ public class ARMarker : MonoBehaviour
 		}
     }
 	
-	// Unload any underlying ARToolKit structures, and clear the UID.
+	// Unload any native ARTrackable structures, and clear the UID.
 	public void Unload()
 	{
 		//ARController.Log(LogTag + "ARMarker.Unload()");

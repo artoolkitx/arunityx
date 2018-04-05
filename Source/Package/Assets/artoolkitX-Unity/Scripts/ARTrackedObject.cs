@@ -1,18 +1,21 @@
 ﻿/*
  *  ARTrackedObject.cs
- *  ARToolKit for Unity
+ *  artoolkitX for Unity
  *
+ *  This file is part of artoolkitX for Unity.
+ *
+ *  artoolkitX for Unity is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  ARToolKit for Unity is distributed in the hope that it will be useful,
+ *  artoolkitX for Unity is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with ARToolKit for Unity.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with artoolkitX for Unity.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  As a special exception, the copyright holders of this library give you
  *  permission to link this library with independent modules to produce an

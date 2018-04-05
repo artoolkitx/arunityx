@@ -1,21 +1,21 @@
 ﻿/*
  *  ARPattern.cs
- *  ARToolKit for Unity
+ *  artoolkitX for Unity
  *
- *  This file is part of ARToolKit for Unity.
+ *  This file is part of artoolkitX for Unity.
  *
- *  ARToolKit for Unity is free software: you can redistribute it and/or modify
+ *  artoolkitX for Unity is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  ARToolKit for Unity is distributed in the hope that it will be useful,
+ *  artoolkitX for Unity is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
  *
  *  You should have received a copy of the GNU Lesser General Public License
- *  along with ARToolKit for Unity.  If not, see <http://www.gnu.org/licenses/>.
+ *  along with artoolkitX for Unity.  If not, see <http://www.gnu.org/licenses/>.
  *
  *  As a special exception, the copyright holders of this library give you
  *  permission to link this library with independent modules to produce an
@@ -64,14 +64,14 @@ public class ARPattern
 		width = widthRaw*0.001f;
 		height = heightRaw*0.001f;
 
-		matrixRawArray[12] *= 0.001f; // Scale the position from ARToolKit units (mm) into Unity units (m).
+		matrixRawArray[12] *= 0.001f; // Scale the position from artoolkitX units (mm) into Unity units (m).
 		matrixRawArray[13] *= 0.001f;
 		matrixRawArray[14] *= 0.001f;
 
 		Matrix4x4 matrixRaw = ARUtilityFunctions.MatrixFromFloatArray(matrixRawArray);
 		//ARController.Log("arwGetMarkerPatternConfig(" + markerID + ", " + patternID + ", ...) got matrix: [" + Environment.NewLine + matrixRaw.ToString("F3").Trim() + "]");
 
-		// ARToolKit uses right-hand coordinate system where the marker lies in x-y plane with right in direction of +x,
+		// artoolkitX uses right-hand coordinate system where the marker lies in x-y plane with right in direction of +x,
 		// up in direction of +y, and forward (towards viewer) in direction of +z.
 		// Need to convert to Unity's left-hand coordinate system where marker lies in x-y plane with right in direction of +x,
 		// up in direction of +y, and forward (towards viewer) in direction of -z.

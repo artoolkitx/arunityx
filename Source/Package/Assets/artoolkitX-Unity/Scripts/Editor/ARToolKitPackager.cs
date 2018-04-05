@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 
 class ARToolKitPackager {
-	const string MAIN_DIRECTORY = "ARToolKit5-Unity";
+	const string MAIN_DIRECTORY = "artoolkitX-Unity";
 	const string PLUGINS_DIRECTORY = "Plugins";
 	const string STREAMINGASSETS_DIRECTORY = "StreamingAssets";
 
