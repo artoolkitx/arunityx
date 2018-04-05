@@ -178,12 +178,29 @@ public class ARMarkerEditor : Editor
 					m.NFTDataName = NFTDataSetName;
 					m.Load();
 				}
+
 				float nftScalePrev = m.NFTScale;
 				m.NFTScale = EditorGUILayout.FloatField("NFT marker scalefactor", m.NFTScale);
 				if (nftScalePrev != m.NFTScale) {
 					EditorUtility.SetDirty(m);
 				}
 				break;
+
+            case MarkerType.TwoD:
+                string TwoDImageFile = EditorGUILayout.TextField("Image file", m.TwoDImageFile);
+                if (TwoDImageFile != m.TwoDImageFile) {
+                    m.Unload();
+                    m.TwoDImageFile = TwoDImageFile;
+                    m.Load();
+                }
+
+                float twoDImageWidthPrev = m.TwoDImageWidth;
+                m.TwoDImageWidth = EditorGUILayout.FloatField("Image width", m.TwoDImageWidth);
+                if (twoDImageWidthPrev != m.TwoDImageWidth) {
+                    m.Unload();
+                    m.Load();
+                }
+                break;
         }
 		
         EditorGUILayout.Separator();

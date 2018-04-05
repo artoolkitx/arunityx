@@ -44,10 +44,11 @@ using UnityEngine;
 
 public enum MarkerType
 {
-    Square,      		// A standard ARToolKit template (pattern) marker
+    Square,      		// A standard ARToolKit template (pattern) marker.
     SquareBarcode,      // A standard ARToolKit matrix (barcode) marker.
-    Multimarker,        // Multiple markers treated as a single target
-	NFT
+    Multimarker,        // Multiple markers treated as a single target.
+    NFT,                // A legacy NFT marker.
+    TwoD                // An artoolkitX 2D textured trackable.
 }
 
 public enum ARWMarkerOption : int {
@@ -77,7 +78,8 @@ public class ARMarker : MonoBehaviour
 		{MarkerType.Square, "Single AR pattern"},
 		{MarkerType.SquareBarcode, "Single AR barcode"},
     	{MarkerType.Multimarker, "Multimarker AR configuration"},
-		{MarkerType.NFT, "NFT dataset"}
+		{MarkerType.NFT, "NFT dataset"},
+        {MarkerType.TwoD, "2D image texture"}
     };
 
     private const string LogTag = "ARMarker: ";
@@ -117,6 +119,10 @@ public class ARMarker : MonoBehaviour
 	public float NFTWidth; // Once marker is loaded, this holds the width of the marker in Unity units.
 	[NonSerialized]
 	public float NFTHeight; // Once marker is loaded, this holds the height of the marker in Unity units.
+
+    // 2D image trackables have an image filename and image width.
+    public string TwoDImageFile = "";
+    public float TwoDImageWidth = 1.0f;
 
     // Single markers have a single pattern, multi markers have one or more, NFT have none.
 	private ARPattern[] patterns;
@@ -262,6 +268,23 @@ public class ARMarker : MonoBehaviour
 				}
 				break;
 
+        case MarkerType.TwoD:
+            #if !UNITY_METRO
+            if (dir.Contains("://")) {
+                // On Android, we need to unpack the StreamingAssets from the .jar file in which
+                // they're archived into the native file system.
+                dir = Application.temporaryCachePath;
+                if (!unpackStreamingAssetToCacheDir(TwoDImageFile)) {
+                    dir = "";
+                }
+            }
+            #endif
+
+            if (!string.IsNullOrEmpty(dir) && !string.IsNullOrEmpty(TwoDImageFile)) {
+                cfg = "2d;" + System.IO.Path.Combine(dir, TwoDImageFile) + ";" + TwoDImageWidth;
+            }
+            break;
+
             default:
                 // Unknown marker type?
                 break;
@@ -284,8 +307,8 @@ public class ARMarker : MonoBehaviour
 				FilterCutoffFreq = currentFilterCutoffFreq;
 
 				// Retrieve any required information from the configured ARToolKit ARMarker.
-				if (MarkerType == MarkerType.NFT) {
-					NFTScale = currentNFTScale;
+                if (MarkerType == MarkerType.NFT || MarkerType == MarkerType.TwoD) {
+                    if (MarkerType == MarkerType.NFT) NFTScale = currentNFTScale;
 
 					int imageSizeX, imageSizeY;
 					PluginFunctions.arwGetMarkerPatternConfig(UID, 0, null, out NFTWidth, out NFTHeight, out imageSizeX, out imageSizeY);

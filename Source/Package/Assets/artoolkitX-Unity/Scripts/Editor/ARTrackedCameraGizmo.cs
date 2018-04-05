@@ -87,6 +87,7 @@ class ARTrackedCameraGizmo
 			    break;
 			
 			case MarkerType.NFT:
+            case MarkerType.TwoD:
 				DrawNFTMarker(m, pose, selected);
 			    break;
 
