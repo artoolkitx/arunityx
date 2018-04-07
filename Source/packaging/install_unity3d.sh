@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ $# -gt 2 ]; then
 	exit -1	
 fi
 
-if [ -d $ipath ]; then
+if [ ! -z $ipath ] && [ -d $ipath ]; then
 	echo "ERROR: $ipath directory already present"
 	usage
 	exit -1	
@@ -76,10 +76,12 @@ if [ -d "$apphome$appversion" ]; then
     exit -1
 fi
 
-if [ -z "$ipath" ]; then
+if [ ! -z "$ipath" ]; then
 	ipath="$apphome$appversion"
+    sudo mv "$apphome" "$ipath"
+    echo "Unity $appversion installed at $ipath"
+else 
+    echo "Unity $appversion installed at $apphome"
 fi
 
-sudo mv "$apphome" "$ipath"
 
-echo "Unity $appversion installed at $ipath"
