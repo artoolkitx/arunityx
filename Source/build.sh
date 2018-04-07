@@ -128,12 +128,11 @@ build_android() {
 }
 
 build_android_unity_player () {
-            #Build arunityXPlayer
-        cd $ARUNITYX_HOME/Source/Extras/arunityx_java/arunityX_Android_Player/
+        #Build arunityXPlayer
+        cd $ARUNITYX_HOME/Source/Extras/arunityX_java/arunityX_Android_Player/
         ./gradlew :arunityXPlayer:assembleRelease
         #Copy to plugins directory
-        cp $ARUNITYX_HOME/Source/Extras/arunityx_java/arunityX_Android_Player/arunityXPlayer/build/outputs/aar/arunityXPlayer-release.aar $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/
-
+        cp $ARUNITYX_HOME/Source/Extras/arunityX_java/arunityX_Android_Player/arunityXPlayer/build/outputs/aar/arunityXPlayer-release.aar $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/
 }
 
 install_plugin() {
