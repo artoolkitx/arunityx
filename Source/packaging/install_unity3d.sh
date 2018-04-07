@@ -1,7 +1,7 @@
 file=$1
 ipath=$2
 
-function usage {
+usage() {
 	echo "USAGE: $0 file[.dmg|.pkg] [installation path]"
 }
 

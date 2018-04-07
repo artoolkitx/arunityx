@@ -25,7 +25,7 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # 
-function usage {
+usage() {
 	echo "USAGE: $0 url_or_version"
 }
 

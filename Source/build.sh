@@ -124,11 +124,16 @@ build_android() {
         cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/intermediates/bundles/release/jni/x86/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/
         cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/intermediates/bundles/release/jni/x86/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/
 
-        #Build arunityXPlayer
+        build_android_unity_player
+}
+
+build_android_unity_player () {
+            #Build arunityXPlayer
         cd $ARUNITYX_HOME/Source/Extras/arunityx_java/arunityX_Android_Player/
         ./gradlew :arunityXPlayer:assembleRelease
         #Copy to plugins directory
         cp $ARUNITYX_HOME/Source/Extras/arunityx_java/arunityX_Android_Player/arunityXPlayer/build/outputs/aar/arunityXPlayer-release.aar $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/
+
 }
 
 install_plugin() {
@@ -140,7 +145,7 @@ install_plugin() {
     if [ "$TYPE" = "macOS" ]; then 
         unzip -o plugin.zip -d Package/Assets/Plugins/
     elif [ "$TYPE" = "Windows" ]; then 
-        unzip -o plugin.zip -d Package/Assets/Plugins/x86_64/
+        unzip -j -o plugin.zip "unity-lib/ARX.dll" -d Package/Assets/Plugins/x86_64/
     else
         unzip -o plugin.zip -d Package/Assets/Plugins/$TYPE/
     fi
@@ -213,33 +218,23 @@ if [ $DEV ] ; then
 else 
     echo "start download of libs"
 
-    if [ "$OS" = "Darwin" ] ; then
-        # ======================================================================
-        #  Download plugins hosted by macOS (iOS, macOS, Android)
-        # ======================================================================
+    # ======================================================================
+    #  Download plugins (iOS, macOS, Android, Windows)
+    # ======================================================================
 
-        if [ $BUILD_IOS ] ; then 
-            install_plugin iOS
-        fi
-        if [ $BUILD_MACOS ] ; then 
-            install_plugin macOS
-        fi
-        if [ $BUILD_ANDROID ] ; then
-            install_plugin Android
-        fi
+    if [ $BUILD_IOS ] ; then 
+        install_plugin iOS
     fi
-    if [ "$OS" = "Windows" ] ; then 
-
-    # ======================================================================
-    #  Download plugins hosted by Windows (Windows, Android)
-    # ======================================================================
-        if [ $BUILD_WINDOWS ] ; then
-            install_plugin Windows
-        fi
-
-        if [ $BUILD_ANDROID ] ; then
-            install_plugin Android
-        fi
-
+    if [ $BUILD_MACOS ] ; then 
+        install_plugin macOS
+    fi
+    if [ $BUILD_ANDROID ] ; then
+        install_plugin Android
+        # Every lib can be created during the artoolkitX build and downloaded from GitHub except the Unity-Player for Android
+        # that is been built on the fly
+        build_android_unity_player
+    fi
+    if [ $BUILD_WINDOWS ] ; then
+        install_plugin Windows
     fi
 fi
