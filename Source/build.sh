@@ -166,7 +166,6 @@ if [ $DEV ] ; then
 
         #Android
         if [ $BUILD_ANDROID ] ; then 
-            echo "Hello"
             build_android
         fi
 
@@ -222,18 +221,22 @@ else
     # ======================================================================
 
     if [ $BUILD_IOS ] ; then 
+        cd $OURDIR
         install_plugin iOS
     fi
     if [ $BUILD_MACOS ] ; then 
+        cd $OURDIR
         install_plugin macOS
     fi
     if [ $BUILD_ANDROID ] ; then
+        cd $OURDIR
         install_plugin Android
         # Every lib can be created during the artoolkitX build and downloaded from GitHub except the Unity-Player for Android
         # that is been built on the fly
         build_android_unity_player
     fi
     if [ $BUILD_WINDOWS ] ; then
+        cd $OURDIR
         install_plugin Windows
     fi
 fi
