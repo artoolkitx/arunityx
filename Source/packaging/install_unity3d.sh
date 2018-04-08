@@ -1,3 +1,5 @@
+set -x
+
 file=$1
 ipath=$2
 
