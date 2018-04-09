@@ -52,92 +52,91 @@ public class AROrigin : MonoBehaviour
 		AutoByTags,
 		Manual
 	}
-	public List<String> findMarkerTags = new List<string>();
+    public List<String> findTrackableTags = new List<string>();
 
-	private ARMarker baseMarker = null;
-	private List<ARMarker> markersEligibleForBaseMarker = new List<ARMarker>();
+	private ARTrackable baseTrackable = null;
+    private List<ARTrackable> trackablesEligibleForBaseTrackable = new List<ARTrackable>();
 
 	[SerializeField]
-	private FindMode _findMarkerMode = FindMode.AutoAll;
+    private FindMode _findTrackableMode = FindMode.AutoAll;
 
-	public FindMode findMarkerMode
+	public FindMode findTrackableMode
 	{
 		get
 		{
-			return _findMarkerMode;
+			return _findTrackableMode;
 		}
 		
 		set
 		{
-			if (_findMarkerMode != value) {
-				_findMarkerMode = value;
-				FindMarkers();
+			if (_findTrackableMode != value) {
+				_findTrackableMode = value;
+				FindTrackables();
 			}
 		}
 	}
 
-	public void AddMarker(ARMarker marker, bool atHeadOfList = false)
+    public void AddTrackable(ARTrackable trackable, bool atHeadOfList = false)
 	{
 		if (!atHeadOfList) {
-			markersEligibleForBaseMarker.Add(marker);
+			trackablesEligibleForBaseTrackable.Add(trackable);
 		} else {
-			markersEligibleForBaseMarker.Insert(0, marker);
+            trackablesEligibleForBaseTrackable.Insert(0, trackable);
 		}
 	}
 
-	public bool RemoveMarker(ARMarker marker)
+    public bool RemoveTrackable(ARTrackable trackable)
 	{
-		if (baseMarker == marker) baseMarker = null;
-		return markersEligibleForBaseMarker.Remove(marker);
+		if (baseTrackable == trackable) baseTrackable = null;
+        return trackablesEligibleForBaseTrackable.Remove(trackable);
 	}
 	
-	public void RemoveAllMarkers()
+    public void RemoveAllTrackables()
 	{
-		baseMarker = null;
-		markersEligibleForBaseMarker.Clear();
+		baseTrackable = null;
+        trackablesEligibleForBaseTrackable.Clear();
 	}
 
-	public void FindMarkers()
+    public void FindTrackables()
 	{
-		RemoveAllMarkers();
-		if (findMarkerMode != FindMode.Manual) {
-			ARMarker[] ms = FindObjectsOfType<ARMarker>(); // Does not find inactive objects.
-			foreach (ARMarker m in ms) {
-				if (findMarkerMode == FindMode.AutoAll || (findMarkerMode == FindMode.AutoByTags && findMarkerTags.Contains(m.Tag))) {
-					markersEligibleForBaseMarker.Add(m);
+		RemoveAllTrackables();
+		if (findTrackableMode != FindMode.Manual) {
+			ARTrackable[] ms = FindObjectsOfType<ARTrackable>(); // Does not find inactive objects.
+			foreach (ARTrackable m in ms) {
+				if (findTrackableMode == FindMode.AutoAll || (findTrackableMode == FindMode.AutoByTags && findTrackableTags.Contains(m.Tag))) {
+                    trackablesEligibleForBaseTrackable.Add(m);
 				}
 			}
-			ARController.Log(LogTag + "Found " + markersEligibleForBaseMarker.Count + " markers eligible to become base marker.");
+            ARController.Log(LogTag + "Found " + trackablesEligibleForBaseTrackable.Count + " trackables eligible to become base trackable.");
 		}
 	}
 
 	void Start()
 	{
-		FindMarkers();
+		FindTrackables();
 	}
 
-	// Get the marker, if any, currently acting as the base.
-	public ARMarker GetBaseMarker()
+    // Get the trackable, if any, currently acting as the base.
+	public ARTrackable GetBaseTrackable()
 	{
-		if (baseMarker != null) {
-			if (baseMarker.Visible) return baseMarker;
-			else baseMarker = null;
+        if (baseTrackable != null) {
+			if (baseTrackable.Visible) return baseTrackable;
+			else baseTrackable = null;
 		}
-		
-		foreach (ARMarker m in markersEligibleForBaseMarker) {
+        foreach (ARTrackable m in trackablesEligibleForBaseTrackable) {
 			if (m.Visible) {
-				baseMarker = m;
-				//ARController.Log("Marker " + m.UID + " became base marker.");
+				baseTrackable = m;
+				ARController.Log("Trackable " + m.UID + " became base trackable.");
 				break;
 			}
 		}
 		
-		return baseMarker;
+		return baseTrackable;
 	}
 	
 	void OnApplicationQuit()
 	{
-		RemoveAllMarkers();
+		RemoveAllTrackables();
 	}
 }
 

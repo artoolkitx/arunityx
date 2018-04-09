@@ -50,13 +50,13 @@ public class ARTrackedObjectEditor : Editor
 		ARTrackedObject arto = (ARTrackedObject)target;
 		if (arto == null) return;
 
-		arto.MarkerTag = EditorGUILayout.TextField("Marker tag", arto.MarkerTag);
+		arto.TrackableTag = EditorGUILayout.TextField("Marker tag", arto.TrackableTag);
 
-		ARMarker marker = arto.GetMarker();
-		EditorGUILayout.LabelField("Got marker", marker == null ? "no" : "yes");
-		if (marker != null) {
-			string type = ARMarker.MarkerTypeNames[marker.MarkerType];
-			EditorGUILayout.LabelField("Marker UID", (marker.UID != ARMarker.NO_ID ? marker.UID.ToString() : "Not loaded") + " (" + type + ")");	
+        ARTrackable trackable = arto.GetTrackable();
+		EditorGUILayout.LabelField("Got marker", trackable == null ? "no" : "yes");
+		if (trackable != null) {
+			string type = ARTrackable.TrackableTypeNames[trackable.Type];
+			EditorGUILayout.LabelField("Marker UID", (trackable.UID != ARTrackable.NO_ID ? trackable.UID.ToString() : "Not loaded") + " (" + type + ")");	
 		}
 		
 		EditorGUILayout.Separator();

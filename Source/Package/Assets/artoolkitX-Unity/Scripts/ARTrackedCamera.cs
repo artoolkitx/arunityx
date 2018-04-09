@@ -80,25 +80,25 @@ public class ARTrackedCamera : ARCamera
 		set
 		{
 			_markerTag = value;
-			_marker = null;
+			_trackable = null;
 		}
 	}
 	
 	// Return the marker associated with this component.
 	// Uses cached value if available, otherwise performs a find operation.
-	public override ARMarker GetMarker()
+	public override ARTrackable GetTrackable()
 	{
-		if (_marker == null) {
+		if (_trackable == null) {
 			// Locate the marker identified by the tag
-			ARMarker[] ms = FindObjectsOfType<ARMarker>();
-			foreach (ARMarker m in ms) {
+			ARTrackable[] ms = FindObjectsOfType<ARTrackable>();
+			foreach (ARTrackable m in ms) {
 				if (m.Tag == _markerTag) {
-					_marker = m;
+					_trackable = m;
 					break;
 				}
 			}
 		}
-		return _marker;
+		return _trackable;
 	}
 
 	public virtual void Start()
@@ -116,15 +116,15 @@ public class ARTrackedCamera : ARCamera
 		if (arVisible || (timeLastUpdate - timeTrackingLost < secondsToRemainVisible)) {
 			if (arVisible != lastArVisible) {
 				this.gameObject.GetComponent<Camera>().cullingMask = cullingMask;
-				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnMarkerFound", GetMarker(), SendMessageOptions.DontRequireReceiver);
+				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", GetTrackable(), SendMessageOptions.DontRequireReceiver);
 			}
 			transform.localPosition = arPosition; // TODO: Change to transform.position = PositionFromMatrix(origin.transform.localToWorldMatrix * pose) etc;
 			transform.localRotation = arRotation;
-			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnMarkerTracked", GetMarker(), SendMessageOptions.DontRequireReceiver);
+            if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", GetTrackable(), SendMessageOptions.DontRequireReceiver);
 		} else {
 			if (arVisible != lastArVisible) {
 				this.gameObject.GetComponent<Camera>().cullingMask = 0;
-				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnMarkerLost", GetMarker(), SendMessageOptions.DontRequireReceiver);
+                if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", GetTrackable(), SendMessageOptions.DontRequireReceiver);
 			}
 		}
 		lastArVisible = arVisible;

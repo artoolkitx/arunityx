@@ -51,11 +51,11 @@ public class ARTrackedCameraEditor : ARCameraEditor
 		if (artc == null) return;
 		artc.MarkerTag = EditorGUILayout.TextField("Marker tag", artc.MarkerTag);
 
-		ARMarker marker = artc.GetMarker();
+		ARTrackable marker = artc.GetTrackable();
 		EditorGUILayout.LabelField("Got marker", marker == null ? "no" : "yes");
 		if (marker != null) {
-			string type = ARMarker.MarkerTypeNames[marker.MarkerType];
-			EditorGUILayout.LabelField("Marker UID", (marker.UID != ARMarker.NO_ID ? marker.UID.ToString() : "Not loaded") + " (" + type + ")");	
+			string type = ARTrackable.TrackableTypeNames[marker.Type];
+			EditorGUILayout.LabelField("Marker UID", (marker.UID != ARTrackable.NO_ID ? marker.UID.ToString() : "Not loaded") + " (" + type + ")");	
 		}
 		
 		EditorGUILayout.Separator();

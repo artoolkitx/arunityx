@@ -167,7 +167,7 @@ public class ARControllerEditor : Editor
 
 			// Labeling mode selection.
             ARController.ARToolKitLabelingMode currentLabelingMode = arcontroller.LabelingMode;
-            ARController.ARToolKitLabelingMode newLabelingMode = (ARController.ARToolKitLabelingMode)EditorGUILayout.EnumPopup("Marker borders:", currentLabelingMode);
+            ARController.ARToolKitLabelingMode newLabelingMode = (ARController.ARToolKitLabelingMode)EditorGUILayout.EnumPopup("Trackable borders:", currentLabelingMode);
             if (newLabelingMode != currentLabelingMode) {
                 arcontroller.LabelingMode = newLabelingMode;
             }

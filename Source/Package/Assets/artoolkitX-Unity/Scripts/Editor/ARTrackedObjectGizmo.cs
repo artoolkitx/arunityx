@@ -62,39 +62,39 @@ class ARTrackedObjectGizmo
 
     private static void DrawMarker(ARTrackedObject to, bool selected)
     {
-        ARMarker m = to.GetMarker();
+        ARTrackable m = to.GetTrackable();
         if (m == null || m.enabled == false) return;
         if (!m.gameObject.activeInHierarchy) return; // Don't attempt to load inactive ARMarkers.
         
         // Attempt to load. Might not work out if e.g. for a single marker, pattern hasn't been
         // assigned yet, or for an NFT marker, dataset hasn't been specified.
-        if (m.UID == ARMarker.NO_ID) {
+        if (m.UID == ARTrackable.NO_ID) {
             m.Load();
         }
 
         Matrix4x4 pose = to.gameObject.transform.localToWorldMatrix;
         //ARController.Log("pose=" + pose.ToString("F3"));
 
-        switch (m.MarkerType) {
+        switch (m.Type) {
 
-            case MarkerType.Square:
-            case MarkerType.SquareBarcode:
+            case ARTrackable.TrackableType.Square:
+            case ARTrackable.TrackableType.SquareBarcode:
                 DrawSingleMarker(m, pose, selected);
                 break;
 
-            case MarkerType.Multimarker:
+            case ARTrackable.TrackableType.Multimarker:
                 DrawMultiMarker(m, pose, selected);
                 break;
             
-            case MarkerType.NFT:
-            case MarkerType.TwoD:
+            case ARTrackable.TrackableType.NFT:
+            case ARTrackable.TrackableType.TwoD:
                 DrawNFTMarker(m, pose, selected, false);
                 break;
 
         }
     }
 
-    private static void DrawSingleMarker(ARMarker m, Matrix4x4 mat, bool selected) 
+    private static void DrawSingleMarker(ARTrackable m, Matrix4x4 mat, bool selected) 
     {
         float pattWidth = m.PatternWidth;
         Vector3 origin = mat.GetColumn(3);
@@ -113,10 +113,10 @@ class ARTrackedObjectGizmo
         DrawWord(m.Tag, wordUnitSize, origin - up * (pattWidth * 0.6f + (wordUnitSize * 4)) - right * (pattWidth * 0.525f), up, right * 0.5f);
     }
 
-    private static void DrawMultiMarker(ARMarker m, Matrix4x4 mat, bool selected) 
+    private static void DrawMultiMarker(ARTrackable m, Matrix4x4 mat, bool selected) 
     {
         //Sanity check if Patterns are loaded or Marker-UID != -1
-        if (m.Patterns == null || m.UID == ARMarker.NO_ID) {
+        if (m.Patterns == null || m.UID == ARTrackable.NO_ID) {
             return;
         }
 
@@ -143,7 +143,7 @@ class ARTrackedObjectGizmo
         //Gizmos.DrawGUITexture(new Rect(origin.x, origin.y, 20, 20), m.MarkerImage);
     }
 
-    private static void DrawNFTMarker(ARMarker m, Matrix4x4 mat, bool selected, bool originAtCentre) 
+    private static void DrawNFTMarker(ARTrackable m, Matrix4x4 mat, bool selected, bool originAtCentre) 
     {
         float pattWidth = m.NFTWidth;
         float pattHeight = m.NFTHeight;

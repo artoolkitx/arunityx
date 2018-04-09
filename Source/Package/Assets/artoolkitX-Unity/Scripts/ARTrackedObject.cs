@@ -48,7 +48,7 @@ public class ARTrackedObject : MonoBehaviour
 	private const string LogTag = "ARTrackedObject: ";
 
 	private AROrigin _origin = null;
-	private ARMarker _marker = null;
+    private ARTrackable _trackable = null;
 
 	private bool visible = false;					// Current visibility from tracking
 	private float timeTrackingLost = 0;				// Time when tracking was last lost
@@ -59,38 +59,38 @@ public class ARTrackedObject : MonoBehaviour
 
 	// Private fields with accessors.
 	[SerializeField]
-	private string _markerTag = "";					// Unique tag for the marker to get tracking from
+    private string _trackableTag = "";					// Unique tag for the marker to get tracking from
 	
 	
-	public string MarkerTag
+	public string TrackableTag
 	{
 		get
 		{
-			return _markerTag;
+			return _trackableTag;
 		}
 		
 		set
 		{
-			_markerTag = value;
-			_marker = null;
+            _trackableTag = value;
+			_trackable = null;
 		}
 	}
 
-	// Return the marker associated with this component.
+	// Return the trackable associated with this component.
 	// Uses cached value if available, otherwise performs a find operation.
-	public virtual ARMarker GetMarker()
+	public virtual ARTrackable GetTrackable()
 	{
-		if (_marker == null) {
-			// Locate the marker identified by the tag
-			ARMarker[] ms = FindObjectsOfType<ARMarker>();
-			foreach (ARMarker m in ms) {
-				if (m.Tag == _markerTag) {
-					_marker = m;
+		if (_trackable == null) {
+            // Locate the trackable identified by the tag
+			ARTrackable[] ms = FindObjectsOfType<ARTrackable>();
+			foreach (ARTrackable m in ms) {
+				if (m.Tag == _trackableTag) {
+					_trackable = m;
 					break;
 				}
 			}
 		}
-		return _marker;
+		return _trackable;
 	}
 
 	// Return the origin associated with this component.
@@ -117,7 +117,7 @@ public class ARTrackedObject : MonoBehaviour
 		}
 	}
 
-	// Use LateUpdate to be sure the ARMarker has updated before we try and use the transformation.
+	// Use LateUpdate to be sure the ARTrackable has updated before we try and use the transformation.
 	void LateUpdate()
 	{
 		// Local scale is always 1 for now
@@ -133,49 +133,49 @@ public class ARTrackedObject : MonoBehaviour
 
 			} else {
 
-				// Sanity check, make sure we have an ARMarker assigned.
-				ARMarker marker = GetMarker();
-				if (marker == null) {
+				// Sanity check, make sure we have an ARTrackable assigned.
+                ARTrackable trackable = GetTrackable();
+				if (trackable == null) {
 					//visible = visibleOrRemain = false;
 				} else {
 
 					// Note the current time
 					float timeNow = Time.realtimeSinceStartup;
 					
-					ARMarker baseMarker = origin.GetBaseMarker();
-					if (baseMarker != null && marker.Visible) {
+                    ARTrackable baseTrackable = origin.GetBaseTrackable();
+					if (baseTrackable != null && trackable.Visible) {
 
 						if (!visible) {
-							// Marker was hidden but now is visible.
+							// Trackable was hidden but now is visible.
 							visible = visibleOrRemain = true;
-							if (eventReceiver != null) eventReceiver.BroadcastMessage("OnMarkerFound", marker, SendMessageOptions.DontRequireReceiver);
+							if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", trackable, SendMessageOptions.DontRequireReceiver);
 
 							for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
 						}
 
                         Matrix4x4 pose;
-                        if (marker == baseMarker) {
+                        if (trackable == baseTrackable) {
                             // If this marker is the base, no need to take base inverse etc.
                             pose = origin.transform.localToWorldMatrix;
                         } else {
-						    pose = (origin.transform.localToWorldMatrix * baseMarker.TransformationMatrix.inverse * marker.TransformationMatrix);
+						    pose = (origin.transform.localToWorldMatrix * baseTrackable.TransformationMatrix.inverse * trackable.TransformationMatrix);
 						}
 						transform.position = ARUtilityFunctions.PositionFromMatrix(pose);
 						transform.rotation = ARUtilityFunctions.QuaternionFromMatrix(pose);
 
-						if (eventReceiver != null) eventReceiver.BroadcastMessage("OnMarkerTracked", marker, SendMessageOptions.DontRequireReceiver);
+						if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", trackable, SendMessageOptions.DontRequireReceiver);
 
 					} else {
 
 						if (visible) {
-							// Marker was visible but now is hidden.
+							// Trackable was visible but now is hidden.
 							visible = false;
 							timeTrackingLost = timeNow;
 						}
 
 						if (visibleOrRemain && (timeNow - timeTrackingLost >= secondsToRemainVisible)) {
 							visibleOrRemain = false;
-							if (eventReceiver != null) eventReceiver.BroadcastMessage("OnMarkerLost", marker, SendMessageOptions.DontRequireReceiver);
+							if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", trackable, SendMessageOptions.DontRequireReceiver);
 							for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
 						}
 					}

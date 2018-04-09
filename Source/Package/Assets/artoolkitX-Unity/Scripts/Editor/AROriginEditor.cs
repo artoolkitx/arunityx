@@ -54,11 +54,11 @@ public class AROriginEditor : Editor
         if (o == null) return;
 		
 		// Find mode		
-		o.findMarkerMode = (AROrigin.FindMode)EditorGUILayout.EnumPopup("ARMarker find mode", o.findMarkerMode);
+		o.findTrackableMode = (AROrigin.FindMode)EditorGUILayout.EnumPopup("ARTrackable find mode", o.findTrackableMode);
 		
-		if (o.findMarkerMode == AROrigin.FindMode.AutoByTags) {
+		if (o.findTrackableMode == AROrigin.FindMode.AutoByTags) {
 			serializedObject.Update();
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("findMarkerTags"), true);
+			EditorGUILayout.PropertyField(serializedObject.FindProperty("findTrackableTags"), true);
 			serializedObject.ApplyModifiedProperties();
 			//o.FindMarkers();
 		}

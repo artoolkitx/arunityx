@@ -82,7 +82,7 @@ public class ARCamera : MonoBehaviour
 	}*/
 	
 	private AROrigin _origin = null;
-	protected ARMarker _marker = null;				// Instance of marker that will be used as the origin for the camera pose.
+	protected ARTrackable _trackable = null;				// Instance of trackable that will be used as the origin for the camera pose.
 	
 	[NonSerialized]
 	protected Vector3 arPosition = Vector3.zero;	// Current 3D position from tracking
@@ -177,11 +177,11 @@ public class ARCamera : MonoBehaviour
 	}
 	
 	// Get the marker, if any, currently acting as the base.
-	public virtual ARMarker GetMarker()
+	public virtual ARTrackable GetTrackable()
 	{
 		AROrigin origin = GetOrigin();
 		if (origin == null) return null;
-		return (origin.GetBaseMarker());
+		return (origin.GetBaseTrackable());
 	}
 	
 	// Updates arVisible, arPosition, arRotation based on linked marker state.
@@ -191,8 +191,8 @@ public class ARCamera : MonoBehaviour
 		timeLastUpdate = Time.realtimeSinceStartup;
 			
 		// First, ensure we have a base marker. If none, then no markers are currently in view.
-		ARMarker marker = GetMarker();
-		if (marker == null) {
+        ARTrackable trackable = GetTrackable();
+		if (trackable == null) {
 			if (arVisible) {
 				// Marker was visible but now is hidden.
 				timeTrackingLost = timeLastUpdate;
@@ -200,13 +200,13 @@ public class ARCamera : MonoBehaviour
 			}
 		} else {
 			
-			if (marker.Visible) {
+			if (trackable.Visible) {
 				
 				Matrix4x4 pose;
 				if (Optical && opticalSetupOK) {
-					pose = (opticalViewMatrix * marker.TransformationMatrix).inverse;
+					pose = (opticalViewMatrix * trackable.TransformationMatrix).inverse;
 				} else {
-					pose = marker.TransformationMatrix.inverse;
+					pose = trackable.TransformationMatrix.inverse;
 				}
 				
 				arPosition = ARUtilityFunctions.PositionFromMatrix(pose);

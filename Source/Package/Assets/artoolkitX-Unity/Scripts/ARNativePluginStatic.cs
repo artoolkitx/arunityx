@@ -122,34 +122,34 @@ public static class ARNativePluginStatic
 	public static extern bool arwUpdateTexture32Stereo(IntPtr colors32L, IntPtr colors32R);
 	
 	[DllImport("__Internal")]
-	public static extern int arwGetMarkerPatternCount(int markerID);
+	public static extern int arwGetTrackablePatternCount(int trackableId);
 	
 	[DllImport("__Internal")]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwGetMarkerPatternConfig(int markerID, int patternID, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrix, out float width, out float height, out int imageSizeX, out int imageSizeY);
+	public static extern bool arwGetTrackablePatternConfig(int trackableId, int patternID, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrix, out float width, out float height, out int imageSizeX, out int imageSizeY);
 	
 	[DllImport("__Internal")]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwGetMarkerPatternImage(int markerID, int patternID, [In, Out]Color[] colors);
+	public static extern bool arwGetTrackablePatternImage(int trackableId, int patternID, [In, Out]Color[] colors);
 	
 	[DllImport("__Internal")]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwGetMarkerOptionBool(int markerID, int option);
+	public static extern bool arwGetTrackableOptionBool(int trackableId, int option);
 	
 	[DllImport("__Internal")]
-	public static extern void arwSetMarkerOptionBool(int markerID, int option, bool value);
+	public static extern void arwSetTrackableOptionBool(int trackableId, int option, bool value);
 	
 	[DllImport("__Internal")]
-	public static extern int arwGetMarkerOptionInt(int markerID, int option);
+	public static extern int arwGetTrackableOptionInt(int trackableId, int option);
 	
 	[DllImport("__Internal")]
-	public static extern void arwSetMarkerOptionInt(int markerID, int option, int value);
+	public static extern void arwSetTrackableOptionInt(int trackableId, int option, int value);
 	
 	[DllImport("__Internal")]
-	public static extern float arwGetMarkerOptionFloat(int markerID, int option);
+	public static extern float arwGetTrackableOptionFloat(int trackableId, int option);
 	
 	[DllImport("__Internal")]
-	public static extern void arwSetMarkerOptionFloat(int markerID, int option, float value);
+	public static extern void arwSetTrackableOptionFloat(int trackableId, int option, float value);
 	
 	[DllImport("__Internal")]
 	public static extern void arwSetTrackerOptionBool(int option, bool debug);
@@ -175,22 +175,22 @@ public static class ARNativePluginStatic
 	
 
 	[DllImport("__Internal", CharSet = CharSet.Ansi)]
-	public static extern int arwAddMarker(string cfg);
+	public static extern int arwAddTrackable(string cfg);
 	
 	[DllImport("__Internal")]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwRemoveMarker(int markerID);
+	public static extern bool arwRemoveTrackable(int trackableId);
 	
 	[DllImport("__Internal")]
-	public static extern int arwRemoveAllMarkers();
-	
-	[DllImport("__Internal")]
-	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwQueryMarkerVisibilityAndTransformation(int markerID, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrix);
+	public static extern int arwRemoveAllTrackables();
 	
 	[DllImport("__Internal")]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwQueryMarkerVisibilityAndTransformationStereo(int markerID, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrixL, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrixR);
+	public static extern bool arwQueryTrackableVisibilityAndTransformation(int trackableId, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrix);
+	
+	[DllImport("__Internal")]
+	[return: MarshalAsAttribute(UnmanagedType.I1)]
+	public static extern bool arwQueryTrackableVisibilityAndTransformationStereo(int trackableId, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrixL, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrixR);
 	
 	[DllImport("__Internal", CharSet = CharSet.Ansi)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
