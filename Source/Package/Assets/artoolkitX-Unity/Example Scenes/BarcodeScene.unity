@@ -526,7 +526,7 @@ GameObject:
   - component: {fileID: 617108500}
   - component: {fileID: 617108501}
   m_Layer: 9
-  m_Name: Marker scene
+  m_Name: Trackable scene
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

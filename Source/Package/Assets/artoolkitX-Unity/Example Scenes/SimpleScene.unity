@@ -308,7 +308,7 @@ GameObject:
   - component: {fileID: 446854239}
   - component: {fileID: 446854240}
   m_Layer: 8
-  m_Name: Marker scene
+  m_Name: Trackable scene
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -341,7 +341,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   secondsToRemainVisible: 0
   eventReceiver: {fileID: 0}
-  _trackableTag: tag
+  _trackableTag: trackable1
 --- !u!1 &749452074
 GameObject:
   m_ObjectHideFlags: 0
@@ -416,7 +416,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  Tag: tag
+  Tag: trackable1
   PatternFilenameIndex: 1
   PatternFilename: patt.kanji
   PatternContents: " 214 225 240 225 214 240 216 204 214 227 181 192 198 192 181 192\n
