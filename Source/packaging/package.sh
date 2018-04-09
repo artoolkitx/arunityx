@@ -53,6 +53,6 @@ fi
 sed -Ei "" "s/artoolkitX for Unity Version (([0-9]+\.[0-9]+)(\.[0-9]+)?(r[0-9]+)?)/artoolkitX for Unity Version $VERSION/" $ARUNITYX_HOME/Source/Package/Assets/ARToolKitX-Unity/Scripts/Editor/ARToolKitMenuEditor.cs
 
 # Build the unitypackage.
-/Applications/Unity$UNITY_VERSION/Unity.app/Contents/MacOS/Unity -quit -batchmode -nographics -stackTraceLogType Full -executeMethod ARToolKitPackager.CreatePackage -projectPath "$ARUNITYX_HOME/Source/Package ARUnityX-${VERSION}.unitypackage"
+/Applications/Unity$UNITY_VERSION/Unity.app/Contents/MacOS/Unity -quit -batchmode -nographics -stackTraceLogType Full -executeMethod ARToolKitPackager.CreatePackage -projectPath $ARUNITYX_HOME/Source/Package ARUnityX-${VERSION}.unitypackage
 
 mv $ARUNITYX_HOME/Source/Package/arunityX-${VERSION}.unitypackage $ARUNITYX_HOME
