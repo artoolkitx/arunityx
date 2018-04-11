@@ -108,7 +108,7 @@ public class ARTransitionalCamera : ARTrackedCamera
     public override void Start()
     {
 		base.Start();
-
+        if(targetObject == null) return ;
 		Matrix4x4 targetInWorldFrame = targetObject.transform.localToWorldMatrix;
 		Matrix4x4 targetInCameraFrame = this.gameObject.GetComponent<Camera>().transform.parent.worldToLocalMatrix * targetInWorldFrame;
 		vrTargetPosition = ARUtilityFunctions.PositionFromMatrix(targetInCameraFrame);
