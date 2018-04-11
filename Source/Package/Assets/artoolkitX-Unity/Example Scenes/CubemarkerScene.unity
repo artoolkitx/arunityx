@@ -553,7 +553,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c16ddf38594f4ae78c7b37f56f16d57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 0
+  type: 2
   Tag: marker0
   PatternFilenameIndex: 0
   PatternFilename: patt.hiro
@@ -721,7 +721,7 @@ MonoBehaviour:
     209 155  72  85 216 240 240 240 240 240 240 240 240 240 239 233\n\n"
   PatternWidth: 0.08
   BarcodeID: 0
-  MultiConfigFile: 
+  MultiConfigFile: cubeMarkerConfig.dat
   NFTDataName: 
   TwoDImageFile: 
   TwoDImageWidth: 1

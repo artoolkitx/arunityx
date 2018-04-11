@@ -181,7 +181,7 @@ MonoBehaviour:
   videoConfigurationAndroid0: 
   videoConfigurationLinux0: 
   BackgroundLayer0: 8
-  VideoIsStereo: 1
+  VideoIsStereo: 0
   transL2RName: transL2R
   videoCParamName1: 
   videoConfigurationWindows1: -devNum=2 -showDialog
