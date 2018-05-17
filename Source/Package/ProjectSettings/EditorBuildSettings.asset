@@ -4,4 +4,10 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 0
+    path: Assets/artoolkitX-Unity/Example Scenes/TwoMarkerScene.unity
+    guid: 2de9db8029065464ab5202cac04a1878
+  - enabled: 1
+    path: Assets/artoolkitX-Unity/Example Scenes/SimpleScene.unity
+    guid: 156500a6c4c2c4808a2583d8b15d923f
