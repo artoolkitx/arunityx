@@ -3,21 +3,21 @@ using UnityEngine;
 
 public interface IPluginFunctions
 {
-    bool inited { get; set; }
+    bool Inited { get; set; }
 
-    int arwAddMarker(string cfg);
+    int arwAddTrackable(string cfg);
     bool arwCapture();
     string arwGetARToolKitVersion();
     float arwGetBorderSize();
     int arwGetError();
     int arwGetImageProcMode();
     int arwGetLabelingMode();
-    bool arwGetMarkerOptionBool(int markerID, int option);
-    float arwGetMarkerOptionFloat(int markerID, int option);
-    int arwGetMarkerOptionInt(int markerID, int option);
-    bool arwGetMarkerPatternConfig(int markerID, int patternID, float[] matrix, out float width, out float height, out int imageSizeX, out int imageSizeY);
-    int arwGetMarkerPatternCount(int markerID);
-    bool arwGetMarkerPatternImage(int markerID, int patternID, [In, Out] Color[] colors);
+    bool arwGetTrackableOptionBool(int markerID, int option);
+    float arwGetTrackableOptionFloat(int markerID, int option);
+    int arwGetTrackableOptionInt(int markerID, int option);
+    bool arwGetTrackablePatternConfig(int markerID, int patternID, float[] matrix, out float width, out float height, out int imageSizeX, out int imageSizeY);
+    int arwGetTrackablePatternCount(int markerID);
+    bool arwGetTrackablePatternImage(int markerID, int patternID, [In, Out] Color[] colors);
     int arwGetMatrixCodeType();
     bool arwGetNFTMultiMode();
     int arwGetPatternDetectionMode();
@@ -31,18 +31,18 @@ public interface IPluginFunctions
     bool arwInitialiseAR(int pattSize = 16, int pattCountMax = 25);
     bool arwIsRunning();
     bool arwLoadOpticalParams(string optical_param_name, byte[] optical_param_buff, int optical_param_buffLen, float projectionNearPlane, float projectionFarPlane, out float fovy_p, out float aspect_p, float[] m, float[] p);
-    bool arwQueryMarkerVisibilityAndTransformation(int markerID, float[] matrix);
-    bool arwQueryMarkerVisibilityAndTransformationStereo(int markerID, float[] matrixL, float[] matrixR);
+    bool arwQueryTrackableVisibilityAndTransformation(int markerID, float[] matrix);
+    bool arwQueryTrackableVisibilityAndTransformationStereo(int markerID, float[] matrixL, float[] matrixR);
     void arwRegisterLogCallback(DefaultPluginFunctions.LogCallback lcb);
-    int arwRemoveAllMarkers();
-    bool arwRemoveMarker(int markerID);
+    int arwRemoveAllTrackables();
+    bool arwRemoveTrackable(int markerID);
     void arwSetBorderSize(float size);
     void arwSetImageProcMode(int mode);
     void arwSetLabelingMode(int mode);
     void arwSetLogLevel(int logLevel);
-    void arwSetMarkerOptionBool(int markerID, int option, bool value);
-    void arwSetMarkerOptionFloat(int markerID, int option, float value);
-    void arwSetMarkerOptionInt(int markerID, int option, int value);
+    void arwSetTrackableOptionBool(int markerID, int option, bool value);
+    void arwSetTrackableOptionFloat(int markerID, int option, float value);
+    void arwSetTrackableOptionInt(int markerID, int option, int value);
     void arwSetMatrixCodeType(int type);
     void arwSetNFTMultiMode(bool on);
     void arwSetPatternCountMax(int count);

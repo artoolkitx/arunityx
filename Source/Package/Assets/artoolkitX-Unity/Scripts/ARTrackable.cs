@@ -214,7 +214,7 @@ public class ARTrackable : MonoBehaviour
                 return;
             }
 
-            if (!ARController.pluginFunctions.inited) {
+            if (!ARController.pluginFunctions.Inited) {
                 // If arwInitialiseAR() has not yet been called, we can't load the native trackable yet.
                 // ARController.InitialiseAR() will call this again when arwInitialiseAR() has been called.
                 return;
@@ -358,7 +358,7 @@ public class ARTrackable : MonoBehaviour
         lock (loadLock)
         {
             //ARController.Log(LogTag + "ARTrackable.Update()");
-            if (UID == NO_ID || !ARController.pluginFunctions.inited)
+            if (UID == NO_ID || !ARController.pluginFunctions.Inited)
             {
                 visible = false;
                 return;
@@ -401,7 +401,7 @@ public class ARTrackable : MonoBehaviour
             }
             
             // Remove the native trackable, unless arwShutdownAR() has already been called (as it will already have been removed.)
-            if (ARController.pluginFunctions.inited) {
+            if (ARController.pluginFunctions.Inited) {
                 ARController.pluginFunctions.arwRemoveTrackable(UID);
             }
 

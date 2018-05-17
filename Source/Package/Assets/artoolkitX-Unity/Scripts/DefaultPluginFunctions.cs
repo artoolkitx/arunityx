@@ -66,7 +66,7 @@ public class DefaultPluginFunctions : IPluginFunctions
                        ARW_TRACKER_OPTION_SQUARE_PATTERN_SIZE = 9,                    ///< Number of rows and columns in square template (pattern) markers. Defaults to AR_PATT_SIZE1, which is 16 in all versions of ARToolKit prior to 5.3. int.
                        ARW_TRACKER_OPTION_SQUARE_PATTERN_COUNT_MAX = 10;
 
-    bool IPluginFunctions.inited
+    bool IPluginFunctions.Inited
     {
         get
         {
@@ -80,8 +80,8 @@ public class DefaultPluginFunctions : IPluginFunctions
     }
 
     public void arwRegisterLogCallback(LogCallback lcb)
-        {
-            logCallback = lcb;
+    {
+        logCallback = lcb;
 		if (lcb != null) {
             logCallbackGCH = GCHandle.Alloc(logCallback); // Does not need to be pinned, see http://stackoverflow.com/a/19866119/316487 
         }
@@ -256,60 +256,60 @@ public class DefaultPluginFunctions : IPluginFunctions
         return ok;
     }
 
-    public int arwGetMarkerPatternCount(int markerID)
+    public int arwGetTrackablePatternCount(int markerID)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetMarkerPatternCount(markerID);
-        else return ARNativePlugin.arwGetMarkerPatternCount(markerID);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetTrackablePatternCount(markerID);
+        else return ARNativePlugin.arwGetTrackablePatternCount(markerID);
     }
 
-    public bool arwGetMarkerPatternConfig(int markerID, int patternID, float[] matrix, out float width, out float height, out int imageSizeX, out int imageSizeY)
+    public bool arwGetTrackablePatternConfig(int markerID, int patternID, float[] matrix, out float width, out float height, out int imageSizeX, out int imageSizeY)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetMarkerPatternConfig(markerID, patternID, matrix, out width, out height, out imageSizeX, out imageSizeY);
-        else return ARNativePlugin.arwGetMarkerPatternConfig(markerID, patternID, matrix, out width, out height, out imageSizeX, out imageSizeY);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetTrackablePatternConfig(markerID, patternID, matrix, out width, out height, out imageSizeX, out imageSizeY);
+        else return ARNativePlugin.arwGetTrackablePatternConfig(markerID, patternID, matrix, out width, out height, out imageSizeX, out imageSizeY);
     }
 
-    public bool arwGetMarkerPatternImage(int markerID, int patternID, [In, Out]Color[] colors)
+    public bool arwGetTrackablePatternImage(int markerID, int patternID, [In, Out]Color[] colors)
     {
         bool ok;
-        if (Application.platform == RuntimePlatform.IPhonePlayer) ok = ARNativePluginStatic.arwGetMarkerPatternImage(markerID, patternID, colors);
-        else ok = ARNativePlugin.arwGetMarkerPatternImage(markerID, patternID, colors);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) ok = ARNativePluginStatic.arwGetTrackablePatternImage(markerID, patternID, colors);
+        else ok = ARNativePlugin.arwGetTrackablePatternImage(markerID, patternID, colors);
         return ok;
     }
 
-    public bool arwGetMarkerOptionBool(int markerID, int option)
+    public bool arwGetTrackableOptionBool(int markerID, int option)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetMarkerOptionBool(markerID, option);
-        else return ARNativePlugin.arwGetMarkerOptionBool(markerID, option);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetTrackableOptionBool(markerID, option);
+        else return ARNativePlugin.arwGetTrackableOptionBool(markerID, option);
     }
 
-    public void arwSetMarkerOptionBool(int markerID, int option, bool value)
+    public void arwSetTrackableOptionBool(int markerID, int option, bool value)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwSetMarkerOptionBool(markerID, option, value);
-        else ARNativePlugin.arwSetMarkerOptionBool(markerID, option, value);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwSetTrackableOptionBool(markerID, option, value);
+        else ARNativePlugin.arwSetTrackableOptionBool(markerID, option, value);
     }
 
-    public int arwGetMarkerOptionInt(int markerID, int option)
+    public int arwGetTrackableOptionInt(int markerID, int option)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetMarkerOptionInt(markerID, option);
-        else return ARNativePlugin.arwGetMarkerOptionInt(markerID, option);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetTrackableOptionInt(markerID, option);
+        else return ARNativePlugin.arwGetTrackableOptionInt(markerID, option);
     }
 
-    public void arwSetMarkerOptionInt(int markerID, int option, int value)
+    public void arwSetTrackableOptionInt(int markerID, int option, int value)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwSetMarkerOptionInt(markerID, option, value);
-        else ARNativePlugin.arwSetMarkerOptionInt(markerID, option, value);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwSetTrackableOptionInt(markerID, option, value);
+        else ARNativePlugin.arwSetTrackableOptionInt(markerID, option, value);
     }
 
-    public float arwGetMarkerOptionFloat(int markerID, int option)
+    public float arwGetTrackableOptionFloat(int markerID, int option)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetMarkerOptionFloat(markerID, option);
-        else return ARNativePlugin.arwGetMarkerOptionFloat(markerID, option);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwGetTrackableOptionFloat(markerID, option);
+        else return ARNativePlugin.arwGetTrackableOptionFloat(markerID, option);
     }
 
-    public void arwSetMarkerOptionFloat(int markerID, int option, float value)
+    public void arwSetTrackableOptionFloat(int markerID, int option, float value)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwSetMarkerOptionFloat(markerID, option, value);
-        else ARNativePlugin.arwSetMarkerOptionFloat(markerID, option, value);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) ARNativePluginStatic.arwSetTrackableOptionFloat(markerID, option, value);
+        else ARNativePlugin.arwSetTrackableOptionFloat(markerID, option, value);
     }
 
     public void arwSetVideoDebugMode(bool debug)
@@ -421,34 +421,34 @@ public class DefaultPluginFunctions : IPluginFunctions
     }
 
 
-    public int arwAddMarker(string cfg)
+    public int arwAddTrackable(string cfg)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwAddMarker(cfg);
-        else return ARNativePlugin.arwAddMarker(cfg);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwAddTrackable(cfg);
+        else return ARNativePlugin.arwAddTrackable(cfg);
     }
 
-    public bool arwRemoveMarker(int markerID)
+    public bool arwRemoveTrackable(int markerID)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwRemoveMarker(markerID);
-        else return ARNativePlugin.arwRemoveMarker(markerID);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwRemoveTrackable(markerID);
+        else return ARNativePlugin.arwRemoveTrackable(markerID);
     }
 
-    public int arwRemoveAllMarkers()
+    public int arwRemoveAllTrackables()
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwRemoveAllMarkers();
-        else return ARNativePlugin.arwRemoveAllMarkers();
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwRemoveAllTrackables();
+        else return ARNativePlugin.arwRemoveAllTrackables();
     }
 
-    public bool arwQueryMarkerVisibilityAndTransformation(int markerID, float[] matrix)
+    public bool arwQueryTrackableVisibilityAndTransformation(int markerID, float[] matrix)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwQueryMarkerVisibilityAndTransformation(markerID, matrix);
-        else return ARNativePlugin.arwQueryMarkerVisibilityAndTransformation(markerID, matrix);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwQueryTrackableVisibilityAndTransformation(markerID, matrix);
+        else return ARNativePlugin.arwQueryTrackableVisibilityAndTransformation(markerID, matrix);
     }
 
-    public bool arwQueryMarkerVisibilityAndTransformationStereo(int markerID, float[] matrixL, float[] matrixR)
+    public bool arwQueryTrackableVisibilityAndTransformationStereo(int markerID, float[] matrixL, float[] matrixR)
     {
-        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwQueryMarkerVisibilityAndTransformationStereo(markerID, matrixL, matrixR);
-        else return ARNativePlugin.arwQueryMarkerVisibilityAndTransformationStereo(markerID, matrixL, matrixR);
+        if (Application.platform == RuntimePlatform.IPhonePlayer) return ARNativePluginStatic.arwQueryTrackableVisibilityAndTransformationStereo(markerID, matrixL, matrixR);
+        else return ARNativePlugin.arwQueryTrackableVisibilityAndTransformationStereo(markerID, matrixL, matrixR);
     }
 
     public bool arwLoadOpticalParams(string optical_param_name, byte[] optical_param_buff, int optical_param_buffLen, float projectionNearPlane, float projectionFarPlane, out float fovy_p, out float aspect_p, float[] m, float[] p)

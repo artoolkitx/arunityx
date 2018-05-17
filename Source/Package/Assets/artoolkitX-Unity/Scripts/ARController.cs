@@ -366,6 +366,7 @@ public class ARController : MonoBehaviour
     void OnEnable()
     {
         //Log(LogTag + "ARController.OnEnable()");
+        Application.runInBackground = true;
 
         // Register the log callback. This can be set irrespective of whether PluginFunctions.inited is true or false.
         switch (Application.platform)
@@ -393,7 +394,7 @@ public class ARController : MonoBehaviour
         }
 
         // ARController is up, so init.
-        if (pluginFunctions.inited == false) {
+        if (pluginFunctions.Inited == false)
         {
             InitializeAR();
         }
@@ -401,13 +402,13 @@ public class ARController : MonoBehaviour
 
     private void InitializeAR()
     {
-        if (pluginFunctions.inited) {
+        if (pluginFunctions.Inited)
         {
             Log(LogTag + "artoolkitX already inited.");
             return;
         }
 
-       if (pluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax)) {
+       if (pluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax))
         {
             // artoolkitX version number
             _version = pluginFunctions.arwGetARToolKitVersion();
@@ -544,7 +545,7 @@ public class ARController : MonoBehaviour
 
         Log(LogTag + "Shutting down artoolkitX");
         // arwShutdownAR() causes everything artoolkitX holds to be unloaded.
-        if (!pluginFunctions.arwShutdownAR ()) {
+        if (!pluginFunctions.arwShutdownAR ())
         {
             Log(LogTag + "Error shutting down artoolkitX.");
         }
@@ -744,7 +745,7 @@ public class ARController : MonoBehaviour
 #endif
 
             // Wait for the wrapper to confirm video frames have arrived before configuring our video-dependent stuff.
-            if (!pluginFunctions.arwIsRunning()) {
+            if (!pluginFunctions.arwIsRunning())
             {
                 if (!_sceneConfiguredForVideoWaitingMessageLogged)
                 {
@@ -897,7 +898,7 @@ public class ARController : MonoBehaviour
         Log(LogTag + "Stopping AR.");
 
         // Stop video capture and marker detection.
-        if (!pluginFunctions.arwStopRunning()) {
+        if (!pluginFunctions.arwStopRunning())
         {
             Log(LogTag + "Error stopping AR.");
         }
@@ -1022,6 +1023,7 @@ public class ARController : MonoBehaviour
         {
             int ret;
             if (_running)
+            {
                 ret = pluginFunctions.arwGetVideoThresholdMode();
                 if (ret >= 0) currentThresholdMode = (ARController.ARToolKitThresholdMode)ret;
                 else currentThresholdMode = ARController.ARToolKitThresholdMode.Manual;
@@ -1033,6 +1035,7 @@ public class ARController : MonoBehaviour
         {
             currentThresholdMode = value;
             if (_running)
+            {
                 pluginFunctions.arwSetVideoThresholdMode((int)currentThresholdMode);
             }
         }
@@ -1043,6 +1046,7 @@ public class ARController : MonoBehaviour
         get
         {
             if (_running)
+            {
                 currentThreshold = pluginFunctions.arwGetVideoThreshold();
                 if (currentThreshold < 0 || currentThreshold > 255) currentThreshold = 100;
             }
@@ -1053,6 +1057,7 @@ public class ARController : MonoBehaviour
         {
             currentThreshold = value;
             if (_running)
+            {
                 pluginFunctions.arwSetVideoThreshold(value);
             }
         }
@@ -1064,6 +1069,7 @@ public class ARController : MonoBehaviour
         {
             int ret;
             if (_running)
+            {
                 ret = pluginFunctions.arwGetLabelingMode();
                 if (ret >= 0) currentLabelingMode = (ARController.ARToolKitLabelingMode)ret;
                 else currentLabelingMode = ARController.ARToolKitLabelingMode.BlackRegion;
@@ -1075,6 +1081,7 @@ public class ARController : MonoBehaviour
         {
             currentLabelingMode = value;
             if (_running)
+            {
                 pluginFunctions.arwSetLabelingMode((int)currentLabelingMode);
             }
         }
@@ -1086,6 +1093,7 @@ public class ARController : MonoBehaviour
         {
             float ret;
             if (_running)
+            {
                 ret = pluginFunctions.arwGetBorderSize();
                 if (ret > 0.0f && ret < 0.5f) currentBorderSize = ret;
                 else currentBorderSize = 0.25f;
@@ -1097,6 +1105,7 @@ public class ARController : MonoBehaviour
         {
             currentBorderSize = value;
             if (_running)
+            {
                 pluginFunctions.arwSetBorderSize(currentBorderSize);
             }
         }
@@ -1136,6 +1145,7 @@ public class ARController : MonoBehaviour
         {
             int ret;
             if (_running)
+            {
                 ret = pluginFunctions.arwGetPatternDetectionMode();
                 if (ret >= 0) currentPatternDetectionMode = (ARController.ARToolKitPatternDetectionMode)ret;
                 else currentPatternDetectionMode = ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR;
@@ -1147,6 +1157,7 @@ public class ARController : MonoBehaviour
         {
             currentPatternDetectionMode = value;
             if (_running)
+            {
                 pluginFunctions.arwSetPatternDetectionMode((int)currentPatternDetectionMode);
             }
         }
@@ -1158,6 +1169,7 @@ public class ARController : MonoBehaviour
         {
             int ret;
             if (_running)
+            {
                 ret = pluginFunctions.arwGetMatrixCodeType();
                 if (ret >= 0) currentMatrixCodeType = (ARController.ARToolKitMatrixCodeType)ret;
                 else currentMatrixCodeType = ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3;
@@ -1169,6 +1181,7 @@ public class ARController : MonoBehaviour
         {
             currentMatrixCodeType = value;
             if (_running)
+            {
                 pluginFunctions.arwSetMatrixCodeType((int)currentMatrixCodeType);
             }
         }
@@ -1180,6 +1193,7 @@ public class ARController : MonoBehaviour
         {
             int ret;
             if (_running)
+            {
                 ret = pluginFunctions.arwGetImageProcMode();
                 if (ret >= 0) currentImageProcMode = (ARController.ARToolKitImageProcMode)ret;
                 else currentImageProcMode = ARController.ARToolKitImageProcMode.AR_IMAGE_PROC_FRAME_IMAGE;
@@ -1191,6 +1205,7 @@ public class ARController : MonoBehaviour
         {
             currentImageProcMode = value;
             if (_running)
+            {
                 pluginFunctions.arwSetImageProcMode((int)currentImageProcMode);
             }
         }
@@ -1201,6 +1216,7 @@ public class ARController : MonoBehaviour
         get
         {
             if (_running)
+            {
                 currentNFTMultiMode = pluginFunctions.arwGetNFTMultiMode();
             }
             return currentNFTMultiMode;
@@ -1210,6 +1226,7 @@ public class ARController : MonoBehaviour
         {
             currentNFTMultiMode = value;
             if (_running)
+            {
                 pluginFunctions.arwSetNFTMultiMode(currentNFTMultiMode);
             }
         }
@@ -1282,9 +1299,10 @@ public class ARController : MonoBehaviour
                 Log(LogTag + "Error: No video texture to update.");
             }
             else
-                    bool updatedTexture = pluginFunctions.arwUpdateTexture32(_videoColor32Array0);
+            {
                 if (_videoColor32Array0 != null)
                 {
+                    bool updatedTexture = pluginFunctions.arwUpdateTexture32(_videoColor32Array0);
                     if (updatedTexture)
                     {
                         _videoTexture0.SetPixels32(_videoColor32Array0);
