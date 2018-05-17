@@ -130,7 +130,7 @@ public class ARCamera : MonoBehaviour
 			float aspect;
 			float[] m = new float[16];
 			float[] p = new float[16];
-			opticalSetupOK = PluginFunctions.arwLoadOpticalParams(null, OpticalParamsFileContents, OpticalParamsFileContents.Length, nearClipPlane, farClipPlane, out fovy, out aspect, m, p);
+			opticalSetupOK = ARController.pluginFunctions.arwLoadOpticalParams(null, OpticalParamsFileContents, OpticalParamsFileContents.Length, nearClipPlane, farClipPlane, out fovy, out aspect, m, p);
 			if (!opticalSetupOK) {
 				ARController.Log(LogTag + "Error loading optical parameters.");
 				return false;

@@ -397,6 +397,7 @@ GameObject:
   - component: {fileID: 1192976671}
   - component: {fileID: 1192976670}
   - component: {fileID: 1192976669}
+  - component: {fileID: 1192976672}
   m_Layer: 0
   m_Name: ARToolKit
   m_TagString: Untagged
@@ -656,6 +657,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1192976672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1192976668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 028f04244828faf4a97b795ec5df46a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ipAddress: 
+  port: 0
 --- !u!1 &1562006351
 GameObject:
   m_ObjectHideFlags: 0

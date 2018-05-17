@@ -48,7 +48,7 @@ public static class ARNativePlugin
 	private const string LIBRARY_NAME = "ARX";
 
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
-	public static extern void arwRegisterLogCallback(PluginFunctions.LogCallback callback);
+	public static extern void arwRegisterLogCallback(DefaultPluginFunctions.LogCallback callback);
 
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	public static extern void arwSetLogLevel(int logLevel);
