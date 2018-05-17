@@ -80,8 +80,6 @@ public class DefaultPluginFunctions : IPluginFunctions
     }
 
     public void arwRegisterLogCallback(LogCallback lcb)
-    {
-        if (lcb != null)
         {
             logCallback = lcb;
 		if (lcb != null) {
