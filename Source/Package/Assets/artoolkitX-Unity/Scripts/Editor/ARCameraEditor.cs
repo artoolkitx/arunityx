@@ -47,9 +47,9 @@ public class ARCameraEditor : Editor
 {
 	private static TextAsset[] OpticalParamsAssets;
 	private static int OpticalParamsAssetCount;
-	private static string[] OpticalParamsFilenames;
+    private static string[] OpticalParamsFilenames;
 
-	public static void RefreshOpticalParamsFilenames() 
+    public static void RefreshOpticalParamsFilenames() 
 	{
 		OpticalParamsAssets = Resources.LoadAll("ardata/optical", typeof(TextAsset)).Cast<TextAsset>().ToArray();
 		OpticalParamsAssetCount = OpticalParamsAssets.Length;
@@ -81,24 +81,38 @@ public class ARCameraEditor : Editor
 		arc.Optical = EditorGUILayout.Toggle("Optical see-through mode.", arc.Optical);
 
 		if (arc.Optical) {
-			// Offer a popup with optical params file names.
-			RefreshOpticalParamsFilenames(); // Update the list of available optical params from the resources dir
-			if (OpticalParamsFilenames.Length > 0) {
-				int opticalParamsFilenameIndex = EditorGUILayout.Popup("Optical parameters file", arc.OpticalParamsFilenameIndex, OpticalParamsFilenames);
-				string opticalParamsFilename = OpticalParamsAssets[opticalParamsFilenameIndex].name;
-				if (opticalParamsFilename != arc.OpticalParamsFilename) {
-					arc.OpticalParamsFilenameIndex = opticalParamsFilenameIndex;
-					arc.OpticalParamsFilename = opticalParamsFilename;
-					arc.OpticalParamsFileContents = OpticalParamsAssets[arc.OpticalParamsFilenameIndex].bytes;
-				}
-				arc.OpticalEyeLateralOffsetRight = EditorGUILayout.FloatField("Lateral offset right:", arc.OpticalEyeLateralOffsetRight);
-				EditorGUILayout.HelpBox("Enter an amount by which this eye should be moved to the right, relative to the video camera lens. E.g. if this is the right eye, but you're using calibrated optical paramters for the left eye, enter 0.065 (65mm).", MessageType.Info);
-			} else {
-				arc.OpticalParamsFilenameIndex = 0;
-				EditorGUILayout.LabelField("Optical parameters file", "No parameters files available");
-				arc.OpticalParamsFilename = "";
-				arc.OpticalParamsFileContents = new byte[0];
-			}
+
+            arc.OpticalCalibrationMode0 = (ARCamera.OpticalCalibrationMode)EditorGUILayout.EnumPopup("Optical calibration type", arc.OpticalCalibrationMode0);
+            if (arc.OpticalCalibrationMode0 == ARCamera.OpticalCalibrationMode.ARXOpticalParametersFile)
+            {
+                // Offer a popup with optical params file names.
+                RefreshOpticalParamsFilenames(); // Update the list of available optical params from the resources dir
+                if (OpticalParamsFilenames.Length > 0)
+                {
+                    int opticalParamsFilenameIndex = EditorGUILayout.Popup("Optical parameters file", arc.OpticalParamsFilenameIndex, OpticalParamsFilenames);
+                    string opticalParamsFilename = OpticalParamsAssets[opticalParamsFilenameIndex].name;
+                    if (opticalParamsFilename != arc.OpticalParamsFilename)
+                    {
+                        arc.OpticalParamsFilenameIndex = opticalParamsFilenameIndex;
+                        arc.OpticalParamsFilename = opticalParamsFilename;
+                        arc.OpticalParamsFileContents = OpticalParamsAssets[arc.OpticalParamsFilenameIndex].bytes;
+                    }
+                    arc.OpticalEyeLateralOffsetRight = EditorGUILayout.FloatField("Lateral offset right:", arc.OpticalEyeLateralOffsetRight);
+                    EditorGUILayout.HelpBox("Enter an amount by which this eye should be moved to the right, relative to the video camera lens. E.g. if this is the right eye, but you're using calibrated optical paramters for the left eye, enter 0.065 (65mm).", MessageType.Info);
+                }
+                else
+                {
+                    arc.OpticalParamsFilenameIndex = 0;
+                    EditorGUILayout.LabelField("Optical parameters file", "No parameters files available");
+                    arc.OpticalParamsFilename = "";
+                    arc.OpticalParamsFileContents = new byte[0];
+                }
+            }
+            else
+            {
+                arc.OpticalEyeLateralOffsetRight = EditorGUILayout.FloatField("Lateral offset right:", arc.OpticalEyeLateralOffsetRight);
+                EditorGUILayout.HelpBox("Enter an amount by which this eye is to the right of the video camera lens. E.g. if the camera is centred between the eyes, and your IPD is 0.065 (65mm), enter 0.0325 for the right eye and -0.0325 for the left eye.", MessageType.Info);
+            }
 		}
     }
 }

@@ -28,10 +28,11 @@
  *  are not obligated to do so. If you do not wish to do so, delete this exception
  *  statement from your version.
  *
+ *  Copyright 2017-2018 Realmax, Inc.
  *  Copyright 2015 Daqri, LLC.
  *  Copyright 2010-2015 ARToolworks, Inc.
  *
- *  Author(s): Philip Lamb, Julian Looser
+ *  Author(s): Philip Lamb, Julian Looser, Dan Bell, Thorsten Bux.
  *
  */
 
@@ -116,6 +117,8 @@ public class ARController : MonoBehaviour
     // public string videoConfigurationWindowsStore0 = "-device=WinMC -format=BGRA -position=rear";
     public string videoConfigurationLinux0 = "";
     public int BackgroundLayer0 = 8;
+
+    public bool PluginConfigurationRequiredFlag = false;
 
     // Config. out.
     private int _videoWidth0 = 0;
@@ -227,15 +230,6 @@ public class ARController : MonoBehaviour
         BlackRegion = 1,
     }
 
-    public readonly static Dictionary<ARToolKitThresholdMode, string> ThresholdModeDescriptions = new Dictionary<ARToolKitThresholdMode, string>
-    {
-        {ARToolKitThresholdMode.Manual, "Uses a fixed threshold value"},
-        {ARToolKitThresholdMode.Median, "Automatically adjusts threshold to whole-image median"},
-        {ARToolKitThresholdMode.Otsu, "Automatically adjusts threshold using Otsu's method for foreground/background determination"},
-        {ARToolKitThresholdMode.Adaptive, "Uses adaptive dynamic thresholding (warning: computationally expensive)"},
-        {ARToolKitThresholdMode.Bracketing, "Automatically adjusts threshold using bracketed threshold values"}
-    };
-
     public enum ARToolKitPatternDetectionMode
     {
         AR_TEMPLATE_MATCHING_COLOR = 0,
@@ -328,8 +322,8 @@ public class ARController : MonoBehaviour
     [SerializeField]
     private AR_LOG_LEVEL currentLogLevel = AR_LOG_LEVEL.AR_LOG_LEVEL_INFO;
 
-    //Set the plugin functions you would like to use. Either for PI tracking or for default tracking (which is the usual)
-    public static IPluginFunctions pluginFunctions = new DefaultPluginFunctions();
+    // Main reference to the plugin functions. Created in Awake, destroyed in OnDestroy().
+    private IPluginFunctions pluginFunctions = null;
 
     //
     // MonoBehavior methods.
@@ -337,35 +331,38 @@ public class ARController : MonoBehaviour
     void Awake()
     {
         Log(LogTag + "ARController.Awake())");
-#if UNITY_IOS && !UNITY_EDITOR
-            ARNativePluginStatic.aruRequestCamera();
-            Thread.Sleep(2000);
-#endif
 
-
-#if UNITY_ANDROID && !UNITY_EDITOR
-
-            Log (LogTag + "About to initialize the Android Plugin");
-                using( AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer")){
-                    if(jc != null){
-                        using(AndroidJavaObject activity = jc.GetStatic<AndroidJavaObject>("currentActivity")) {
-                            androidPlugin = activity.Call<AndroidJavaObject>("getArtoolkitXPlugin");
-                            if (null == androidPlugin) {
-                                Log(LogTag + "ERROR: Failed to connect to artoolkitX-Android plugin! We might be missing arxjUnity.jar?");
-                            }
-                            else { 
-                                androidPlugin.Call("setUnityRunning",new object[]{true});
-                                activity.Call("startCamera");
-                            }
-                    }
-                }
-            }
-#endif
     }
 
     void OnEnable()
     {
-        //Log(LogTag + "ARController.OnEnable()");
+
+        pluginFunctions = new PluginFunctionsARX();
+#if !UNITY_EDITOR
+#  if UNITY_IOS
+        ARX_pinvoke.aruRequestCamera();
+        Thread.Sleep(2000);
+#  elif UNITY_ANDROID
+
+        Log (LogTag + "About to initialize the Android Plugin");
+        using( AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
+            if (jc != null) {
+                using(AndroidJavaObject activity = jc.GetStatic<AndroidJavaObject>("currentActivity")) {
+                    androidPlugin = activity.Call<AndroidJavaObject>("getArtoolkitXPlugin");
+                    if (null == androidPlugin) {
+                        Log(LogTag + "ERROR: Failed to connect to artoolkitX-Android plugin! We might be missing arxjUnity.jar?");
+                    }
+                    else { 
+                        androidPlugin.Call("setUnityRunning",new object[]{true});
+                        activity.Call("startCamera");
+                    }
+                }
+            }
+        }
+#  endif
+#endif // !UNITY_EDITOR
+
+        Log(LogTag + "ARController.OnEnable()");
         Application.runInBackground = true;
 
         // Register the log callback. This can be set irrespective of whether PluginFunctions.inited is true or false.
@@ -373,28 +370,24 @@ public class ARController : MonoBehaviour
         {
             case RuntimePlatform.OSXEditor:                        // Unity Editor on OS X.
             case RuntimePlatform.OSXPlayer:                        // Unity Player on OS X.
-                goto case RuntimePlatform.WindowsPlayer;
             case RuntimePlatform.WindowsEditor:                    // Unity Editor on Windows.
             case RuntimePlatform.WindowsPlayer:                    // Unity Player on Windows.
-            //case RuntimePlatform.LinuxEditor:
+            case RuntimePlatform.LinuxEditor:
             case RuntimePlatform.LinuxPlayer:
+            case RuntimePlatform.WSAPlayerX86:                     // Unity Player on Windows Store X86.
+            case RuntimePlatform.WSAPlayerX64:                     // Unity Player on Windows Store X64.
+            case RuntimePlatform.WSAPlayerARM:                     // Unity Player on Windows Store ARM.
                 pluginFunctions.arwRegisterLogCallback(Log);
                 break;
-            case RuntimePlatform.Android:                        // Unity Player on Android.
-                break;
-            case RuntimePlatform.IPhonePlayer:                    // Unity Player on iOS.
-                break;
-            case RuntimePlatform.WSAPlayerX86:                  // Unity Player on Windows Store X86.
-            case RuntimePlatform.WSAPlayerX64:                  // Unity Player on Windows Store X64.
-            case RuntimePlatform.WSAPlayerARM:                  // Unity Player on Windows Store ARM.
-                pluginFunctions.arwRegisterLogCallback(Log);
+            case RuntimePlatform.Android:                          // Unity Player on Android.
+            case RuntimePlatform.IPhonePlayer:                     // Unity Player on iOS.
                 break;
             default:
                 break;
         }
 
         // ARController is up, so init.
-        if (pluginFunctions.Inited == false)
+        if (!pluginFunctions.IsInited())
         {
             InitializeAR();
         }
@@ -402,51 +395,47 @@ public class ARController : MonoBehaviour
 
     private void InitializeAR()
     {
-        if (pluginFunctions.Inited)
+        if (!pluginFunctions.IsInited())
         {
-            Log(LogTag + "artoolkitX already inited.");
-            return;
+            if (pluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax))
+            {
+                // artoolkitX version number
+                _version = pluginFunctions.arwGetARToolKitVersion();
+                Log(LogTag + "artoolkitX version " + _version + " initialised.");
+            }
+            else
+            {
+                Log(LogTag + "Error initialising artoolkitX");
+            }
         }
 
-       if (pluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax))
+        // ARTrackables may be loaded once the plugin is initialised. The ARController
+        // is now responsible for letting the ARTrackable know that this is ready by
+        // passing a reference to the plugin.
+        // This code has a matching block in FinalizeAR which undoes the reference.
+        if (pluginFunctions.IsInited())
         {
-            // artoolkitX version number
-            _version = pluginFunctions.arwGetARToolKitVersion();
-            Log(LogTag + "artoolkitX version " + _version + " initialised.");
-        }
-        else
-        {
-            Log(LogTag + "Error initialising artoolkitX");
-        }
-
-        // Ensure ARTrackable objects that were instantiated/deserialized before the native interface came up are all loaded.
-        ARTrackable[] trackables = FindObjectsOfType<ARTrackable>();
-        foreach (ARTrackable m in trackables)
-        {
-            m.Load();
+            // Ensure ARTrackable objects that were instantiated/deserialized before the native interface came up are all loaded.
+            ARTrackable[] trackables = FindObjectsOfType<ARTrackable>();
+            foreach (ARTrackable t in trackables)
+            {
+                t.PluginFunctions = pluginFunctions;
+            }
         }
     }
 
     void Start()
     {
-        Log(LogTag + "ARController.Start()");
-
         Log(LogTag + "ARController.Start(): Application.isPlaying = " + Application.isPlaying + " autoStart: " + AutoStartAR);
-        if (Application.isPlaying)
-        {
+        if (!Application.isPlaying) return; // Editor Start.
 
-            // Player start.
-            if (AutoStartAR)
+        // Player start.
+        if (AutoStartAR)
+        {
+            if (!StartAR()) 
             {
-                if (!StartAR()) Application.Quit();
+                //Application.Quit(); 
             }
-
-        }
-        else
-        {
-
-            // Editor Start.
-
         }
     }
 
@@ -472,28 +461,17 @@ public class ARController : MonoBehaviour
     }
 
     void Update()
-
     {
         //Log(LogTag + "ARController.Update()");
+        if (!Application.isPlaying) return; // Editor update.
 
-        if (Application.isPlaying)
-        {
+        // Player update.
+        if (Input.GetKeyDown(KeyCode.Menu) || Input.GetKeyDown(KeyCode.Return)) showGUIDebug = !showGUIDebug;
+        if (QuitOnEscOrBack && Input.GetKeyDown(KeyCode.Escape)) Application.Quit(); // On Android, maps to "back" button.
 
-            // Player update.
-            if (Input.GetKeyDown(KeyCode.Menu) || Input.GetKeyDown(KeyCode.Return)) showGUIDebug = !showGUIDebug;
-            if (QuitOnEscOrBack && Input.GetKeyDown(KeyCode.Escape)) Application.Quit(); // On Android, maps to "back" button.
+        CalculateFPS();
 
-            CalculateFPS();
-
-            UpdateAR();
-
-        }
-        else
-        {
-
-            // Editor update.
-
-        }
+        UpdateAR();
     }
 
     // Called when the user quits the application, or presses stop in the editor.
@@ -506,7 +484,12 @@ public class ARController : MonoBehaviour
 
     void OnDisable()
     {
-        //Log(LogTag + "ARController.OnDisable()");
+        Log(LogTag + "ARController.OnDisable()");
+
+        if (pluginFunctions.IsInited())
+        {
+            FinalizeAR();
+        }
 
         // Since we might be going away, tell users of our Log function
         // to stop calling it.
@@ -533,7 +516,32 @@ public class ARController : MonoBehaviour
             default:
                 break;
         }
+        pluginFunctions = null;
 
+    }
+
+    void FinalizeAR()
+    {
+        //Log(LogTag + "ARController.FinalizeAR()");
+        if (_running) {
+            StopAR();
+        }
+
+        if (pluginFunctions.IsInited()) {
+            // Ensure ARTrackable objects are all unloaded.
+            ARTrackable[] trackables = FindObjectsOfType<ARTrackable>();
+            foreach (ARTrackable t in trackables)
+            {
+                t.PluginFunctions = null;
+            }
+
+            Log(LogTag + "Shutting down artoolkitX");
+            // arwShutdownAR() causes everything artoolkitX holds to be unloaded.
+            if (!pluginFunctions.arwShutdownAR())
+            {
+                Log(LogTag + "Error shutting down artoolkitX.");
+            }
+        }
     }
 
     // As OnDestroy() is called from the ARController object's destructor, don't do anything
@@ -543,14 +551,9 @@ public class ARController : MonoBehaviour
     {
         //Log(LogTag + "ARController.OnDestroy()");
 
-        Log(LogTag + "Shutting down artoolkitX");
-        // arwShutdownAR() causes everything artoolkitX holds to be unloaded.
-        if (!pluginFunctions.arwShutdownAR ())
-        {
-            Log(LogTag + "Error shutting down artoolkitX.");
-        }
 
         // Classes inheriting from MonoBehavior should set all static member variables to null on unload.
+        //none.
     }
 
     //
@@ -566,181 +569,194 @@ public class ARController : MonoBehaviour
             return false;
         }
 
-        Log(LogTag + "Starting AR.");
-
-        _sceneConfiguredForVideo = _sceneConfiguredForVideoWaitingMessageLogged = false;
-
-        // Check rendering device.
-        string renderDevice = SystemInfo.graphicsDeviceVersion;
-        _useNativeGLTexturing = !renderDevice.StartsWith("Direct") && UseNativeGLTexturingIfAvailable;
-        if (_useNativeGLTexturing)
+        // For late startup after configuration, StartAR needs to ensure InitialiseAR has been called.
+        if (!pluginFunctions.IsInited())
         {
-            Log(LogTag + "Render device: " + renderDevice + ", using native GL texturing.");
+            InitializeAR();
         }
-        else
+        if (pluginFunctions.IsInited())
         {
-            Log(LogTag + "Render device: " + renderDevice + ", using Unity texturing.");
-        }
+            Log(LogTag + "Starting AR.");
 
-        CreateClearCamera();
+            _sceneConfiguredForVideo = _sceneConfiguredForVideoWaitingMessageLogged = false;
 
-        // Retrieve video configuration, and append any required per-platform overrides.
-        // For native GL texturing we need monoplanar video; iOS and Android default to biplanar format. 
-        string videoConfiguration0;
-        string videoConfiguration1;
-        switch (Application.platform)
-        {
-            case RuntimePlatform.OSXEditor:
-            case RuntimePlatform.OSXPlayer:
-                videoConfiguration0 = videoConfigurationMacOSX0;
-                videoConfiguration1 = videoConfigurationMacOSX1;
-                if (_useNativeGLTexturing || !AllowNonRGBVideo)
-                {
-                    if (videoConfiguration0.IndexOf("-device=QuickTime7") != -1 || videoConfiguration0.IndexOf("-device=QUICKTIME") != -1) videoConfiguration0 += " -pixelformat=BGRA";
-                    if (videoConfiguration1.IndexOf("-device=QuickTime7") != -1 || videoConfiguration1.IndexOf("-device=QUICKTIME") != -1) videoConfiguration1 += " -pixelformat=BGRA";
-                }
-                break;
-            case RuntimePlatform.WindowsEditor:
-            case RuntimePlatform.WindowsPlayer:
-                videoConfiguration0 = videoConfigurationWindows0;
-                videoConfiguration1 = videoConfigurationWindows1;
-                if (_useNativeGLTexturing || !AllowNonRGBVideo)
-                {
-                    if (videoConfiguration0.IndexOf("-device=WinMF") != -1) videoConfiguration0 += " -format=BGRA";
-                    if (videoConfiguration1.IndexOf("-device=WinMF") != -1) videoConfiguration1 += " -format=BGRA";
-                }
-                break;
-            case RuntimePlatform.Android:
-                videoConfiguration0 = videoConfigurationAndroid0 + " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
-                videoConfiguration1 = videoConfigurationAndroid1 + " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
-                break;
-            case RuntimePlatform.IPhonePlayer:
-                videoConfiguration0 = videoConfigurationiOS0 + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
-                videoConfiguration1 = videoConfigurationiOS1 + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
-                break;
-            //            case RuntimePlatform.WSAPlayerX86:
-            //            case RuntimePlatform.WSAPlayerX64:
-            //            case RuntimePlatform.WSAPlayerARM:
-            //                videoConfiguration0 = videoConfigurationWindowsStore0;
-            //                videoConfiguration1 = videoConfigurationWindowsStore1;
-            //                break;
-            //case RuntimePlatform.LinuxEditor:
-            case RuntimePlatform.LinuxPlayer:
-                videoConfiguration0 = videoConfigurationLinux0;
-                videoConfiguration1 = videoConfigurationLinux1;
-                break;
-            default:
-                videoConfiguration0 = "";
-                videoConfiguration1 = "";
-                break;
-        }
-
-        // Load the default camera parameters.
-        byte[] cparam0 = null;
-        byte[] cparam1 = null;
-        byte[] transL2R = null;
-        if (!string.IsNullOrEmpty(videoCParamName0))
-        {
-            TextAsset ta = Resources.Load("ardata/" + videoCParamName0, typeof(TextAsset)) as TextAsset;
-            if (ta == null)
+            // Check rendering device.
+            string renderDevice = SystemInfo.graphicsDeviceVersion;
+            _useNativeGLTexturing = !renderDevice.StartsWith("Direct") && UseNativeGLTexturingIfAvailable;
+            if (_useNativeGLTexturing)
             {
-                // Error - the camera_para.dat file isn't in the right place            
-                Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName0 + ".bytes");
-                return (false);
-            }
-            cparam0 = ta.bytes;
-        }
-        if (VideoIsStereo)
-        {
-            if (!string.IsNullOrEmpty(videoCParamName1))
-            {
-                TextAsset ta = Resources.Load("ardata/" + videoCParamName1, typeof(TextAsset)) as TextAsset;
-                if (ta == null)
-                {
-                    // Error - the camera_para.dat file isn't in the right place            
-                    Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName1 + ".bytes");
-                    return (false);
-                }
-                cparam1 = ta.bytes;
-            }
-            TextAsset ta1 = Resources.Load("ardata/" + transL2RName, typeof(TextAsset)) as TextAsset;
-            if (ta1 == null)
-            {
-                // Error - the transL2R.dat file isn't in the right place            
-                Log(LogTag + "StartAR(): Error: The stereo calibration file not found at Resources/ardata/" + transL2RName + ".bytes");
-                return (false);
-            }
-            transL2R = ta1.bytes;
-        }
-
-        // Begin video capture and marker detection.
-        if (!VideoIsStereo)
-        {
-            Log(LogTag + "Starting artoolkitX video with vconf '" + videoConfiguration0 + "'.");
-            _running = pluginFunctions.arwStartRunningB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0));
-        }
-        else
-        {
-            Log(LogTag + "Starting artoolkitX video with vconfL '" + videoConfiguration0 + "', vconfR '" + videoConfiguration1 + "'.");
-            _running = pluginFunctions.arwStartRunningStereoB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0), videoConfiguration1, cparam1, (cparam1 != null ? cparam1.Length : 0), transL2R, (transL2R != null ? transL2R.Length : 0));
-
-        }
-
-        if (!_running)
-        {
-            Log(LogTag + "Error starting running");
-            ARW_ERROR error = (ARW_ERROR)pluginFunctions.arwGetError();
-            if (error == ARW_ERROR.ARW_ERROR_DEVICE_UNAVAILABLE)
-            {
-                showGUIErrorDialogContent = "Unable to start AR tracking. The camera may be in use by another application.";
+                Log(LogTag + "Render device: " + renderDevice + ", using native GL texturing.");
             }
             else
             {
-                showGUIErrorDialogContent = "Unable to start AR tracking. Please check that you have a camera connected.";
+                Log(LogTag + "Render device: " + renderDevice + ", using Unity texturing.");
             }
-            showGUIErrorDialog = true;
-            return false;
+
+            CreateClearCamera();
+
+            // Retrieve video configuration, and append any required per-platform overrides.
+            // For native GL texturing we need monoplanar video; iOS and Android default to biplanar format. 
+            string videoConfiguration0;
+            string videoConfiguration1;
+            switch (Application.platform)
+            {
+                case RuntimePlatform.OSXEditor:
+                case RuntimePlatform.OSXPlayer:
+                    videoConfiguration0 = videoConfigurationMacOSX0;
+                    videoConfiguration1 = videoConfigurationMacOSX1;
+                    if (_useNativeGLTexturing || !AllowNonRGBVideo)
+                    {
+                        if (videoConfiguration0.IndexOf("-device=QuickTime7") != -1 || videoConfiguration0.IndexOf("-device=QUICKTIME") != -1) videoConfiguration0 += " -pixelformat=BGRA";
+                        if (videoConfiguration1.IndexOf("-device=QuickTime7") != -1 || videoConfiguration1.IndexOf("-device=QUICKTIME") != -1) videoConfiguration1 += " -pixelformat=BGRA";
+                    }
+                    break;
+                case RuntimePlatform.WindowsEditor:
+                case RuntimePlatform.WindowsPlayer:
+                    videoConfiguration0 = videoConfigurationWindows0;
+                    videoConfiguration1 = videoConfigurationWindows1;
+                    if (_useNativeGLTexturing || !AllowNonRGBVideo)
+                    {
+                        if (videoConfiguration0.IndexOf("-device=WinMF") != -1) videoConfiguration0 += " -format=BGRA";
+                        if (videoConfiguration1.IndexOf("-device=WinMF") != -1) videoConfiguration1 += " -format=BGRA";
+                    }
+                    break;
+                case RuntimePlatform.Android:
+                    videoConfiguration0 = videoConfigurationAndroid0 + " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
+                    videoConfiguration1 = videoConfigurationAndroid1 + " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
+                    break;
+                case RuntimePlatform.IPhonePlayer:
+                    videoConfiguration0 = videoConfigurationiOS0 + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
+                    videoConfiguration1 = videoConfigurationiOS1 + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
+                    break;
+                //            case RuntimePlatform.WSAPlayerX86:
+                //            case RuntimePlatform.WSAPlayerX64:
+                //            case RuntimePlatform.WSAPlayerARM:
+                //                videoConfiguration0 = videoConfigurationWindowsStore0;
+                //                videoConfiguration1 = videoConfigurationWindowsStore1;
+                //                break;
+                //case RuntimePlatform.LinuxEditor:
+                case RuntimePlatform.LinuxPlayer:
+                    videoConfiguration0 = videoConfigurationLinux0;
+                    videoConfiguration1 = videoConfigurationLinux1;
+                    break;
+                default:
+                    videoConfiguration0 = "";
+                    videoConfiguration1 = "";
+                    break;
+            }
+
+            // Load the default camera parameters.
+            byte[] cparam0 = null;
+            byte[] cparam1 = null;
+            byte[] transL2R = null;
+            if (!string.IsNullOrEmpty(videoCParamName0))
+            {
+                TextAsset ta = Resources.Load("ardata/" + videoCParamName0, typeof(TextAsset)) as TextAsset;
+                if (ta == null)
+                {
+                    // Error - the camera_para.dat file isn't in the right place            
+                    Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName0 + ".bytes");
+                    return (false);
+                }
+                cparam0 = ta.bytes;
+            }
+            if (VideoIsStereo)
+            {
+                if (!string.IsNullOrEmpty(videoCParamName1))
+                {
+                    TextAsset ta = Resources.Load("ardata/" + videoCParamName1, typeof(TextAsset)) as TextAsset;
+                    if (ta == null)
+                    {
+                        // Error - the camera_para.dat file isn't in the right place            
+                        Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName1 + ".bytes");
+                        return (false);
+                    }
+                    cparam1 = ta.bytes;
+                }
+                TextAsset ta1 = Resources.Load("ardata/" + transL2RName, typeof(TextAsset)) as TextAsset;
+                if (ta1 == null)
+                {
+                    // Error - the transL2R.dat file isn't in the right place            
+                    Log(LogTag + "StartAR(): Error: The stereo calibration file not found at Resources/ardata/" + transL2RName + ".bytes");
+                    return (false);
+                }
+                transL2R = ta1.bytes;
+            }
+
+            // Begin video capture and marker detection.
+            if (!VideoIsStereo)
+            {
+                Log(LogTag + "Starting artoolkitX video with vconf '" + videoConfiguration0 + "'.");
+                _running = pluginFunctions.arwStartRunningB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0));
+            }
+            else
+            {
+                Log(LogTag + "Starting artoolkitX video with vconfL '" + videoConfiguration0 + "', vconfR '" + videoConfiguration1 + "'.");
+                _running = pluginFunctions.arwStartRunningStereoB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0), videoConfiguration1, cparam1, (cparam1 != null ? cparam1.Length : 0), transL2R, (transL2R != null ? transL2R.Length : 0));
+
+            }
+
+            if (!_running)
+            {
+
+                Log(LogTag + "Error starting running");
+                ARW_ERROR error = (ARW_ERROR)pluginFunctions.arwGetError();
+                if (error == ARW_ERROR.ARW_ERROR_DEVICE_UNAVAILABLE)
+                {
+                    showGUIErrorDialogContent = "Unable to start AR tracking. The camera may be in use by another application.";
+                }
+                else
+                {
+                    showGUIErrorDialogContent = "Unable to start AR tracking. Please check that you have a camera connected.";
+                }
+                showGUIErrorDialog = true;
+                return false;
+            }
+
+            // After calling arwStartRunningB/arwStartRunningStereoB, set artoolkitX configuration.
+            Log(LogTag + "Setting artoolkitX tracking settings.");
+            VideoThreshold = currentThreshold;
+            VideoThresholdMode = currentThresholdMode;
+            LabelingMode = currentLabelingMode;
+            BorderSize = currentBorderSize;
+            PatternDetectionMode = currentPatternDetectionMode;
+            MatrixCodeType = currentMatrixCodeType;
+            ImageProcMode = currentImageProcMode;
+            NFTMultiMode = currentNFTMultiMode;
+
         }
-
-        // After calling arwStartRunningB/arwStartRunningStereoB, set artoolkitX configuration.
-        Log(LogTag + "Setting artoolkitX tracking settings.");
-        VideoThreshold = currentThreshold;
-        VideoThresholdMode = currentThresholdMode;
-        LabelingMode = currentLabelingMode;
-        BorderSize = currentBorderSize;
-        PatternDetectionMode = currentPatternDetectionMode;
-        MatrixCodeType = currentMatrixCodeType;
-        ImageProcMode = currentImageProcMode;
-        NFTMultiMode = currentNFTMultiMode;
-
         // Remaining Unity setup happens in UpdateAR().
         return true;
     }
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
         private ScreenOrientation screenOrientation = ScreenOrientation.Unknown;
-#if UNITY_ANDROID
-            private int screenWidth = 0;
-            private int screenHeight = 0;
-#endif
+#  if UNITY_ANDROID
+        private int screenWidth = 0;
+        private int screenHeight = 0;
+#  endif
 #endif
 
 
     bool UpdateAR()
     {
+        // For late startup after configuration, UpdateAR needs to ensure StartAR has been called.
         if (!_running)
         {
-            return false;
+            StartAR();
+            if (!_running) {
+                return true;
+            }
         }
 
         if (!_sceneConfiguredForVideo)
         {
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-                screenOrientation = Screen.orientation;
+            screenOrientation = Screen.orientation;
 #if UNITY_ANDROID
-                    screenWidth = Screen.width;
-                    screenHeight = Screen.height;
+            screenWidth = Screen.width;
+            screenHeight = Screen.height;
 #endif
 #endif
 
@@ -852,7 +868,7 @@ public class ARController : MonoBehaviour
                 ConfigureViewports();
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-                    UpdateVideoTexture();
+                UpdateVideoTexture();
 #endif
 
                 Log(LogTag + "Scene configured for video.");
@@ -861,21 +877,21 @@ public class ARController : MonoBehaviour
         } // !sceneConfiguredForVideo
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-#if UNITY_IOS
-                if (Screen.orientation != screenOrientation) {
-                    UpdateVideoTexture();
-                }
-#elif UNITY_ANDROID
-                if ((Screen.width != screenWidth) || (Screen.height != screenHeight)) {
-                    UpdateVideoTexture();
-                } else if (Screen.orientation != screenOrientation) {
-                    screenWidth = screenHeight = 0;  // Force video texture update on next pass.
-                }
+#  if UNITY_IOS
+        if (Screen.orientation != screenOrientation) {
+            UpdateVideoTexture();
+        }
+#  elif UNITY_ANDROID
+        if ((Screen.width != screenWidth) || (Screen.height != screenHeight)) {
+            UpdateVideoTexture();
+        } else if (Screen.orientation != screenOrientation) {
+            screenWidth = screenHeight = 0;  // Force video texture update on next pass.
+        }
+#  endif
 #endif
-#endif
-
         bool gotFrame = pluginFunctions.arwCapture();
         bool ok = pluginFunctions.arwUpdateAR();
+        Debug.LogWarning(string.Format("Ok - {0}..... Got Frame - {1}", ok.ToString(), gotFrame.ToString()));
         if (!ok) return false;
         if (gotFrame)
         {
@@ -920,10 +936,10 @@ public class ARController : MonoBehaviour
     {
         ScreenOrientation screenOrientation = Screen.orientation;
 
-#if UNITY_ANDROID
+#  if UNITY_ANDROID
             screenWidth = Screen.width;
             screenHeight = Screen.height;
-#endif
+#  endif
         Matrix4x4 deviceRotation;
         int height = _videoHeight0;
         int width = _videoWidth0;
@@ -970,7 +986,7 @@ public class ARController : MonoBehaviour
         bool optical;
         ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
         foreach (ARCamera arCamera in arCameras) {
-            bool success = arCamera.SetupCamera(NearPlane, FarPlane, deviceRotation * _videoProjectionMatrix0, out optical);
+            bool success = arCamera.SetupCamera(pluginFunctions, NearPlane, FarPlane, deviceRotation * _videoProjectionMatrix0, out optical);
             if(!success){
                 Log(LogTag + "Error setting up ARCamera.");
             }
@@ -1652,6 +1668,7 @@ public class ARController : MonoBehaviour
 
         Log(LogTag + "For " + backingWidth + "x" + backingHeight + " screen, calculated viewport " + w + "x" + h + " at (" + left + ", " + bottom + ").");
 #if !UNITY_EDITOR && UNITY_ANDROID
+        if (androidPlugin != null)
             androidPlugin.Call("logUnityMessage", LogTag + "For " + backingWidth + "x" + backingHeight + " screen, calculated viewport " + w + "x" + h + " at (" + left + ", " + bottom + ").");
 #endif
 
@@ -1691,18 +1708,18 @@ public class ARController : MonoBehaviour
             if (!arc.Stereo)
             {
                 // A mono display.
-                ok = arc.SetupCamera(NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
+                ok = arc.SetupCamera(pluginFunctions, NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
             }
             else
             {
                 // One eye of a stereo display.
                 if (arc.StereoEye == ARCamera.ViewEye.Left)
                 {
-                    ok = arc.SetupCamera(NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
+                    ok = arc.SetupCamera(pluginFunctions, NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
                 }
                 else
                 {
-                    ok = arc.SetupCamera(NearPlane, FarPlane, (VideoIsStereo ? _videoProjectionMatrix1 : _videoProjectionMatrix0), out optical);
+                    ok = arc.SetupCamera(pluginFunctions, NearPlane, FarPlane, (VideoIsStereo ? _videoProjectionMatrix1 : _videoProjectionMatrix0), out optical);
                 }
             }
             if (!ok)
@@ -1761,7 +1778,7 @@ public class ARController : MonoBehaviour
 #if UNITY_ANDROID
         // Special feature: on Android, call the UnityARPlayer.setStereo(haveStereoARCamera) Java method.
         // This allows Android-based devices (e.g. the Epson Moverio BT-200) to support hardware switching between mono/stereo display modes.
-        if (Application.platform == RuntimePlatform.Android) {
+        if (Application.platform == RuntimePlatform.Android && androidPlugin != null) {
             androidPlugin.Call("setStereo",new object[]{haveStereoARCamera});
         }        
 #endif
@@ -1892,7 +1909,8 @@ public class ARController : MonoBehaviour
 #if UNITY_ANDROID
         if (Application.platform == RuntimePlatform.Android) {
             if (GUI.Button(new Rect(400, 250, 150, 50), "Camera preferences")) {
-                androidPlugin.Call("launchSettings");
+                if (androidPlugin != null)
+                    androidPlugin.Call("launchSettings");
             }
         }
 #endif

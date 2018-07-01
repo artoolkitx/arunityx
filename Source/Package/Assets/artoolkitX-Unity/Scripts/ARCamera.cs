@@ -65,6 +65,12 @@ public class ARCamera : MonoBehaviour
 		Right = 2,
 	}
 	
+    public enum OpticalCalibrationMode
+    {
+        ManuallySpecified = 0,
+        ARXOpticalParametersFile
+    }
+
 	/*public enum STEREO_DISPLAY_MODE {
 		STEREO_DISPLAY_MODE_INACTIVE = 0,           // Stereo display not active.
 		STEREO_DISPLAY_MODE_DUAL_OUTPUT,            // Two outputs, one displaying the left view, and one the right view.  Blue-line optional.
@@ -103,15 +109,15 @@ public class ARCamera : MonoBehaviour
 	
 	// Optical settings.
 	public bool Optical = false;
+    public OpticalCalibrationMode OpticalCalibrationMode0 = OpticalCalibrationMode.ManuallySpecified;
 	private bool opticalSetupOK = false;
 	public int OpticalParamsFilenameIndex = 0;
 	public string OpticalParamsFilename = "";
 	public byte[] OpticalParamsFileContents = new byte[0]; // Set by the Editor.
 	public float OpticalEyeLateralOffsetRight = 0.0f;
 	private Matrix4x4 opticalViewMatrix; // This transform expresses the position and orientation of the physical camera in eye coordinates.
-	
 
-	public bool SetupCamera(float nearClipPlane, float farClipPlane, Matrix4x4 projectionMatrix, out bool opticalOut)
+    public bool SetupCamera(IPluginFunctions pluginFunctions, float nearClipPlane, float farClipPlane, Matrix4x4 projectionMatrix, out bool opticalOut)
 	{
 		Camera c = this.gameObject.GetComponent<Camera>();
         opticalOut = false;
@@ -124,23 +130,33 @@ public class ARCamera : MonoBehaviour
 		// isn't using the custom projection matrix.
 		c.nearClipPlane = nearClipPlane;
 		c.farClipPlane = farClipPlane;
-		
-		if (Optical) {
-			float fovy ;
-			float aspect;
-			float[] m = new float[16];
-			float[] p = new float[16];
-			opticalSetupOK = ARController.pluginFunctions.arwLoadOpticalParams(null, OpticalParamsFileContents, OpticalParamsFileContents.Length, nearClipPlane, farClipPlane, out fovy, out aspect, m, p);
-			if (!opticalSetupOK) {
-				ARController.Log(LogTag + "Error loading optical parameters.");
-				return false;
-			}
-			m[12] *= 0.001f;
-			m[13] *= 0.001f;
-			m[14] *= 0.001f;
-			ARController.Log(LogTag + "Optical parameters: fovy=" + fovy  + ", aspect=" + aspect + ", camera position (m)={" + m[12].ToString("F3") + ", " + m[13].ToString("F3") + ", " + m[14].ToString("F3") + "}");
-			
-			c.projectionMatrix = ARUtilityFunctions.MatrixFromFloatArray(p);
+
+        if (Optical)
+        {
+            float fovy;
+            float aspect;
+            float[] m = new float[16];
+            float[] p = new float[16];
+
+            if (OpticalCalibrationMode0 == OpticalCalibrationMode.ARXOpticalParametersFile)
+            {
+                opticalSetupOK = pluginFunctions.arwLoadOpticalParams(null, OpticalParamsFileContents, OpticalParamsFileContents.Length, nearClipPlane, farClipPlane, out fovy, out aspect, m, p);
+                if (!opticalSetupOK)
+                {
+                    ARController.Log(LogTag + "Error loading ARX optical parameters.");
+                    return false;
+                }
+
+                // Convert millimetres to metres.
+                m[12] *= 0.001f;
+                m[13] *= 0.001f;
+                m[14] *= 0.001f;
+                c.projectionMatrix = ARUtilityFunctions.MatrixFromFloatArray(p);
+                ARController.Log(LogTag + "Optical parameters: fovy=" + fovy + ", aspect=" + aspect + ", camera position (m)={" + m[12].ToString("F3") + ", " + m[13].ToString("F3") + ", " + m[14].ToString("F3") + "}");
+            } else {
+                m[0] = m[5] = m[10] = m[15] = 1.0f;
+                m[1] = m[2] = m[3] = m[4] = m[6] = m[7] = m[8] = m[9] = m[11] = m[12] = m[13] = m[14] = 0.0f;
+            }
 			
 			opticalViewMatrix = ARUtilityFunctions.MatrixFromFloatArray(m);
 			if (OpticalEyeLateralOffsetRight != 0.0f) opticalViewMatrix = Matrix4x4.TRS(new Vector3(-OpticalEyeLateralOffsetRight, 0.0f, 0.0f), Quaternion.identity, Vector3.one) * opticalViewMatrix; 
@@ -185,7 +201,7 @@ public class ARCamera : MonoBehaviour
 	}
 	
 	// Updates arVisible, arPosition, arRotation based on linked marker state.
-	private void UpdateTracking()
+	protected virtual void UpdateTracking()
 	{
 		// Note the current time
 		timeLastUpdate = Time.realtimeSinceStartup;
@@ -240,7 +256,7 @@ public class ARCamera : MonoBehaviour
 	}
 	
 	// Use LateUpdate to be sure the ARMarker has updated before we try and use the transformation.
-	public void LateUpdate()
+	protected virtual void LateUpdate()
 	{
 		// Local scale is always 1 for now
 		transform.localScale = Vector3.one;

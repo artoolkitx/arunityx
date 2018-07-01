@@ -50,14 +50,15 @@ public class ARPattern
 	public int imageSizeX;
 	public int imageSizeY;
 
-    public ARPattern(int trackableID, int patternID)
+    public ARPattern(IPluginFunctions pluginFunctions, int trackableID, int patternID)
     {
 		float[] matrixRawArray = new float[16];
 		float widthRaw = 0.0f;
 		float heightRaw = 0.0f;
 
 		// Get the pattern local transformation and size.
-		if (!ARController.pluginFunctions.arwGetTrackablePatternConfig(trackableID, patternID, matrixRawArray, out widthRaw, out heightRaw, out imageSizeX, out imageSizeY))
+
+        if (!pluginFunctions.arwGetTrackablePatternConfig(trackableID, patternID, matrixRawArray, out widthRaw, out heightRaw, out imageSizeX, out imageSizeY))
 		{
 			throw new ArgumentException("Invalid argument", "markerID,patternID");
 		}
@@ -87,7 +88,7 @@ public class ARPattern
 			
 			// Get the pattern image data and load it into the texture
 			Color[] colors = new Color[imageSizeX * imageSizeY];
-			if (ARController.pluginFunctions.arwGetTrackablePatternImage(trackableID, patternID, colors)) {
+            if (pluginFunctions.arwGetTrackablePatternImage(trackableID, patternID, colors)) {
 				texture.SetPixels(colors);
 				texture.Apply();
 			}

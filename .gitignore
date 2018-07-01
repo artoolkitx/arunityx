@@ -48,3 +48,4 @@ sysinfo.txt
 *.apk
 Documentation/APIReference
 Source/Extra/arunityX_java/example2
+Source/Package/.vs
