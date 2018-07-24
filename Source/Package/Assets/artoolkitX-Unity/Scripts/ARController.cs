@@ -724,6 +724,8 @@ public class ARController : MonoBehaviour
             ImageProcMode = currentImageProcMode;
             NFTMultiMode = currentNFTMultiMode;
 
+            // Prevent display sleep.
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
         }
         // Remaining Unity setup happens in UpdateAR().
         return true;
@@ -922,6 +924,9 @@ public class ARController : MonoBehaviour
         // Clean up.
         DestroyVideoBackground();
         DestroyClearCamera();
+
+        // Reset display sleep.
+        Screen.sleepTimeout = SleepTimeout.SystemSetting;
 
         _running = false;
         return true;
