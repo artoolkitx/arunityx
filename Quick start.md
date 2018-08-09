@@ -13,7 +13,8 @@ As a quick start with Unity3D and artoolkitX you can use one of the example scen
 You need to run the build script before you can use this repository. The reason for this is, that arunityX does not ship with the artoolkitX libraries, but it downloads them when you run the build script. It is designed this way to assure arunityX always uses a stable and up to date release of artoolkitX libraries. The version in question is noted in the version.txt in the root of this repository.
 
 1. Open Terminal on macOS or Git Bash on Windows
-2. Run ```./build.sh [Target platform]```. ```[Target platform]``` can be one or several of *macos, ios, Android, Windows*
+2. ```cd Source```
+3. Run ```./build.sh [Target platform]```. ```[Target platform]``` can be one or several of *macos, ios, Android, Windows*
 
 This will fetch all the dependencies and place them inside the ```Plugins``` directory.
 
@@ -22,7 +23,7 @@ To create a arunityX.unitypackage, which can be imported into other Unity3D proj
 
 
 ### Import the arunityX.unitypackge Plugin
-The arunityX.unitypackage created in the previous stepp can be imported into other Unity3D projects.
+The arunityX.unitypackage created in the previous step can be imported into other Unity3D projects.
 
 * Start Unity3D
 * Create a new 3D scene
