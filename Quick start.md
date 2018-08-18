@@ -45,3 +45,8 @@ Navigate to:
   * This will load the scene into the Hierarchy-Tab
 * Select the 'Play'-Button to run the scene inside the Unity3D Editor
 * Present on or multiple of the trackables to the camera. A cube should appear on the trackable.
+
+### Building for iOS with XCode
+
+You may get `Error: Undefined symbols for architecture arm64:   "_vImageRotate90_ARGB8888"` which means you need to add the Accelerate.framework to your build:
+In the project settings editor, select the "Build Phases" tab, and click the small triangle next to "Link Binary With Libraries" to view all of the frameworks in your application. Click the "+" below the list of frameworks and add the `Accelerate.framework`
