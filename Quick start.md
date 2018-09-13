@@ -14,7 +14,7 @@ You need to run the build script before you can use this repository. The reason 
 
 1. Open Terminal on macOS or Git Bash on Windows
 2. ```cd Source```
-3. Run ```./build.sh [Target platform]```. ```[Target platform]``` can be one or several of *macos, ios, Android, Windows*
+3. Run ```./build.sh [Target platform]```. ```[Target platform]``` can be one or several of *macos, ios, android, windows*
 
 This will fetch all the dependencies and place them inside the ```Plugins``` directory.
 
