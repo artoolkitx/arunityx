@@ -214,6 +214,17 @@ public class ARController : MonoBehaviour
     private float lastFramerate = 0.0f;
     private float refreshTime = 0.5f;
 
+    // Public instance for runtime access to the controller
+    public static ARController Instance = null;
+
+    //List of deferred-loading trackable objects
+    private List<ARTrackable> trackableLoadQueue = new List<ARTrackable>();
+
+    //Add an ARTrackable to the deferred-loading queue.
+    public void QueueForLoad(ARTrackable Tracked)
+    {
+        trackableLoadQueue.Add(Tracked);
+    }
 
     public enum ARToolKitThresholdMode
     {
@@ -325,6 +336,11 @@ public class ARController : MonoBehaviour
     // Main reference to the plugin functions. Created in Awake, destroyed in OnDestroy().
     private IPluginFunctions pluginFunctions = null;
 
+    //Get access to the Plugin functions, for runtime-created content.
+    public IPluginFunctions PluginFunctions
+    {
+        get { return pluginFunctions;  }
+    }
     //
     // MonoBehavior methods.
     //
@@ -426,6 +442,8 @@ public class ARController : MonoBehaviour
 
     void Start()
     {
+        Instance = this; 
+
         Log(LogTag + "ARController.Start(): Application.isPlaying = " + Application.isPlaying + " autoStart: " + AutoStartAR);
         if (!Application.isPlaying) return; // Editor Start.
 
@@ -472,6 +490,19 @@ public class ARController : MonoBehaviour
         CalculateFPS();
 
         UpdateAR();
+
+        //Go through each of the deferred-load trackable objects and try to load them.
+        if (trackableLoadQueue.Count > 0)
+        {
+            for(int q=trackableLoadQueue.Count-1;q>=0;q--)
+            {
+                if (trackableLoadQueue[q].Load(false) != 0)
+                {
+                    trackableLoadQueue.RemoveAt(q);
+                    continue;
+                }
+            }
+        }
     }
 
     // Called when the user quits the application, or presses stop in the editor.
@@ -932,7 +963,7 @@ public class ARController : MonoBehaviour
 #endif
         bool gotFrame = pluginFunctions.arwCapture();
         bool ok = pluginFunctions.arwUpdateAR();
-        Debug.LogWarning(string.Format("Ok - {0}..... Got Frame - {1}", ok.ToString(), gotFrame.ToString()));
+        //Debug.LogWarning(string.Format("Ok - {0}..... Got Frame - {1}", ok.ToString(), gotFrame.ToString()));
         if (!ok) return false;
         if (gotFrame)
         {
