@@ -110,7 +110,7 @@ public class ARController : MonoBehaviour
 
     // Config. in.
     public string videoCParamName0 = "";
-    public string videoConfigurationWindows0 = "-showDialog";
+    public string videoConfigurationWindows0 = "-format=BGRA";
     public string videoConfigurationMacOSX0 = "-width=640 -height=480";
     public string videoConfigurationiOS0 = "";
     public string videoConfigurationAndroid0 = "";
@@ -738,6 +738,45 @@ public class ARController : MonoBehaviour
         private int screenHeight = 0;
 #  endif
 #endif
+
+	//Returns the GameObject that is displaying video content.
+	public GameObject GetVideoObject()
+    {
+        return _videoBackgroundMeshGO0;
+    }
+
+	//Grab a copy of the current video texture.
+	// This function isn't as clean or efficient as it should be - there seem to be some access-right issues with the Unity texture. 
+    public Texture2D GetTexture()
+    {
+
+        // Create a temporary RenderTexture of the same size as the texture
+        RenderTexture tmp = RenderTexture.GetTemporary(
+                            _videoTexture0.width,
+                            _videoTexture0.height,
+                            0,
+                            RenderTextureFormat.Default,
+                            RenderTextureReadWrite.Linear);
+
+        // Blit the pixels on texture to the RenderTexture
+        Graphics.Blit(_videoTexture0, tmp);
+
+        // Backup the currently set RenderTexture
+        RenderTexture previous = RenderTexture.active;
+
+        Texture2D myTexture2D = new Texture2D(_videoTexture0.width, _videoTexture0.height);
+
+        // Copy the pixels from the RenderTexture to the new Texture
+        myTexture2D.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
+        myTexture2D.Apply();
+
+        // Reset the active RenderTexture
+        RenderTexture.active = previous;
+
+        RenderTexture.ReleaseTemporary(tmp);
+
+        return myTexture2D;
+    }
 
 
     bool UpdateAR()
