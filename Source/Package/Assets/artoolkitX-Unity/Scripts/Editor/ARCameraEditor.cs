@@ -37,7 +37,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+//using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -51,8 +51,14 @@ public class ARCameraEditor : Editor
 
     public static void RefreshOpticalParamsFilenames() 
 	{
-		OpticalParamsAssets = Resources.LoadAll("ardata/optical", typeof(TextAsset)).Cast<TextAsset>().ToArray();
-		OpticalParamsAssetCount = OpticalParamsAssets.Length;
+        //OpticalParamsAssets = Resources.LoadAll("ardata/optical", typeof(TextAsset)).Cast<TextAsset>().ToArray();
+        List<TextAsset> Markers = new List<TextAsset>();
+        foreach (object o in Resources.LoadAll("ardata/optical", typeof(TextAsset)))
+        {
+            Markers.Add((TextAsset)o);
+        }
+        OpticalParamsAssets = Markers.ToArray();
+        OpticalParamsAssetCount = OpticalParamsAssets.Length;
 		OpticalParamsFilenames = new string[OpticalParamsAssetCount];
 		for (int i = 0; i < OpticalParamsAssetCount; i++) {					
 			OpticalParamsFilenames[i] = OpticalParamsAssets[i].name;				
