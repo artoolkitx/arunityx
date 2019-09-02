@@ -207,17 +207,29 @@ public class ARTrackable : MonoBehaviour
     #if !UNITY_METRO
     private bool unpackStreamingAssetToCacheDir(string basename)
     {
-        if (!File.Exists(System.IO.Path.Combine(Application.temporaryCachePath, basename))) {
-            string file = System.IO.Path.Combine(Application.streamingAssetsPath, basename); // E.g. "jar:file://" + Application.dataPath + "!/assets/" + basename;
-            WWW unpackerWWW = new WWW(file);
-            while (!unpackerWWW.isDone) { } // This will block in the webplayer. TODO: switch to co-routine.
-            if (!string.IsNullOrEmpty(unpackerWWW.error)) {
-                ARController.Log(LogTag + "Error unpacking '" + file + "'");
-                return (false);
+        if (basename == "") return false;
+        try
+        {
+            if (!File.Exists(System.IO.Path.Combine(Application.temporaryCachePath, basename)))
+            {
+                Debug.Log("Can't Find " + System.IO.Path.Combine(Application.temporaryCachePath, basename) + " - Extracting");
+                string file = System.IO.Path.Combine(Application.streamingAssetsPath, basename); // E.g. "jar:file://" + Application.dataPath + "!/assets/" + basename;
+                WWW unpackerWWW = new WWW(file);
+                while (!unpackerWWW.isDone) { } // This will block in the webplayer. TODO: switch to co-routine.
+                if (!string.IsNullOrEmpty(unpackerWWW.error))
+                {
+                    ARController.Log(LogTag + "Error unpacking '" + file + "'");
+                    return (false);
+                }
+                File.WriteAllBytes(System.IO.Path.Combine(Application.temporaryCachePath, basename), unpackerWWW.bytes); // 64MB limit on File.WriteAllBytes.
             }
-            File.WriteAllBytes(System.IO.Path.Combine(Application.temporaryCachePath, basename), unpackerWWW.bytes); // 64MB limit on File.WriteAllBytes.
         }
-        return (true);
+        catch(Exception e)
+        {
+            Debug.LogError("Could not load streaming asset data: " + System.IO.Path.Combine(Application.temporaryCachePath, basename));
+            return false;
+        }
+        return true;
     }
     #endif
 
