@@ -211,8 +211,7 @@ public class ARTrackable : MonoBehaviour
         try
         {
             if (!File.Exists(System.IO.Path.Combine(Application.temporaryCachePath, basename)))
-            {
-                Debug.Log("Can't Find " + System.IO.Path.Combine(Application.temporaryCachePath, basename) + " - Extracting");
+            {                
                 string file = System.IO.Path.Combine(Application.streamingAssetsPath, basename); // E.g. "jar:file://" + Application.dataPath + "!/assets/" + basename;
                 WWW unpackerWWW = new WWW(file);
                 while (!unpackerWWW.isDone) { } // This will block in the webplayer. TODO: switch to co-routine.
