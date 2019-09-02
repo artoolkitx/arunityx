@@ -110,7 +110,7 @@ public class ARController : MonoBehaviour
 
     // Config. in.
     public string videoCParamName0 = "";
-    public string videoConfigurationWindows0 = "-showDialog";
+    public string videoConfigurationWindows0 = "-format=BGRA";
     public string videoConfigurationMacOSX0 = "-width=640 -height=480";
     public string videoConfigurationiOS0 = "";
     public string videoConfigurationAndroid0 = "";
@@ -214,6 +214,17 @@ public class ARController : MonoBehaviour
     private float lastFramerate = 0.0f;
     private float refreshTime = 0.5f;
 
+    // Public instance for runtime access to the controller
+    public static ARController Instance = null;
+
+    //List of deferred-loading trackable objects
+    private List<ARTrackable> trackableLoadQueue = new List<ARTrackable>();
+
+    //Add an ARTrackable to the deferred-loading queue.
+    public void QueueForLoad(ARTrackable Tracked)
+    {
+        trackableLoadQueue.Add(Tracked);
+    }
 
     public enum ARToolKitThresholdMode
     {
@@ -325,6 +336,11 @@ public class ARController : MonoBehaviour
     // Main reference to the plugin functions. Created in Awake, destroyed in OnDestroy().
     private IPluginFunctions pluginFunctions = null;
 
+    //Get access to the Plugin functions, for runtime-created content.
+    public IPluginFunctions PluginFunctions
+    {
+        get { return pluginFunctions;  }
+    }
     //
     // MonoBehavior methods.
     //
@@ -426,6 +442,8 @@ public class ARController : MonoBehaviour
 
     void Start()
     {
+        Instance = this; 
+
         Log(LogTag + "ARController.Start(): Application.isPlaying = " + Application.isPlaying + " autoStart: " + AutoStartAR);
         if (!Application.isPlaying) return; // Editor Start.
 
@@ -472,6 +490,19 @@ public class ARController : MonoBehaviour
         CalculateFPS();
 
         UpdateAR();
+
+        //Go through each of the deferred-load trackable objects and try to load them.
+        if (trackableLoadQueue.Count > 0)
+        {
+            for(int q=trackableLoadQueue.Count-1;q>=0;q--)
+            {
+                if (trackableLoadQueue[q].Load(false) != 0)
+                {
+                    trackableLoadQueue.RemoveAt(q);
+                    continue;
+                }
+            }
+        }
     }
 
     // Called when the user quits the application, or presses stop in the editor.
@@ -739,6 +770,45 @@ public class ARController : MonoBehaviour
 #  endif
 #endif
 
+	//Returns the GameObject that is displaying video content.
+	public GameObject GetVideoObject()
+    {
+        return _videoBackgroundMeshGO0;
+    }
+
+	//Grab a copy of the current video texture.
+	// This function isn't as clean or efficient as it should be - there seem to be some access-right issues with the Unity texture. 
+    public Texture2D GetTexture()
+    {
+
+        // Create a temporary RenderTexture of the same size as the texture
+        RenderTexture tmp = RenderTexture.GetTemporary(
+                            _videoTexture0.width,
+                            _videoTexture0.height,
+                            0,
+                            RenderTextureFormat.Default,
+                            RenderTextureReadWrite.Linear);
+
+        // Blit the pixels on texture to the RenderTexture
+        Graphics.Blit(_videoTexture0, tmp);
+
+        // Backup the currently set RenderTexture
+        RenderTexture previous = RenderTexture.active;
+
+        Texture2D myTexture2D = new Texture2D(_videoTexture0.width, _videoTexture0.height);
+
+        // Copy the pixels from the RenderTexture to the new Texture
+        myTexture2D.ReadPixels(new Rect(0, 0, tmp.width, tmp.height), 0, 0);
+        myTexture2D.Apply();
+
+        // Reset the active RenderTexture
+        RenderTexture.active = previous;
+
+        RenderTexture.ReleaseTemporary(tmp);
+
+        return myTexture2D;
+    }
+
 
     bool UpdateAR()
     {
@@ -893,7 +963,7 @@ public class ARController : MonoBehaviour
 #endif
         bool gotFrame = pluginFunctions.arwCapture();
         bool ok = pluginFunctions.arwUpdateAR();
-        Debug.LogWarning(string.Format("Ok - {0}..... Got Frame - {1}", ok.ToString(), gotFrame.ToString()));
+        //Debug.LogWarning(string.Format("Ok - {0}..... Got Frame - {1}", ok.ToString(), gotFrame.ToString()));
         if (!ok) return false;
         if (gotFrame)
         {

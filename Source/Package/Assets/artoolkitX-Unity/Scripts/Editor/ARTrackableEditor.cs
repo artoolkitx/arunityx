@@ -37,7 +37,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+//using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -76,7 +76,13 @@ public class ARTrackableEditor : Editor
 	
 	private static void RefreshPatternFilenames() 
 	{
-		PatternAssets = Resources.LoadAll("ardata/markers", typeof(TextAsset)).Cast<TextAsset>().ToArray();
+        List<TextAsset> Markers = new List<TextAsset>();
+        foreach(object o in Resources.LoadAll("ardata/markers", typeof(TextAsset)))
+        {
+            Markers.Add((TextAsset)o);
+        }
+        //PatternAssets = Resources.LoadAll("ardata/markers", typeof(TextAsset)).Cast<TextAsset>().ToArray();
+        PatternAssets = Markers.ToArray();
 		PatternAssetCount = PatternAssets.Length;
 		
 		PatternFilenames = new string[PatternAssetCount];
