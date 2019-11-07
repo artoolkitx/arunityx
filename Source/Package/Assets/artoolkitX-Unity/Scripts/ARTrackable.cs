@@ -222,22 +222,37 @@ public class ARTrackable : MonoBehaviour
     #endif
 
     // Load the native ARTrackable structure(s) and set the UID.
-    public void Load() 
+    // Returns 0 if the underlying system is not ready and the load has been queued, 1 if it has been successfully loaded, and -1 if a failure has occured.
+    public int Load(bool Queue = true) 
     {
         lock (loadLock) {
-            if (this.enabled == false) {
-                return;
+            if (this.enabled == false) {               
+                return -1;
             }
 
-            //ARController.Log(LogTag + "ARTrackable.Load()");
+            
             if (UID != NO_ID) {
-                return;
+                return 1;
+            }
+
+            //If there are no plugin functions specified on this trackable, see if there are any available from the controller.
+            if (pluginFunctions == null)
+            {
+                if ((ARController.Instance != null) && (ARController.Instance.PluginFunctions != null))
+                {
+                    pluginFunctions = ARController.Instance.PluginFunctions;
+                }
             }
 
             if (pluginFunctions == null || !pluginFunctions.IsInited()) {
                 // If arwInitialiseAR() has not yet been called, we can't load the native trackable yet.
                 // ARController.InitialiseAR() will trigger this again when arwInitialiseAR() has been called.
-                return;
+                if (Queue == true)
+                {
+                    //Queue this object for later loading once pluginFunctions are present and initialised.
+                    ARController.Instance.QueueForLoad(this);
+                }                
+                return 0;
             }
 
             // Work out the configuration string to pass to the native side.
@@ -367,6 +382,7 @@ public class ARTrackable : MonoBehaviour
                 }
             }
         }
+        return 1;
     }
 
     // We use Update() here, but be aware that unless ARController has been configured to
