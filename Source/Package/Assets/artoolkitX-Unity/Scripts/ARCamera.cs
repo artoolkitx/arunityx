@@ -54,6 +54,7 @@ using UnityEngine;
 /// </summary>
 /// 
 [RequireComponent(typeof(Transform))]   // A Transform is required to update the position and orientation from tracking
+[RequireComponent(typeof(Camera))]      // A Camera is required.
 [ExecuteInEditMode]                     // Run in the editor so we can keep the scale at 1
 public class ARCamera : MonoBehaviour
 {

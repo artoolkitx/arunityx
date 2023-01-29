@@ -21,20 +21,20 @@ allprojects {
 apply plugin: 'com.android.application'
 
 dependencies {
-	compile fileTree(dir: 'libs', include: ['*.jar'])
-	compile(name: 'support-v4-24.1.1', ext:'aar')
-	compile(name: 'arunityXPlayer-release', ext:'aar')
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(name: 'support-v4-24.1.1', ext:'aar')
+    implementation(name: 'arunityXPlayer-release', ext:'aar')
 //	compile project(':arunityXPlayer')
 //	compile project(':arxj')
 }
 
 android {
-	compileSdkVersion 27
-	buildToolsVersion '27.0.3'
+	compileSdk 33
 
 	defaultConfig {
-		targetSdkVersion 27
+		targetSdk 33
 		applicationId 'org.artoolkitx.arx.example'
+		minSdk 21
 	}
 
 	lintOptions {

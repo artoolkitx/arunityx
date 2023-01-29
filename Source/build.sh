@@ -1,23 +1,30 @@
 #! /bin/bash
 
 #
-# Build artoolkitX for all platforms.
+# Build artoolkitX for Unity for all platforms.
 #
-# Copyright 2018, artoolkitX Contributors.
-# Author(s): Thorsten Bux <thor_artk@outlook.com> , Philip Lamb <phil@artoolkitx.org>
+# Copyright 2018-2023, artoolkitX Contributors.
+# Author(s): Thorsten Bux <thor_artk@outlook.com>, Philip Lamb <phil@artoolkitx.org>
 #
 
 # Get our location.
 OURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ARUNITYX_HOME=$OURDIR/..
 
-if [ $# -eq 0 ]; then
-    echo "Must specify platform to build. One or more of: macos, ios, windows, android."
+function usage {
+    echo "Usage: $(basename $0) [--debug] (macos | windows | ios | linux | android) [--dev]"
     exit 1
+}
+
+if [ $# -eq 0 ]; then
+    usage
 fi
 
 # -e = exit on errors
-set -e -x
+set -e
+
+# -x = debug
+set -x
 
 # Parse parameters
 while test $# -gt 0
@@ -64,14 +71,14 @@ then
 elif [ "$OS" = "Darwin" ]
 then
     CPUS=`/usr/sbin/sysctl -n hw.ncpu`
-elif [ "$OS" = "CYGWIN_NT-6.1" ]
+elif [[ "$OS" == "CYGWIN_NT-"* ]]
 then
     # bash on Cygwin.
     CPUS=`/usr/bin/nproc`
     OS='Windows'
-elif [ "$OS" = "MINGW64_NT-10.0" ]
+elif [[ "$OS" == "MINGW64_NT-"* ]]
 then
-    # git-bash on Windows.
+    # git-bash on Windows
     CPUS=`/usr/bin/nproc`
     OS='Windows'
 else
@@ -106,11 +113,17 @@ build_android() {
         #Empty the existing plugin directory
         rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libc++_shared.so
         rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libARX.so
+        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libc++_shared.so
+        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libARX.so
         rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/libc++_shared.so
         rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/libARX.so
+        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/libc++_shared.so
+        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/libARX.so
         rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/arxjUnity.jar
         rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/arunityXPlayer-release.aar
 
+        cd $ARTOOLKITX_HOME/Source
+        ./build.sh android
         #Build arxjUnity.jar
         cd $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj
         ./gradlew :ARXJ:jarReleaseUnity
@@ -119,10 +132,14 @@ build_android() {
         cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/libs/arxjUnity.jar $ARUNITYX_HOME/Source/Extras/arunityx_java/arunityX_Android_Player/arunityXPlayer/arxjUnity/
 
         #Copy the native libraries into the Plugin directory. They are build as part of the .jar build
-        cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/intermediates/bundles/release/jni/armeabi-v7a/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/
-        cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/intermediates/bundles/release/jni/armeabi-v7a/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/
-        cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/intermediates/bundles/release/jni/x86/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/
-        cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/intermediates/bundles/release/jni/x86/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/
+        cp $ARTOOLKITX_HOME/SDK/lib/armeabi-v7a/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/
+        cp $ARTOOLKITX_HOME/SDK/lib/armeabi-v7a/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/
+        cp $ARTOOLKITX_HOME/SDK/lib/arm64-v8a/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/
+        cp $ARTOOLKITX_HOME/SDK/lib/arm64-v8a/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/
+        cp $ARTOOLKITX_HOME/SDK/lib/x86/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/
+        cp $ARTOOLKITX_HOME/SDK/lib/x86/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/
+        cp $ARTOOLKITX_HOME/SDK/lib/x86_64/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/
+        cp $ARTOOLKITX_HOME/SDK/lib/x86_64/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/
 
         build_android_unity_player
 }

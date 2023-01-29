@@ -41,6 +41,13 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
+/// <summary>
+/// AROrigin, when instantiated in a scene, provides a means to keep a list of all
+/// ARTrackables in the scene, as well as keep a record of a "base" trackable which
+/// acts as the origin of the coordinate system for an ARCamera.
+/// The base trackable can be set manually, or if none is set, and the base
+/// trackable is requested, the first visible trackable will be returned.
+/// </summary>
 [RequireComponent(typeof(Transform))]
 [ExecuteInEditMode]
 public class AROrigin : MonoBehaviour
