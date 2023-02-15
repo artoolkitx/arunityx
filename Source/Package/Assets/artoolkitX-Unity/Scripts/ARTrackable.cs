@@ -204,12 +204,14 @@ public class ARTrackable : MonoBehaviour
         Unload();
     }
 
-    #if !UNITY_METRO
+#if !UNITY_METRO
     private bool unpackStreamingAssetToCacheDir(string basename)
     {
         if (!File.Exists(System.IO.Path.Combine(Application.temporaryCachePath, basename))) {
             string file = System.IO.Path.Combine(Application.streamingAssetsPath, basename); // E.g. "jar:file://" + Application.dataPath + "!/assets/" + basename;
+#pragma warning disable CS0618 // Keep using WWW for 'jar:' method support.
             WWW unpackerWWW = new WWW(file);
+#pragma warning restore CS0618
             while (!unpackerWWW.isDone) { } // This will block in the webplayer. TODO: switch to co-routine.
             if (!string.IsNullOrEmpty(unpackerWWW.error)) {
                 ARController.Log(LogTag + "Error unpacking '" + file + "'");

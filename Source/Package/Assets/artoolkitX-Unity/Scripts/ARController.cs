@@ -892,11 +892,9 @@ public class ARController : MonoBehaviour
 #  endif
 #endif
         bool gotFrame = pluginFunctions.arwCapture();
-        bool ok = pluginFunctions.arwUpdateAR();
-        Debug.LogWarning(string.Format("Ok - {0}..... Got Frame - {1}", ok.ToString(), gotFrame.ToString()));
-        if (!ok) return false;
         if (gotFrame)
         {
+            if (!pluginFunctions.arwUpdateAR()) return false;
             if (_sceneConfiguredForVideo && UseVideoBackground)
             {
                 UpdateTexture();
