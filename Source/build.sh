@@ -85,9 +85,11 @@ else
     CPUS=1
 fi
 
+ARTOOLKITX_VERSION=`cat ../artoolkitx-version.txt`
+
 # Locate ARTOOLKITX_HOME or clone into submodule
-locate_artkX() {
-    if [ ! -f "$OURDIR/Extras/artoolkitx/LICENSE.txt" ] && [ -z $ARTOOLKITX_HOME ]; then
+locate_artoolkitx() {
+    if [ ! -f "${OURDIR}/Extras/artoolkitx/LICENSE.txt" ] && [ -z "${ARTOOLKITX_HOME}" ]; then
         echo "artoolkitX not found. Please set ARTOOLKITX_HOME or clone submodule"
 
         read -p "Would you like to use the submodule (recommended) y/n" -n 1 -r
@@ -103,74 +105,55 @@ locate_artkX() {
 
     #Set ARTOOLKITX_HOME for internal use
     #Are we using the submodule?
-    if [  -f "$OURDIR/Extras/artoolkitx/LICENSE.txt" ] && [ -z $ARTOOLKITX_HOME ]; then
-        ARTOOLKITX_HOME=$OURDIR/Extras/artoolkitx
+    if [  -f "${OURDIR}/Extras/artoolkitx/LICENSE.txt" ] && [ -z "${ARTOOLKITX_HOME}" ]; then
+        ARTOOLKITX_HOME="${OURDIR}/Extras/artoolkitx"
     fi
 }
 
-#function build_android()
-build_android() {
-        #Empty the existing plugin directory
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libc++_shared.so
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libARX.so
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libc++_shared.so
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libARX.so
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/libc++_shared.so
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/libARX.so
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/libc++_shared.so
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/libARX.so
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/arxjUnity.jar
-        rm -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/arunityXPlayer-release.aar
-
-        cd $ARTOOLKITX_HOME/Source
-        ./build.sh android
-        #Build arxjUnity.jar
-        cd $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj
-        ./gradlew :ARXJ:jarReleaseUnity
-        #copy arxjUnity.jar into plugins directory and into arunityXPlayer project to make the project compileable
-        cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/libs/arxjUnity.jar $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/
-        cp $ARTOOLKITX_HOME/Source/ARXJ/ARXJProj/arxj/build/libs/arxjUnity.jar $ARUNITYX_HOME/Source/Extras/arunityx_java/arunityX_Android_Player/arunityXPlayer/arxjUnity/
-
-        #Copy the native libraries into the Plugin directory. They are build as part of the .jar build
-        cp $ARTOOLKITX_HOME/SDK/lib/armeabi-v7a/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/
-        cp $ARTOOLKITX_HOME/SDK/lib/armeabi-v7a/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/
-        cp $ARTOOLKITX_HOME/SDK/lib/arm64-v8a/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/
-        cp $ARTOOLKITX_HOME/SDK/lib/arm64-v8a/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/
-        cp $ARTOOLKITX_HOME/SDK/lib/x86/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/
-        cp $ARTOOLKITX_HOME/SDK/lib/x86/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/
-        cp $ARTOOLKITX_HOME/SDK/lib/x86_64/libc++_shared.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/
-        cp $ARTOOLKITX_HOME/SDK/lib/x86_64/libARX.so $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/
-
-        build_android_unity_player
-}
-
-build_android_unity_player () {
-        #Build arunityXPlayer
-        cd $ARUNITYX_HOME/Source/Extras/arunityX_java/arunityX_Android_Player/
-        ./gradlew :arunityXPlayer:assembleRelease
-        #Copy to plugins directory
-        cp $ARUNITYX_HOME/Source/Extras/arunityX_java/arunityX_Android_Player/arunityXPlayer/build/outputs/aar/arunityXPlayer-release.aar $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/
-}
-
-install_plugin() {
-    TYPE=$1
-    VERSION=`cat ../version.txt`
-    echo "Download plugin: $TYPE"
-    
-    curl --location "https://github.com/artoolkitx/artoolkitx/releases/download/$VERSION/$TYPE-unity.zip" -o plugin.zip
-    if [ "$TYPE" = "macOS" ]; then 
-        unzip -o plugin.zip -d Package/Assets/Plugins/
-    elif [ "$TYPE" = "Windows" ]; then 
-        unzip -j -o plugin.zip "unity-lib/ARX.dll" -d Package/Assets/Plugins/x86_64/
-    else
-        unzip -o plugin.zip -d Package/Assets/Plugins/$TYPE/
+refresh_plugin_for_platform_from_source() {
+    #Empty the existing plugin directory
+    PLATFORM=$1
+    SOURCE="$2"
+    if [ "$PLATFORM" = "Android" ] ; then
+        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libc++_shared.so"
+        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libARX.so"
+        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libc++_shared.so"
+        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libARX.so"
+        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86/libc++_shared.so"
+        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86/libARX.so"
+        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86_64/libc++_shared.so"
+        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86_64/libARX.so"
+        cp "${SOURCE}/SDK/lib/armeabi-v7a/libc++_shared.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/"
+        cp "${SOURCE}/SDK/lib/armeabi-v7a/libARX.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/"
+        cp "${SOURCE}/SDK/lib/arm64-v8a/libc++_shared.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/"
+        cp "${SOURCE}/SDK/lib/arm64-v8a/libARX.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/"
+        cp "${SOURCE}/SDK/lib/x86/libc++_shared.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86/"
+        cp "${SOURCE}/SDK/lib/x86/libARX.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86/"
+        cp "${SOURCE}/SDK/lib/x86_64/libc++_shared.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86_64/"
+        cp "${SOURCE}/SDK/lib/x86_64/libARX.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86_64/"
+    elif [ "$PLATFORM" = "iOS" ] ; then
+        rm -rf "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/iOS/libARX.a"
+        cp -rf "${SOURCE}/SDK/lib/libARX.a" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/iOS/"
+    elif [ "$PLATFORM" = "macOS" ] ; then
+        rm -rf "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/ARX.bundle"
+        cp -rf "${SOURCE}/SDK/Plugins/ARX.bundle" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/"
+    elif [ "$PLATFORM" = "Windows" ] ; then
+        rm -rf "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/x86_64/ARX.dll"
+        cp -rf "${SOURCE}/SDK/bin/ARX.dll" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/x86_64/"
     fi
-    rm plugin.zip
 }
 
-#### If a DEV build is running the script uses the path to artoolkitX source to build artoolkitX plugin-libraries from there
-#### If no dev build is running (default) the artoolkitX plugin-libraries are downloaded from GitHub release using the version provided 
+find_or_fetch_artoolkitx() {
+    if [ ! -f "${1}" ] ; then
+        echo "Downloading ${1}..."
+        curl --location "https://github.com/artoolkitx/artoolkitx/releases/download/${ARTOOLKITX_VERSION}/${1}" -O
+    fi
+}
 
+#
+# If a DEV build is running the script uses the path to artoolkitX source to build artoolkitX plugin-libraries from there.
+# If no dev build is running (default) the artoolkitX libraries are downloaded from GitHub release using the version provided.
+#
 if [ $DEV ] ; then 
 
     if [ "$OS" = "Darwin" ] ; then
@@ -178,82 +161,86 @@ if [ $DEV ] ; then
     #  Build platforms hosted by macOS
     # ======================================================================
 
-    # macOS
-        locate_artkX
+        locate_artoolkitx
 
-        #Android
         if [ $BUILD_ANDROID ] ; then 
-            build_android
+            cd "${ARTOOLKITX_HOME}/Source"
+            ./build.sh android
+            refresh_plugin_for_platform_from_source Android  "${ARTOOLKITX_HOME}"
         fi
-
-        if [ $BUILD_MACOS ] ; then
-            #Start ARToolKitX macOS build
-            cd $ARTOOLKITX_HOME/Source
-            ./build.sh macos
-
-            #Make sure we remove the ARX.bundle first and then copy the new one in
-            rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
-            cp -rf $ARTOOLKITX_HOME/SDK/Plugins/ARX.bundle $ARUNITYX_HOME/Source/Package/Assets/Plugins/
-        fi
-
         if [ $BUILD_IOS ] ; then
-            #Start ARToolKitX macOS build
-            cd $ARTOOLKITX_HOME/Source
+            cd "$ARTOO{ARTOOLKITX_HOME}LKITX_HOME/Source"
             ./build.sh ios
-
-            #Make sure we remove the ARX.bundle first and then copy the new one in
-            rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle
-            cp -rf $ARTOOLKITX_HOME/SDK/lib/libARX.a $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/
+            refresh_plugin_for_platform_from_source iOS "${ARTOOLKITX_HOME}"
+        fi
+        if [ $BUILD_MACOS ] ; then
+            cd "${ARTOOLKITX_HOME}/Source"
+            ./build.sh macos
+            refresh_plugin_for_platform_from_source macOS "${ARTOOLKITX_HOME}"
         fi
     fi
-    if [ "$OS" = "Windows" ] ; then 
 
+    if [ "$OS" = "Windows" ] ; then 
     # ======================================================================
     #  Build platforms hosted by windows
     # ======================================================================
 
-        locate_artkX
+        locate_artoolkitx
 
-        if [ $BUILD_WINDOWS ] ; then
-            #Start artoolkitX windows build
-            cd $ARTOOLKITX_HOME/Source
-            ./build.sh windows
-
-            #Make sure we remove the ARX.dll first and then copy the new one in
-            rm -rf $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/ARX.dll
-            cp -rf $ARTOOLKITX_HOME/SDK/bin/ARX.dll $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/
-        fi
-
-        #Android
         if [ $BUILD_ANDROID ] ; then 
-            build_android
+            cd "${ARTOOLKITX_HOME}/Source"
+            ./build.sh android
+            refresh_plugin_for_platform_from_source Android "${ARTOOLKITX_HOME}"
         fi
-
+        if [ $BUILD_WINDOWS ] ; then
+            cd "${ARTOOLKITX_HOME}/Source"
+            ./build.sh windows
+            refresh_plugin_for_platform_from_source Windows "${ARTOOLKITX_HOME}"
+        fi
     fi
 else 
-    echo "start download of libs"
-
     # ======================================================================
-    #  Download plugins (iOS, macOS, Android, Windows)
+    #  Download plugins (Android, iOS, macOS, Windows)
     # ======================================================================
 
+    if [ $BUILD_ANDROID ] ; then
+        cd "${OURDIR}"
+        MOUNTPOINT=mnt$$
+        IMAGE="artoolkitx.${ARTOOLKITX_VERSION}-Android.zip"
+        find_or_fetch_artoolkitx "${IMAGE}"
+        unzip -o "${IMAGE}" -d "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source Android "${MOUNTPOINT}"
+        rm -rf "${MOUNTPOINT}"
+    fi
     if [ $BUILD_IOS ] ; then 
-        cd $OURDIR
-        install_plugin iOS
+        cd "${OURDIR}"
+        MOUNTPOINT=mnt$$
+        IMAGE="artoolkitX.for.iOS.v${ARTOOLKITX_VERSION}.dmg"
+        find_or_fetch_artoolkitx "${IMAGE}"
+        mkdir -p "${MOUNTPOINT}"
+        hdiutil attach "${IMAGE}" -noautoopen -quiet -mountpoint "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source iOS "${MOUNTPOINT}"
+        hdiutil detach "${MOUNTPOINT}" -quiet -force
+        rmdir "${MOUNTPOINT}"
     fi
     if [ $BUILD_MACOS ] ; then 
-        cd $OURDIR
-        install_plugin macOS
-    fi
-    if [ $BUILD_ANDROID ] ; then
-        cd $OURDIR
-        install_plugin Android
-        # Every lib can be created during the artoolkitX build and downloaded from GitHub except the Unity-Player for Android
-        # that is been built on the fly
-        build_android_unity_player
+        cd "${OURDIR}"
+        MOUNTPOINT=mnt$$
+        IMAGE="artoolkitX.for.macOS.v${ARTOOLKITX_VERSION}.dmg"
+        find_or_fetch_artoolkitx "${IMAGE}"
+        mkdir -p "${MOUNTPOINT}"
+        hdiutil attach "${IMAGE}" -noautoopen -quiet -mountpoint "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source macOS "${MOUNTPOINT}"
+        hdiutil detach "${MOUNTPOINT}" -quiet -force
+        rmdir "${MOUNTPOINT}"
     fi
     if [ $BUILD_WINDOWS ] ; then
-        cd $OURDIR
-        install_plugin Windows
+        cd "${OURDIR}"
+        MOUNTPOINT=mnt$$
+        IMAGE="artoolkitX.for.Windows.v${ARTOOLKITX_VERSION}.zip"
+        find_or_fetch_artoolkitx "${IMAGE}"
+        unzip -o "${IMAGE}" -d "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source Windows "${MOUNTPOINT}"
+        rm -rf "${MOUNTPOINT}"
     fi
 fi

@@ -10,7 +10,7 @@ As a quick start with Unity3D and artoolkitX you can use one of the example scen
 - [Unity3D](https://store.unity.com/?_ga=1.164065343.1498217150.1465512057) - the free, Personal Edition, is sufficient for a start. Version 2017.4.0f1 was used at the time of this writing. The Unity3D IDE, typically referred to as the "Unity Editor", is supported on the desktop platforms of macOS X and Windows 10.
 
 ### Build arunityX
-You need to run the build script before you can use this repository. The reason for this is, that arunityX does not ship with the artoolkitX libraries, but it downloads them when you run the build script. It is designed this way to assure arunityX always uses a stable and up to date release of artoolkitX libraries. The version in question is noted in the version.txt in the root of this repository.
+You need to run the build script before you can use this repository. The reason for this is, that arunityX does not ship with the artoolkitX libraries, but it downloads them when you run the build script. It is designed this way to assure arunityX always uses a stable and up to date release of artoolkitX libraries. The version in question is noted in the artoolkitx-version.txt in the root of this repository.
 
 1. Open Terminal on macOS or Git Bash on Windows
 2. ```cd Source```

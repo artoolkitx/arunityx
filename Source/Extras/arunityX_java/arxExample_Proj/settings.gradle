@@ -1,4 +1,0 @@
-include ':arxExample', 'arunityXPlayer', 'arxj'
-
-project(':arunityXPlayer').projectDir = new File('../arunityX_Android_Player/arunityXPlayer')
-project(':arxj').projectDir = new File('../../artoolkitx/Source/ARXJ/ARXJProj/arxj')

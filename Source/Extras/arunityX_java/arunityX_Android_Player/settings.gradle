@@ -1,8 +1,0 @@
-//README: In order to edit the ARXJ project and compile and run it you can uncomment the below lines.
-//Keep in mind that the path needs to point to your ARTOOLKITX_HOME directory. If have artoolkitX cloned as
-//a submodule, as recommended, this path would be ../../artoolkitx/
-//You also need to uncomment the line //compile project(':ARXJ') in the arunityXPlayer-build.gradle file
-
-include ':arunityXPlayer', 'arxj'
-
-project(':arxj').projectDir = new File('../../artoolkitx/Source/ARXJ/ARXJProj/arxj')

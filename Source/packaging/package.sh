@@ -34,8 +34,8 @@ fi
 if [ ! -f ${CONFIG_LOCATION} ]; then
     # Check if the plugins are available
     if [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/arxjUnity.jar ] ||  [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/libARX.a ] || [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/ARX.dll ] || [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle ]; then
-        # Plugins are available, build using the version number inside version.txt
-        VERSION=`cat $ARUNITYX_HOME/version.txt`
+        # Plugins are available, build using the version number inside artoolkitx-version.txt
+        VERSION=`cat $ARUNITYX_HOME/artoolkitx-version.txt`
     else
         #Print if we didn't built at all.
         echo "You need to run ./build.sh <plattform> before packaging."
