@@ -206,10 +206,10 @@ else
     if [ $BUILD_ANDROID ] ; then
         cd "${OURDIR}"
         MOUNTPOINT=mnt$$
-        IMAGE="artoolkitx.${ARTOOLKITX_VERSION}-Android.zip"
+        IMAGE="artoolkitx-${ARTOOLKITX_VERSION}-Android.zip"
         find_or_fetch_artoolkitx "${IMAGE}"
         unzip -o "${IMAGE}" -d "${MOUNTPOINT}"
-        refresh_plugin_for_platform_from_source Android "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source Android "${MOUNTPOINT}/artoolkitX"
         rm -rf "${MOUNTPOINT}"
     fi
     if [ $BUILD_IOS ] ; then 
@@ -219,7 +219,7 @@ else
         find_or_fetch_artoolkitx "${IMAGE}"
         mkdir -p "${MOUNTPOINT}"
         hdiutil attach "${IMAGE}" -noautoopen -quiet -mountpoint "${MOUNTPOINT}"
-        refresh_plugin_for_platform_from_source iOS "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source iOS "${MOUNTPOINT}/artoolkitX"
         hdiutil detach "${MOUNTPOINT}" -quiet -force
         rmdir "${MOUNTPOINT}"
     fi
@@ -230,17 +230,17 @@ else
         find_or_fetch_artoolkitx "${IMAGE}"
         mkdir -p "${MOUNTPOINT}"
         hdiutil attach "${IMAGE}" -noautoopen -quiet -mountpoint "${MOUNTPOINT}"
-        refresh_plugin_for_platform_from_source macOS "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source macOS "${MOUNTPOINT}/artoolkitX"
         hdiutil detach "${MOUNTPOINT}" -quiet -force
         rmdir "${MOUNTPOINT}"
     fi
     if [ $BUILD_WINDOWS ] ; then
         cd "${OURDIR}"
         MOUNTPOINT=mnt$$
-        IMAGE="artoolkitX.for.Windows.v${ARTOOLKITX_VERSION}.zip"
+        IMAGE="artoolkitX-${ARTOOLKITX_VERSION}-Windows.zip"
         find_or_fetch_artoolkitx "${IMAGE}"
         unzip -o "${IMAGE}" -d "${MOUNTPOINT}"
-        refresh_plugin_for_platform_from_source Windows "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source Windows "${MOUNTPOINT}/artoolkitX"
         rm -rf "${MOUNTPOINT}"
     fi
 fi

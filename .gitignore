@@ -42,12 +42,28 @@ sysinfo.txt
 
 # Visual Studio Tools for Unity
 /Assets/UnityVS*
-
-#### Other VCS
-.svn/
-*.apk
-Documentation/APIReference
-Source/Extra/arunityX_java/example2
 Source/Package/.vs
 Source/Package/Logs
 Source/Package/UserSettings
+
+#### Other VCS
+.svn/
+
+#### Built products
+*.apk
+*.app
+
+#### Plugin source packages and binaries
+Source/artoolkit[xX]-*.zip
+Source/artoolKitX.*.dmg
+Source/Package/Assets/Plugins/ARX.bundle
+Source/Package/Assets/Plugins/ARX.bundle.meta
+Source/Package/Assets/Plugins/Android/libs/arm64-v8a/*.so
+Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/*.so
+Source/Package/Assets/Plugins/Android/libs/x86/*.so
+Source/Package/Assets/Plugins/Android/libs/x86_64/*.so
+Source/Package/Assets/Plugins/iOS/*.a
+Source/Package/Assets/Plugins/x86/*.dll
+Source/Package/Assets/Plugins/x86_64/*.dll
+
+#### Other
