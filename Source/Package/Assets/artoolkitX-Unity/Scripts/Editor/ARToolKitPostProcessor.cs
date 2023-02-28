@@ -43,7 +43,7 @@ public class ARToolKitPostProcessor {
 #if UNITY_STANDALONE_WIN
 	private const  string   EXE           = ".exe";
 	private const  string   RELATIVE_PATH = "{0}_Data/Plugins/";
-	private static string[] REDIST_FILES  = { "ARvideo.dll", "DSVL.dll", "pthreadVC2.dll", "vcredist.exe" };
+	private static string[] REDIST_FILES  = { "pthreadVC2.dll", "vcredist.exe" };
 	private const string FILE_NAME_STATUS = "ARToolKit Post Process Build Player: Operating of file {0}.";
 	[PostProcessBuild(int.MaxValue)]
     public static void OnPostProcessBuild(BuildTarget target, string appPath) {
@@ -121,11 +121,7 @@ public class ARToolKitPostProcessor {
     [PostProcessBuild(int.MaxValue)]
     public static void OnPostProcessBuild(BuildTarget target, string path) {
         string logPath = Path.Combine(path, LOGFILE_NAME);
-#if UNITY_4_5 || UNITY_4_6
-        if (target != BuildTarget.iPhone) {
-#else
         if (target != BuildTarget.iOS) {
-#endif
             Debug.LogError("ARToolKitPostProcessor::OnIosPostProcess - Called on non iOS build target!");
             return;
         } else if (File.Exists(logPath)) {

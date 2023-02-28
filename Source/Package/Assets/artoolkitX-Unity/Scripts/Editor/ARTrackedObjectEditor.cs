@@ -50,7 +50,7 @@ public class ARTrackedObjectEditor : Editor
 		ARTrackedObject arto = (ARTrackedObject)target;
 		if (arto == null) return;
 
-		arto.TrackableTag = EditorGUILayout.TextField("Marker tag", arto.TrackableTag);
+		arto.TrackableTag = EditorGUILayout.TextField(new GUIContent("Marker tag", "Set the marker tag to the same value defined in the ARTrackable object that defines this object's pose."), arto.TrackableTag);
 
         ARTrackable trackable = arto.GetTrackable();
 		EditorGUILayout.LabelField("Got marker", trackable == null ? "no" : "yes");
@@ -61,7 +61,7 @@ public class ARTrackedObjectEditor : Editor
 		
 		EditorGUILayout.Separator();
 		
-		arto.secondsToRemainVisible = EditorGUILayout.FloatField("Stay visible", arto.secondsToRemainVisible);
+		arto.secondsToRemainVisible = EditorGUILayout.FloatField(new GUIContent("Stay visible", "The number of seconds this object should remain visible when the associated ARTrackable object is no longer visible."), arto.secondsToRemainVisible);
 		
 		EditorGUILayout.Separator();
 		

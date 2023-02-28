@@ -175,9 +175,9 @@ public class ARCamera : MonoBehaviour
 		// Renders after the clear and background cameras
 		c.depth = 2;
 		
-		c.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
-		c.transform.rotation = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-		c.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+		c.transform.position = Vector3.zero;
+		c.transform.rotation = Quaternion.identity;
+		c.transform.localScale = Vector3.one;
 		
 		return true;
 	}

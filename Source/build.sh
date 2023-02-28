@@ -3,6 +3,21 @@
 #
 # Build artoolkitX for Unity for all platforms.
 #
+# This file is part of artoolkitX for Unity.
+#
+# artoolkitX for Unity is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# artoolkitX for Unity is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with artoolkitX for Unity.  If not, see <http://www.gnu.org/licenses/>.
+#
 # Copyright 2018-2023, artoolkitX Contributors.
 # Author(s): Thorsten Bux <thor_artk@outlook.com>, Philip Lamb <phil@artoolkitx.org>
 #
@@ -85,7 +100,7 @@ else
     CPUS=1
 fi
 
-ARTOOLKITX_VERSION=`cat ../artoolkitx-version.txt`
+ARTOOLKITX_VERSION=$(cat ${ARUNITYX_HOME}/artoolkitx-version.txt)
 
 # Locate ARTOOLKITX_HOME or clone into submodule
 locate_artoolkitx() {

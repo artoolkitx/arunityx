@@ -1,13 +1,13 @@
 ## Introduction
-As a quick start with Unity3D and artoolkitX you can use one of the example scenes shipped with the arunityX.unitypackage.
+As a quick start with Unity and artoolkitX you can use one of the example scenes shipped with the arunityX.unitypackage.
 
 ### Development Requirements
 
-- [macOS X](http://www.apple.com/mac/) OR [Windows 10](https://www.microsoftstore.com/store/msusa/en_US/cat/Windows-10-/categoryID.70036700)
+- macOS OR Windows
 
-- [Xcode](http://developer.apple.com/xcode/) - Required for the macOS X version of the Unity3D IDE and to target Apple macOS and iOS platforms with Unity. Version 9.3.1 was used at the time of this writing.
+- [Xcode](http://developer.apple.com/xcode/) - Required for the mac OS version of the Unity Editor to target Apple macOS and iOS platforms with Unity. Xcode 14 was used at the time of this writing.
 
-- [Unity3D](https://store.unity.com/?_ga=1.164065343.1498217150.1465512057) - the free, Personal Edition, is sufficient for a start. Version 2017.4.0f1 was used at the time of this writing. The Unity3D IDE, typically referred to as the "Unity Editor", is supported on the desktop platforms of macOS X and Windows 10.
+- [Unity](https://store.unity.com/) - the free, Personal Edition, is sufficient for a start. Version 2021.3 was used at the time of this writing. The Unity Editor is supported on the desktop platforms of macOS and Windows.
 
 ### Build arunityX
 You need to run the build script before you can use this repository. The reason for this is, that arunityX does not ship with the artoolkitX libraries, but it downloads them when you run the build script. It is designed this way to assure arunityX always uses a stable and up to date release of artoolkitX libraries. The version in question is noted in the artoolkitx-version.txt in the root of this repository.
@@ -35,7 +35,7 @@ The arunityX.unitypackage created in the previous step can be imported into othe
 
 ### The Plugin Structure
 
-In the lower left corner in the Project-Tab you can see the arunityX-Unity plugin in form of a folder. Inside this folder, you can find all the Scripts, Resources and Test Scenes that were imported with the arunityX.unitypackage. Additionally, the StreamingAssets directory contains  all resources that are available to your Unity3D app during runtime.
+In the lower left corner in the Project-Tab you can see the arunityX-Unity plugin in form of a folder. Inside this folder, you can find all the Scripts, Resources and Test Scenes that were imported with the arunityX.unitypackage. Additionally, the StreamingAssets directory contains  all resources that are available to your Unity app during runtime.
 
 ### Run the Example Scene
 
