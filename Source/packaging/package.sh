@@ -62,55 +62,47 @@ then
     OS='Windows'
 fi
 
+PROJECT_PATH="${ARUNITYX_HOME}/Source/Package"
+
 # Host-platform dependent options.
 if [ "$OS" = "Windows" ]
 then
     UNITY_EDITOR="$(${WINPATH} -u "${UNITY_EDITOR:-C:\\Program Files\\Unity\\Editor\\Unity.exe}")"
-    PROJECT_PATH="$(${WINPATH} -w "${ARUNITYX_HOME}/Source/Package")"
+    UNITY_PROJECT_PATH="$(${WINPATH} -w "${PROJECT_PATH}")"
 elif [ "$OS" = "Darwin" ]
 then
     UNITY_EDITOR=${UNITY_EDITOR:-'/Applications/Unity/Unity.app/Contents/MacOS/Unity'}
-    PROJECT_PATH="${ARUNITYX_HOME}/Source/Package"
+    UNITY_PROJECT_PATH="${PROJECT_PATH}"
 fi
 
-#Check if we are using the submodule to build
-if [  -f "$OURDIR/../Extras/artoolkitX/LICENSE.txt" ] && [ -z $ARTOOLKITX_HOME ]; then
-    ARTOOLKITX_HOME=$OURDIR/../Extras/artoolkitx/
-fi
+# Extract details from Unity project.
+VERSION=$(sed -En -e 's/.*bundleVersion: +([0-9.]+)/\1/p' ${PROJECT_PATH}/ProjectSettings/ProjectSettings.asset)
+COMPANY_NAME=$(sed -En -e 's/.*companyName: +(.*)/\1/p' ${PROJECT_PATH}/ProjectSettings/ProjectSettings.asset)
+PRODUCT_NAME=$(sed -En -e 's/.*productName: +(.*)/\1/p' ${PROJECT_PATH}/ProjectSettings/ProjectSettings.asset)
+#BUNDLE_ID=$(sed -En -z -e 's/.* +applicationIdentifier:\n +Android: ([^\n]*).*/\1/p' ${PROJECT_PATH}/ProjectSettings/ProjectSettings.asset)
 
-# Get version from <ARX/AR/ar.h> header.
-cd $OURDIR
-CONFIG_LOCATION="${ARTOOLKITX_HOME}/SDK/include/ARX/AR/config.h";
-if [ ! -f ${CONFIG_LOCATION} ]; then
-    #If only 'macos' was built config.h is in a different location
-    CONFIG_LOCATION="${ARTOOLKITX_HOME}/SDK/Frameworks/ARX.framework/Headers/AR/config.h"
-fi
+# Process for version number parts.
+VERSION_MAJOR=$(echo ${VERSION} | sed -E -e 's/^([0-9]+).*/\1/')
+VERSION_MINOR=$(echo ${VERSION} | sed -E -e 's/^[0-9]+\.([0-9]+).*/\1/')
+# VERSION_TINY and its preceding dot can be absent, so allow for that in our regexp and set to 0 in that case.
+VERSION_TINY=$(echo ${VERSION} | sed -E -e 's/^[0-9]+\.[0-9]+\.*([0-9]+)*.*/\1/')
+VERSION_TINY=${VERSION_TINY:-0}
+VERSION_BUILD=${VERSION_BUILD:-0}
 
-# If there is still no config location then there probably is no clone of the artoolkitX source available
-if [ ! -f ${CONFIG_LOCATION} ]; then
-    # Check if the plugins are available
-    if [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libARX.so ] || \
-       [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libARX.so ] || \
-       [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/libARX.so ] || \
-       [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/libARX.so ] || \
-       [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/libARX.a ] || \
-       [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/ARX.dll ] || \
-       [ -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle ]; then
-        # Plugins are available, build using the version number inside artoolkitx-version.txt
-        VERSION=$(cat ${ARUNITYX_HOME}/artoolkitx-version.txt)
-    else
-        #Print if we didn't built at all.
-        echo "You need to run ./build.sh <platform> before packaging."
-        exit -1
-    fi
-else
-    VERSION=`sed -En -e 's/.*AR_HEADER_VERSION_STRING[[:space:]]+"([0-9]+\.[0-9]+(\.[0-9]+)*)".*/\1/p' ${CONFIG_LOCATION}`
-    # If the tiny version number is 0, drop it.
-    VERSION=`echo -n "${VERSION}" | sed -E -e 's/([0-9]+\.[0-9]+)\.0/\1/'`
+# Check if the plugins are available
+if [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libARX.so ] && \
+   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libARX.so ] && \
+   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/libARX.so ] && \
+   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/libARX.so ] && \
+   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/libARX.a ] && \
+   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/ARX.dll ] && \
+   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle ] ; then
+    echo "You need to run ./build.sh <platform> before packaging."
+    exit 1
 fi
 
 # Rename version, where appropriate.
-sed -Ei "" "s/artoolkitX for Unity Version (([0-9]+\.[0-9]+)(\.[0-9]+)?(r[0-9]+)?)/artoolkitX for Unity Version $VERSION/" $ARUNITYX_HOME/Source/Package/Assets/ARToolKitX-Unity/Scripts/Editor/ARToolKitMenuEditor.cs
+sed -Ei "" "s/artoolkitX for Unity Version (([0-9]+\.[0-9]+)(\.[0-9]+)?(r[0-9]+)?)/artoolkitX for Unity Version $VERSION/" "${PROJECT_PATH}/Assets/artoolkitX-Unity/Scripts/Editor/ARToolKitMenuEditor.cs"
 
 # Build the unitypackage.
 "${UNITY_EDITOR}" \
@@ -118,9 +110,9 @@ sed -Ei "" "s/artoolkitX for Unity Version (([0-9]+\.[0-9]+)(\.[0-9]+)?(r[0-9]+)
     -batchmode \
     -nographics \
     -stackTraceLogType Full \
-    -projectPath "${PROJECT_PATH}" \
+    -projectPath "${UNITY_PROJECT_PATH}" \
     -arunityxpackagename arunityX-${VERSION}.unitypackage \
     -executeMethod ARToolKitPackager.CreatePackage
 
 # Move the output.
-mv "${ARUNITYX_HOME}/Source/Package/arunityX-${VERSION}.unitypackage" "${ARUNITYX_HOME}"
+mv "${PROJECT_PATH}/arunityX-${VERSION}.unitypackage" "${ARUNITYX_HOME}"

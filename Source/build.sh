@@ -184,7 +184,7 @@ if [ $DEV ] ; then
             refresh_plugin_for_platform_from_source Android  "${ARTOOLKITX_HOME}"
         fi
         if [ $BUILD_IOS ] ; then
-            cd "$ARTOO{ARTOOLKITX_HOME}LKITX_HOME/Source"
+            cd "${ARTOOLKITX_HOME}/Source"
             ./build.sh ios
             refresh_plugin_for_platform_from_source iOS "${ARTOOLKITX_HOME}"
         fi
