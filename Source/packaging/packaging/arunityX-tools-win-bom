@@ -1,10 +1,8 @@
 CHANGELOG.txt
 LICENSE.txt
 README.md
-ARUnity5.unitypackage
+arunityX.unitypackage
 
-bin/ARvideo.dll
-bin/DSVL.dll
 bin/calib_camera.exe
 bin/calib_optical.exe
 bin/calib_stereo.exe
@@ -30,6 +28,3 @@ doc/*
 redist/*
 
 extras/*
-
-src/Android_Unity_Player_Source/*
-src/Android_Unity_ResLib_AS_Proj/*

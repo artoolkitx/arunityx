@@ -119,8 +119,8 @@ sed -Ei "" "s/artoolkitX for Unity Version (([0-9]+\.[0-9]+)(\.[0-9]+)?(r[0-9]+)
     -nographics \
     -stackTraceLogType Full \
     -projectPath "${PROJECT_PATH}" \
+    -arunityxpackagename arunityX-${VERSION}.unitypackage \
     -executeMethod ARToolKitPackager.CreatePackage
-    ARUnityX-${VERSION}.unitypackage
 
 # Move the output.
-mv $ARUNITYX_HOME/Source/Package/arunityX-${VERSION}.unitypackage $ARUNITYX_HOME
+mv "${ARUNITYX_HOME}/Source/Package/arunityX-${VERSION}.unitypackage" "${ARUNITYX_HOME}"

@@ -1,7 +1,7 @@
 README.md
 ChangeLog.txt
 LICENSE.txt
-ARUnity5.unitypackage
+arunityX.unitypackage
 
 bin/calib_camera
 bin/calib_optical
@@ -24,6 +24,3 @@ bin/Data/
 doc/
 
 extras/
-
-src/Android_Unity_Player_Source/
-src/Android_Unity_ResLib_AS_Proj/
