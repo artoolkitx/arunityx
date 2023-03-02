@@ -99,4 +99,7 @@ public abstract class IPluginFunctions
     abstract public bool arwUpdateAR();
     abstract public bool arwUpdateTexture32([In, Out] Color32[] colors32);
     abstract public bool arwUpdateTexture32Stereo([In, Out] Color32[] colors32L, [In, Out] Color32[] colors32R);
+    abstract public int arwCreateVideoSourceInfoList(string config);
+    abstract public bool arwGetVideoSourceInfoListEntry(int index, out string name, out string model, out string UID, out int flag, out string openToken);
+    abstract public void arwDeleteVideoSourceInfoList();
 }

@@ -388,4 +388,37 @@ public class PluginFunctionsARX : IPluginFunctions
         return ARX_pinvoke.arwLoadOpticalParams(optical_param_name, optical_param_buff, optical_param_buffLen, projectionNearPlane, projectionFarPlane, out fovy_p, out aspect_p, m, p);
     }
 
+    override public int arwCreateVideoSourceInfoList(string config)
+    {
+        return ARX_pinvoke.arwCreateVideoSourceInfoList(config);
+    }
+
+    override public bool arwGetVideoSourceInfoListEntry(int index, out string name, out string model, out string UID, out int flags, out string openToken)
+    {
+        StringBuilder sbName = new StringBuilder(1024);
+        StringBuilder sbModel = new StringBuilder(1024);
+        StringBuilder sbUID = new StringBuilder(1024);
+        StringBuilder sbOpenToken = new StringBuilder(1024);
+        bool ok = ARX_pinvoke.arwGetVideoSourceInfoListEntry(index, sbName, sbName.Capacity, sbModel, sbModel.Capacity, sbUID, sbUID.Capacity, out flags, sbOpenToken, sbOpenToken.Capacity);
+        if (!ok)
+        {
+            name = "";
+            model = "";
+            UID = "";
+            openToken = "";
+        }
+        else
+        {
+            name = sbName.ToString();
+            model = sbModel.ToString();
+            UID = sbUID.ToString();
+            openToken = sbOpenToken.ToString();
+        }
+        return ok;
+    }
+
+    override public void arwDeleteVideoSourceInfoList()
+    {
+        ARX_pinvoke.arwDeleteVideoSourceInfoList();
+    }
 }
