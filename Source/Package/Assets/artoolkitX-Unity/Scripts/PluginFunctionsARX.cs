@@ -43,6 +43,11 @@ using System.Text;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+/// <summary>
+/// A concrete implentation of the IPluginFunctions interface that calls into a local
+/// instance of the ARX library via P/Invoke. This library performs the appropriate
+/// marshalling between managed and unmanaged code.
+/// </summary>
 public class PluginFunctionsARX : IPluginFunctions
 {
     [NonSerialized]
@@ -405,6 +410,7 @@ public class PluginFunctionsARX : IPluginFunctions
             name = "";
             model = "";
             UID = "";
+            flags = 0;
             openToken = "";
         }
         else
@@ -412,6 +418,7 @@ public class PluginFunctionsARX : IPluginFunctions
             name = sbName.ToString();
             model = sbModel.ToString();
             UID = sbUID.ToString();
+            flags = 0;
             openToken = sbOpenToken.ToString();
         }
         return ok;

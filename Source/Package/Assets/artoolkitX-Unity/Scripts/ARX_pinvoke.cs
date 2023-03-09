@@ -42,6 +42,10 @@ using System.Text;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+/// <summary>
+/// Defines the external API of the ARX shared library that may be accessed via C# P/Invoke.
+/// This API is not invoked directly from user scripts, but instead via an instance of PluginFunctionsARX.
+/// </summary>
 public static class ARX_pinvoke
 {
 	// The name of the external library containing the native functions
