@@ -42,6 +42,10 @@ using System.Text;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
+/// <summary>
+/// Defines the external API of the ARX shared library that may be accessed via C# P/Invoke.
+/// This API is not invoked directly from user scripts, but instead via an instance of PluginFunctionsARX.
+/// </summary>
 public static class ARX_pinvoke
 {
 	// The name of the external library containing the native functions
@@ -352,5 +356,27 @@ public static class ARX_pinvoke
     [DllImport("__Internal")]
     public static extern void aruRequestCamera();
 #endif
+
+#if UNITY_IOS
+	[DllImport("__Internal")]
+#else
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+#endif
+	public static extern int arwCreateVideoSourceInfoList(string config);
+
+#if UNITY_IOS
+	[DllImport("__Internal")]
+#else
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+#endif
+	[return: MarshalAsAttribute(UnmanagedType.I1)]
+	public static extern bool arwGetVideoSourceInfoListEntry(int index, [MarshalAs(UnmanagedType.LPStr)] StringBuilder nameBuf, int nameBufLen, [MarshalAs(UnmanagedType.LPStr)] StringBuilder modelBuf, int modelBufLen, [MarshalAs(UnmanagedType.LPStr)] StringBuilder UIDBuf, int UIDBufLen, out int flags_p, [MarshalAs(UnmanagedType.LPStr)] StringBuilder openTokenBuf, int openTokenBufLen);
+
+#if UNITY_IOS
+	[DllImport("__Internal")]
+#else
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+#endif
+	public static extern void arwDeleteVideoSourceInfoList();
 }
 

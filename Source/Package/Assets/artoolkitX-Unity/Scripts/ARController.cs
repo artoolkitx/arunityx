@@ -71,6 +71,7 @@ public enum ContentAlign
 /// </summary>
 /// 
 [ExecuteInEditMode]
+[RequireComponent(typeof(ARVideoConfig))]
 public class ARController : MonoBehaviour
 {
     //
@@ -110,11 +111,6 @@ public class ARController : MonoBehaviour
 
     // Config. in.
     public string videoCParamName0 = "";
-    public string videoConfigurationWindows0 = "-showDialog";
-    public string videoConfigurationMacOSX0 = "-width=640 -height=480";
-    public string videoConfigurationiOS0 = "";
-    public string videoConfigurationAndroid0 = "";
-    // public string videoConfigurationWindowsStore0 = "-device=WinMC -format=BGRA -position=rear";
     public string videoConfigurationLinux0 = "";
     public int BackgroundLayer0 = 8;
 
@@ -144,12 +140,6 @@ public class ARController : MonoBehaviour
 
     // Config. in.
     public string videoCParamName1 = "";
-    public string videoConfigurationWindows1 = "-devNum=2 -showDialog";
-    public string videoConfigurationMacOSX1 = "-source=1 -width=640 -height=480";
-    public string videoConfigurationiOS1 = "";
-    public string videoConfigurationAndroid1 = "";
-    //public string videoConfigurationWindowsStore1 = "-device=WinMC -format=BGRA";
-    public string videoConfigurationLinux1 = "";
     public int BackgroundLayer1 = 9;
 
     // Config. out.
@@ -294,6 +284,68 @@ public class ARController : MonoBehaviour
         AR_LOG_LEVEL_REL_INFO
     }
 
+    ///
+    /// @brief Values for device position, as encoded in ARVideoSourceInfoT.flags & AR_VIDEO_SOURCE_INFO_POSITION_MASK.
+    ///
+    public enum AR_VIDEO_POSITION
+    {
+        AR_VIDEO_POSITION_UNKNOWN   = 0x0000, ///< Camera physical position on device unknown.
+        AR_VIDEO_POSITION_FRONT     = 0x0008, ///< Camera is on front of device pointing towards user.
+        AR_VIDEO_POSITION_BACK      = 0x0010, ///< Camera is on back of device pointing away from user.
+        AR_VIDEO_POSITION_LEFT      = 0x0018, ///< Camera is on left of device pointing to user's left.
+        AR_VIDEO_POSITION_RIGHT     = 0x0020, ///< Camera is on right of device pointing to user's right.
+        AR_VIDEO_POSITION_TOP       = 0x0028, ///< Camera is on top of device pointing toward ceiling when device is held upright.
+        AR_VIDEO_POSITION_BOTTOM    = 0x0030, ///< Camera is on bottom of device pointing towards floor when device is held upright.
+        AR_VIDEO_POSITION_OTHER     = 0x0038, ///< Camera physical position on device is known but none of the above.
+    }
+
+    ///
+    /// @brief Values for device stereo mode, as encoded in ARVideoSourceInfoT.flags & AR_VIDEO_SOURCE_INFO_STEREO_MODE_MASK.
+    ///
+    public enum AR_VIDEO_STEREO_MODE
+    {
+        AR_VIDEO_STEREO_MODE_MONO                      = 0x0000, ///< Device is monoscopic.
+        AR_VIDEO_STEREO_MODE_LEFT                      = 0x0040, ///< Device is left eye of a stereoscopic pair.
+        AR_VIDEO_STEREO_MODE_RIGHT                     = 0x0080, ///< Device is right eye of a stereoscopic pair.
+        AR_VIDEO_STEREO_MODE_FRAME_SEQUENTIAL          = 0x00C0, ///< Device is left and right stereo images in sequential frames.
+        AR_VIDEO_STEREO_MODE_SIDE_BY_SIDE              = 0x0100, ///< Device is left and right stereo images in a single frame, arranged horizontally with left eye on left.
+        AR_VIDEO_STEREO_MODE_OVER_UNDER                = 0x0140, ///< Device is left and right stereo images in a single frame, arranged vertically with left eye on top.
+        AR_VIDEO_STEREO_MODE_HALF_SIDE_BY_SIDE         = 0x0180, ///< Device is left and right stereo images in a single frame with the frames scaled to half-width, arranged horizontally with left eye on left.
+        AR_VIDEO_STEREO_MODE_OVER_UNDER_HALF_HEIGHT    = 0x01C0, ///< Device is left and right stereo images in a single frame with the frames scaled to half-height, arranged vertically with left eye on top.
+        AR_VIDEO_STEREO_MODE_ROW_INTERLACED            = 0x0200, ///< Device is left and right stereo images in a single frame with row interleaving, where pixels in even-numbered rows are sampled from the left eye, and pixels in odd-number rows from the right eye.
+        AR_VIDEO_STEREO_MODE_COLUMN_INTERLACED         = 0x0240, ///< Device is left and right stereo images in a single frame with column interleaving, where pixels in even-numbered columns are sampled from the left eye, and pixels in odd-number columns from the right eye.
+        AR_VIDEO_STEREO_MODE_ROW_AND_COLUMN_INTERLACED = 0x0280, ///< Device is left and right stereo images in a single frame with row and column interleaving, where pixels where the evenness/oddness of the row is the same as the column are sampled from the left eye, and the remaining pixels from the right eye.
+        AR_VIDEO_STEREO_MODE_ANAGLYPH_RG               = 0x02C0, ///< Device is left and right stereo images in a single frame, where both eyes are converted to mono and the left eye is carried in the red channel and the right eye in the green channel.
+        AR_VIDEO_STEREO_MODE_ANAGLYPH_RB               = 0x0300, ///< Device is left and right stereo images in a single frame, where both eyes are converted to mono and the left eye is carried in the red channel and the right eye in the blue channel.
+        AR_VIDEO_STEREO_MODE_RESERVED0                 = 0x0340, ///< Reserved for future use.
+        AR_VIDEO_STEREO_MODE_RESERVED1                 = 0x0380, ///< Reserved for future use.
+        AR_VIDEO_STEREO_MODE_RESERVED2                 = 0x03C0, ///< Reserved for future use.
+    }
+
+    ///
+    /// @brief Values for ARVideoSourceInfoT.flags.
+    ///
+    public enum AR_VIDEO_SOURCE_INFO
+    {
+        AR_VIDEO_SOURCE_INFO_FLAG_OFFLINE     = 0x0001,      ///< 0 = unknown or not offline, 1 = offline.
+        AR_VIDEO_SOURCE_INFO_FLAG_IN_USE      = 0x0002,      ///< 0 = unknown or not in use, 1 = in use.
+        AR_VIDEO_SOURCE_INFO_FLAG_OPEN_ASYNC  = 0x0004,      ///< 0 = open normally, 1 = open async.
+        AR_VIDEO_SOURCE_INFO_POSITION_MASK    = 0x0038,      ///< compare (value & AR_VIDEO_SOURCE_INFO_POSITION_MASK) against enums.
+        AR_VIDEO_SOURCE_INFO_STEREO_MODE_MASK = 0x03C0,      ///< compare (value & AR_VIDEO_SOURCE_INFO_STEREO_MODE_MASK) against enums.
+    }
+
+    ///
+    /// @brief Values describing a video source.
+    ///
+    public struct ARVideoSourceInfoT
+    {
+        public string name;             ///< UTF-8 encoded string representing the name of the source, in a form suitable for presentation to an end-user, e.g. in a list of inputs.
+        public string model;            ///< UTF-8 encoded string representing the model of the source, where this information is available. May be NULL if model information is not attainable.
+        public string UID;              ///< UTF-8 encoded string representing a unique ID for this source, and suitable for passing to arVideoOpen/ar2VideoOpen as a UID in the configuration. May be NULL if sources cannot be uniquely identified.
+        public AR_VIDEO_SOURCE_INFO flags;
+        public string open_token;       ///< UTF-8 encoded string containing the token that should be passed (in the space-separated list of tokens to arVideoOpen/ar2VideoOpen, in order to select this source to be opened. Note that this token is only valid so long as the underlying video hardware configuration does not change, so should not be stored between sessions.
+    }
+
     // Private fields with accessors.
     [SerializeField]
     private ContentMode currentContentMode = ContentMode.Fit;
@@ -322,8 +374,10 @@ public class ARController : MonoBehaviour
     [SerializeField]
     private AR_LOG_LEVEL currentLogLevel = AR_LOG_LEVEL.AR_LOG_LEVEL_INFO;
 
-    // Main reference to the plugin functions. Created in Awake, destroyed in OnDestroy().
+    // Main reference to the plugin functions. Created in OnEnable, destroyed in OnDisable().
     private IPluginFunctions pluginFunctions = null;
+
+    private ARVideoConfig arvideoconfig = null;
 
     //
     // MonoBehavior methods.
@@ -331,34 +385,16 @@ public class ARController : MonoBehaviour
     void Awake()
     {
         Log(LogTag + "ARController.Awake())");
-
     }
 
     void OnEnable()
     {
-
         pluginFunctions = new PluginFunctionsARX();
+        arvideoconfig = gameObject.GetComponent<ARVideoConfig>();
 #if !UNITY_EDITOR
 #  if UNITY_IOS
         ARX_pinvoke.aruRequestCamera();
         Thread.Sleep(2000);
-#  elif UNITY_ANDROID
-
-        Log (LogTag + "About to initialize the Android Plugin");
-        using( AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer")) {
-            if (jc != null) {
-                using(AndroidJavaObject activity = jc.GetStatic<AndroidJavaObject>("currentActivity")) {
-                    androidPlugin = activity.Call<AndroidJavaObject>("getArtoolkitXPlugin");
-                    if (null == androidPlugin) {
-                        Log(LogTag + "ERROR: Failed to connect to artoolkitX-Android plugin! We might be missing arxjUnity.jar?");
-                    }
-                    else { 
-                        androidPlugin.Call("setUnityRunning",new object[]{true});
-                        activity.Call("startCamera");
-                    }
-                }
-            }
-        }
 #  endif
 #endif // !UNITY_EDITOR
 
@@ -391,6 +427,33 @@ public class ARController : MonoBehaviour
         {
             InitializeAR();
         }
+    }
+
+    public List<ARVideoSourceInfoT> GetVideoSourceInfoList(string config)
+    {
+        List<ARVideoSourceInfoT> l = new List<ARVideoSourceInfoT>();
+        if (pluginFunctions == null)
+        {
+            return l;
+        }
+
+        int count = pluginFunctions.arwCreateVideoSourceInfoList(config);
+        if (count > 0)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                ARVideoSourceInfoT si = new ARVideoSourceInfoT();
+                int flags;
+                bool ok = pluginFunctions.arwGetVideoSourceInfoListEntry(i, out si.name, out si.model, out si.UID, out flags, out si.open_token);
+                if (ok)
+                {
+                    si.flags = (AR_VIDEO_SOURCE_INFO)flags; // Coerce type.
+                    l.Add(si);
+                }
+            }
+            pluginFunctions.arwDeleteVideoSourceInfoList();
+        }
+        return l;
     }
 
     private void InitializeAR()
@@ -596,14 +659,12 @@ public class ARController : MonoBehaviour
 
             // Retrieve video configuration, and append any required per-platform overrides.
             // For native GL texturing we need monoplanar video; iOS and Android default to biplanar format. 
-            string videoConfiguration0;
-            string videoConfiguration1;
+            string videoConfiguration0 = arvideoconfig.GetVideoConfigString();
+            string videoConfiguration1 = arvideoconfig.GetVideoConfigString(true);
             switch (Application.platform)
             {
                 case RuntimePlatform.OSXEditor:
                 case RuntimePlatform.OSXPlayer:
-                    videoConfiguration0 = videoConfigurationMacOSX0;
-                    videoConfiguration1 = videoConfigurationMacOSX1;
                     if (_useNativeGLTexturing || !AllowNonRGBVideo)
                     {
                         if (videoConfiguration0.IndexOf("-device=QuickTime7") != -1 || videoConfiguration0.IndexOf("-device=QUICKTIME") != -1) videoConfiguration0 += " -pixelformat=BGRA";
@@ -612,8 +673,6 @@ public class ARController : MonoBehaviour
                     break;
                 case RuntimePlatform.WindowsEditor:
                 case RuntimePlatform.WindowsPlayer:
-                    videoConfiguration0 = videoConfigurationWindows0;
-                    videoConfiguration1 = videoConfigurationWindows1;
                     if (_useNativeGLTexturing || !AllowNonRGBVideo)
                     {
                         if (videoConfiguration0.IndexOf("-device=WinMF") != -1) videoConfiguration0 += " -format=BGRA";
@@ -621,27 +680,16 @@ public class ARController : MonoBehaviour
                     }
                     break;
                 case RuntimePlatform.Android:
-                    videoConfiguration0 = videoConfigurationAndroid0 + " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
-                    videoConfiguration1 = videoConfigurationAndroid1 + " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
+                    videoConfiguration0 += " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
+                    videoConfiguration1 += " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
                     break;
                 case RuntimePlatform.IPhonePlayer:
-                    videoConfiguration0 = videoConfigurationiOS0 + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
-                    videoConfiguration1 = videoConfigurationiOS1 + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
+                    videoConfiguration0 += (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
+                    videoConfiguration1 += (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
                     break;
-                //            case RuntimePlatform.WSAPlayerX86:
-                //            case RuntimePlatform.WSAPlayerX64:
-                //            case RuntimePlatform.WSAPlayerARM:
-                //                videoConfiguration0 = videoConfigurationWindowsStore0;
-                //                videoConfiguration1 = videoConfigurationWindowsStore1;
-                //                break;
                 //case RuntimePlatform.LinuxEditor:
                 case RuntimePlatform.LinuxPlayer:
-                    videoConfiguration0 = videoConfigurationLinux0;
-                    videoConfiguration1 = videoConfigurationLinux1;
-                    break;
                 default:
-                    videoConfiguration0 = "";
-                    videoConfiguration1 = "";
                     break;
             }
 
@@ -940,8 +988,8 @@ public class ARController : MonoBehaviour
         ScreenOrientation screenOrientation = Screen.orientation;
 
 #  if UNITY_ANDROID
-            screenWidth = Screen.width;
-            screenHeight = Screen.height;
+        screenWidth = Screen.width;
+        screenHeight = Screen.height;
 #  endif
         Matrix4x4 deviceRotation;
         int height = _videoHeight0;
@@ -1781,9 +1829,9 @@ public class ARController : MonoBehaviour
 #if UNITY_ANDROID
         // Special feature: on Android, call the UnityARPlayer.setStereo(haveStereoARCamera) Java method.
         // This allows Android-based devices (e.g. the Epson Moverio BT-200) to support hardware switching between mono/stereo display modes.
-        if (Application.platform == RuntimePlatform.Android && androidPlugin != null) {
-            androidPlugin.Call("setStereo",new object[]{haveStereoARCamera});
-        }        
+        //if (Application.platform == RuntimePlatform.Android && androidPlugin != null) {
+        //    androidPlugin.Call("setStereo",new object[]{haveStereoARCamera});
+        //}        
 #endif
         return true;
     }

@@ -40,6 +40,11 @@ using UnityEngine;
 // Delegate type declaration for log callback.
 public delegate void PluginFunctionsLogCallback([MarshalAs(UnmanagedType.LPStr)] string msg);
 
+/// <summary>
+/// Defines a plugin interface via which artoolkitX functionality can be invoked.
+/// Concrete subclasses might e.g. implement this via a local DLL, or might instead
+/// invoke a remote instance of artoolkitX over a network.
+/// </summary>
 public abstract class IPluginFunctions
 {
     abstract public bool IsConfigured();
@@ -99,4 +104,7 @@ public abstract class IPluginFunctions
     abstract public bool arwUpdateAR();
     abstract public bool arwUpdateTexture32([In, Out] Color32[] colors32);
     abstract public bool arwUpdateTexture32Stereo([In, Out] Color32[] colors32L, [In, Out] Color32[] colors32R);
+    abstract public int arwCreateVideoSourceInfoList(string config);
+    abstract public bool arwGetVideoSourceInfoListEntry(int index, out string name, out string model, out string UID, out int flags, out string openToken);
+    abstract public void arwDeleteVideoSourceInfoList();
 }
