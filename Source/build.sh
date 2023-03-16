@@ -223,7 +223,7 @@ else
         MOUNTPOINT=mnt$$
         IMAGE="artoolkitx-${ARTOOLKITX_VERSION}-Android.zip"
         find_or_fetch_artoolkitx "${IMAGE}"
-        unzip -o "${IMAGE}" -d "${MOUNTPOINT}"
+        unzip -q -o "${IMAGE}" -d "${MOUNTPOINT}"
         refresh_plugin_for_platform_from_source Android "${MOUNTPOINT}/artoolkitX"
         rm -rf "${MOUNTPOINT}"
     fi
@@ -254,7 +254,7 @@ else
         MOUNTPOINT=mnt$$
         IMAGE="artoolkitX-${ARTOOLKITX_VERSION}-Windows.zip"
         find_or_fetch_artoolkitx "${IMAGE}"
-        unzip -o "${IMAGE}" -d "${MOUNTPOINT}"
+        unzip -q -o "${IMAGE}" -d "${MOUNTPOINT}"
         refresh_plugin_for_platform_from_source Windows "${MOUNTPOINT}/artoolkitX"
         rm -rf "${MOUNTPOINT}"
     fi
