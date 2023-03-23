@@ -66,6 +66,8 @@ public abstract class IPluginFunctions
     abstract public bool arwGetTrackablePatternImage(int markerID, int patternID, [In, Out] Color[] colors);
     abstract public int arwGetMatrixCodeType();
     abstract public bool arwGetNFTMultiMode();
+    abstract public void arwSet2DMaxMarkersToTrack(int maxMarkersToTrack);
+    abstract public int arwGet2DMaxMarkersToTrack();
     abstract public int arwGetPatternDetectionMode();
     abstract public bool arwGetProjectionMatrix(float nearPlane, float farPlane, float[] matrix);
     abstract public bool arwGetProjectionMatrixStereo(float nearPlane, float farPlane, float[] matrixL, float[] matrixR);

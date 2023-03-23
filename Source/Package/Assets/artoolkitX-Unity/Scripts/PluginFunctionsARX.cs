@@ -57,7 +57,7 @@ public class PluginFunctionsARX : IPluginFunctions
     private PluginFunctionsLogCallback logCallback = null;
     private GCHandle logCallbackGCH;
 
-    private static int ARW_TRACKER_OPTION_NFT_MULTIMODE = 0,                          ///< bool.
+    private readonly static int ARW_TRACKER_OPTION_NFT_MULTIMODE = 0,                 ///< bool.
                        ARW_TRACKER_OPTION_SQUARE_THRESHOLD = 1,                       ///< Threshold value used for image binarization. int in range [0-255].
                        ARW_TRACKER_OPTION_SQUARE_THRESHOLD_MODE = 2,                  ///< Threshold mode used for image binarization. int.
                        ARW_TRACKER_OPTION_SQUARE_LABELING_MODE = 3,                   ///< int.
@@ -67,8 +67,9 @@ public class PluginFunctionsARX : IPluginFunctions
                        ARW_TRACKER_OPTION_SQUARE_IMAGE_PROC_MODE = 7,                 ///< int.
                        ARW_TRACKER_OPTION_SQUARE_DEBUG_MODE = 8,                      ///< Enables or disable state of debug mode in the tracker. When enabled, a black and white debug image is generated during marker detection. The debug image is useful for visualising the binarization process and choosing a threshold value. bool.
                        ARW_TRACKER_OPTION_SQUARE_PATTERN_SIZE = 9,                    ///< Number of rows and columns in square template (pattern) markers. Defaults to AR_PATT_SIZE1, which is 16 in all versions of ARToolKit prior to 5.3. int.
-                       ARW_TRACKER_OPTION_SQUARE_PATTERN_COUNT_MAX = 10/*,              ///< Maximum number of square template (pattern) markers that may be loaded at once. Defaults to AR_PATT_NUM_MAX, which is at least 25 in all versions of ARToolKit prior to 5.3. int.
-                       ARW_TRACKER_OPTION_2D_TRACKER_FEATURE_TYPE = 11*/;               ///< Feature detector type used in the 2d Tracker - 0 AKAZE, 1 ORB, 2 BRISK, 3 KAZE
+                       ARW_TRACKER_OPTION_SQUARE_PATTERN_COUNT_MAX = 10,              ///< Maximum number of square template (pattern) markers that may be loaded at once. Defaults to AR_PATT_NUM_MAX, which is at least 25 in all versions of ARToolKit prior to 5.3. int.
+                       /*ARW_TRACKER_OPTION_2D_TRACKER_FEATURE_TYPE = 11,*/           ///< Feature detector type used in the 2d Tracker - 0 AKAZE, 1 ORB, 2 BRISK, 3 KAZE
+                       ARW_TRACKER_OPTION_2D_MAXIMUM_MARKERS_TO_TRACK = 12;           ///< Maximum number of markers able to be tracked simultaneously. Defaults to 1. Should not be set higher than the number of 2D markers loaded.
 
     override public bool IsConfigured()
     {
@@ -361,6 +362,16 @@ public class PluginFunctionsARX : IPluginFunctions
     override public bool arwGetNFTMultiMode()
     {
         return ARX_pinvoke.arwGetTrackerOptionBool(ARW_TRACKER_OPTION_NFT_MULTIMODE);
+    }
+
+    override public void arwSet2DMaxMarkersToTrack(int maxMarkersToTrack)
+    {
+        ARX_pinvoke.arwSetTrackerOptionInt(ARW_TRACKER_OPTION_2D_MAXIMUM_MARKERS_TO_TRACK, maxMarkersToTrack);
+    }
+
+    override public int arwGet2DMaxMarkersToTrack()
+    {
+        return ARX_pinvoke.arwGetTrackerOptionInt(ARW_TRACKER_OPTION_2D_MAXIMUM_MARKERS_TO_TRACK);
     }
 
     override public int arwAddTrackable(string cfg)

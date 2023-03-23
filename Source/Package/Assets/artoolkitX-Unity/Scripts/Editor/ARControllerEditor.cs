@@ -50,6 +50,7 @@ public class ARControllerEditor : Editor
 	public bool showVideoOptions = true;
     public bool showThresholdOptions = false;
     public bool showSquareTrackingOptions = false;
+    public bool show2DTrackingOptions = false;
 	public bool showNFTTrackingOptions = false;
 	public bool showApplicationOptions = false;
 
@@ -124,51 +125,53 @@ public class ARControllerEditor : Editor
 
         EditorGUILayout.Separator();
 
-        showThresholdOptions = EditorGUILayout.Foldout(showThresholdOptions, "Threshold Options");
-        if (showThresholdOptions)
-        {
-            // Threshold mode selection
-            ARController.ARToolKitThresholdMode currentThreshMode = arcontroller.VideoThresholdMode;
-            ARController.ARToolKitThresholdMode newThreshMode = (ARController.ARToolKitThresholdMode)EditorGUILayout.EnumPopup("Mode:", currentThreshMode);
-            if (newThreshMode != currentThreshMode)
-            {
-                arcontroller.VideoThresholdMode = newThreshMode;
-            }
-
-            // Info about the selected mode
-            EditorGUILayout.LabelField("", thresholdModeDescriptions[newThreshMode]);
-
-            // Show threshold slider only in manual or bracketing modes.
-            if (newThreshMode == ARController.ARToolKitThresholdMode.Manual || newThreshMode == ARController.ARToolKitThresholdMode.Bracketing)
-            {
-
-                int currentThreshold = arcontroller.VideoThreshold;
-                //int newThreshold = UnityEngine.Mathf.Clamp(EditorGUILayout.IntField("Threshold: ", currentThreshold), 0, 255);
-                int newThreshold = EditorGUILayout.IntSlider("Threshold: ", currentThreshold, 0, 255);
-                if (newThreshold != currentThreshold)
-                {
-                    arcontroller.VideoThreshold = newThreshold;
-                }
-            }
-        }
-
-        EditorGUILayout.Separator();
-
         showSquareTrackingOptions = EditorGUILayout.Foldout(showSquareTrackingOptions, "Square Tracking Options");
         if (showSquareTrackingOptions)
         {
+            showThresholdOptions = EditorGUILayout.Foldout(showThresholdOptions, "Threshold Options");
+            if (showThresholdOptions)
+            {
+                // Threshold mode selection
+                ARController.ARToolKitThresholdMode currentThreshMode = arcontroller.VideoThresholdMode;
+                ARController.ARToolKitThresholdMode newThreshMode = (ARController.ARToolKitThresholdMode)EditorGUILayout.EnumPopup("Mode:", currentThreshMode);
+                if (newThreshMode != currentThreshMode)
+                {
+                    Undo.RecordObject(arcontroller, "Set threshold mode");
+                    arcontroller.VideoThresholdMode = newThreshMode;
+                }
 
+                // Info about the selected mode
+                EditorGUILayout.LabelField("", thresholdModeDescriptions[newThreshMode]);
+
+                // Show threshold slider only in manual or bracketing modes.
+                if (newThreshMode == ARController.ARToolKitThresholdMode.Manual || newThreshMode == ARController.ARToolKitThresholdMode.Bracketing)
+                {
+
+                    int currentThreshold = arcontroller.VideoThreshold;
+                    //int newThreshold = UnityEngine.Mathf.Clamp(EditorGUILayout.IntField("Threshold: ", currentThreshold), 0, 255);
+                    int newThreshold = EditorGUILayout.IntSlider("Threshold: ", currentThreshold, 0, 255);
+                    if (newThreshold != currentThreshold)
+                    {
+                        Undo.RecordObject(arcontroller, "Set threshold");
+                        arcontroller.VideoThreshold = newThreshold;
+                    }
+                }
+            }
+
+            EditorGUILayout.Separator();
 
             int currentTemplateSize = arcontroller.TemplateSize;
             int newTemplateSize = EditorGUILayout.IntField("Template size: ", currentTemplateSize);
             if (newTemplateSize != currentTemplateSize && newTemplateSize >= 16 && newTemplateSize <= 64)
             {
+                Undo.RecordObject(arcontroller, "Set template size");
                 arcontroller.TemplateSize = newTemplateSize;
             }
             int currentTemplateCountMax = arcontroller.TemplateCountMax;
             int newTemplateCountMax = EditorGUILayout.IntField("Template count max.: ", currentTemplateCountMax);
             if (newTemplateCountMax != currentTemplateCountMax && newTemplateCountMax > 0)
             {
+                Undo.RecordObject(arcontroller, "Set template count max.");
                 arcontroller.TemplateCountMax = newTemplateCountMax;
             }
 
@@ -177,6 +180,7 @@ public class ARControllerEditor : Editor
             ARController.ARToolKitLabelingMode newLabelingMode = (ARController.ARToolKitLabelingMode)EditorGUILayout.EnumPopup("Trackable borders:", currentLabelingMode);
             if (newLabelingMode != currentLabelingMode)
             {
+                Undo.RecordObject(arcontroller, "Set labeling mode");
                 arcontroller.LabelingMode = newLabelingMode;
             }
 
@@ -185,6 +189,7 @@ public class ARControllerEditor : Editor
             float newBorderSize = UnityEngine.Mathf.Clamp(EditorGUILayout.FloatField("Border size:", currentBorderSize), 0.0f, 0.5f);
             if (newBorderSize != currentBorderSize)
             {
+                Undo.RecordObject(arcontroller, "Set border size");
                 arcontroller.BorderSize = newBorderSize;
             }
 
@@ -193,6 +198,7 @@ public class ARControllerEditor : Editor
             ARController.ARToolKitPatternDetectionMode newPatternDetectionMode = (ARController.ARToolKitPatternDetectionMode)EditorGUILayout.EnumPopup("Pattern detection mode:", currentPatternDetectionMode);
             if (newPatternDetectionMode != currentPatternDetectionMode)
             {
+                Undo.RecordObject(arcontroller, "Set pattern detection mode");
                 arcontroller.PatternDetectionMode = newPatternDetectionMode;
             }
 
@@ -206,6 +212,7 @@ public class ARControllerEditor : Editor
                 ARController.ARToolKitMatrixCodeType newMatrixCodeType = (ARController.ARToolKitMatrixCodeType)EditorGUILayout.EnumPopup("Matrix code type:", currentMatrixCodeType);
                 if (newMatrixCodeType != currentMatrixCodeType)
                 {
+                    Undo.RecordObject(arcontroller, "Set matrix code type");
                     arcontroller.MatrixCodeType = newMatrixCodeType;
                 }
             }
@@ -215,6 +222,7 @@ public class ARControllerEditor : Editor
             ARController.ARToolKitImageProcMode newImageProcMode = (ARController.ARToolKitImageProcMode)EditorGUILayout.EnumPopup("Image processing mode:", currentImageProcMode);
             if (newImageProcMode != currentImageProcMode)
             {
+                Undo.RecordObject(arcontroller, "Set image processing mode");
                 arcontroller.ImageProcMode = newImageProcMode;
             }
 
@@ -222,10 +230,29 @@ public class ARControllerEditor : Editor
 
         EditorGUILayout.Separator();
 
+        show2DTrackingOptions = EditorGUILayout.Foldout(show2DTrackingOptions, "2D Tracking Options");
+        if (show2DTrackingOptions)
+        {
+            int n = EditorGUILayout.IntField("Max. number of markers to track", arcontroller.TwoDMaxMarkersToTrack);
+            if (n != arcontroller.TwoDMaxMarkersToTrack)
+            {
+                Undo.RecordObject(arcontroller, "Set max. number of markers to track");
+                arcontroller.TwoDMaxMarkersToTrack = n;
+
+            }
+        }
+
+        EditorGUILayout.Separator();
+
         showNFTTrackingOptions = EditorGUILayout.Foldout(showNFTTrackingOptions, "NFT Tracking Options");
         if (showNFTTrackingOptions)
         {
-            arcontroller.NFTMultiMode = EditorGUILayout.Toggle("Multi-page mode", arcontroller.NFTMultiMode);
+            bool m = EditorGUILayout.Toggle("Multi-page mode", arcontroller.NFTMultiMode);
+            if (m != arcontroller.NFTMultiMode)
+            {
+                Undo.RecordObject(arcontroller, "Set multi-page mode");
+                arcontroller.NFTMultiMode = m;
+            }
         }
 
 		EditorGUILayout.Separator();

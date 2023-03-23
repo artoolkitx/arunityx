@@ -372,6 +372,8 @@ public class ARController : MonoBehaviour
     [SerializeField]
     private bool currentNFTMultiMode = false;
     [SerializeField]
+    private int currentTwoDMaxMarkersToTrack = 1;
+    [SerializeField]
     private AR_LOG_LEVEL currentLogLevel = AR_LOG_LEVEL.AR_LOG_LEVEL_INFO;
 
     // Main reference to the plugin functions. Created in OnEnable, destroyed in OnDisable().
@@ -771,6 +773,7 @@ public class ARController : MonoBehaviour
             MatrixCodeType = currentMatrixCodeType;
             ImageProcMode = currentImageProcMode;
             NFTMultiMode = currentNFTMultiMode;
+            TwoDMaxMarkersToTrack = currentTwoDMaxMarkersToTrack;
 
             // Prevent display sleep.
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -1295,6 +1298,27 @@ public class ARController : MonoBehaviour
             if (_running)
             {
                 pluginFunctions.arwSetNFTMultiMode(currentNFTMultiMode);
+            }
+        }
+    }
+
+    public int TwoDMaxMarkersToTrack
+    {
+        get
+        {
+            if (_running)
+            {
+                currentTwoDMaxMarkersToTrack = pluginFunctions.arwGet2DMaxMarkersToTrack();
+            }
+            return currentTwoDMaxMarkersToTrack;
+        }
+
+        set
+        {
+            currentTwoDMaxMarkersToTrack = value;
+            if (_running)
+            {
+                pluginFunctions.arwSet2DMaxMarkersToTrack(currentTwoDMaxMarkersToTrack);
             }
         }
     }
