@@ -147,6 +147,10 @@ class ARToolKitPackager {
         }
 #endif // UNITY_ANDROID
 
-		AssetDatabase.ExportPackage(AssetDatabase.GetAllAssetPaths(), packageName, ExportPackageOptions.Recurse);
+        string[] assets = {
+            "Assets",
+        };
+
+		AssetDatabase.ExportPackage(assets, packageName, ExportPackageOptions.Recurse);
 	}
 }
