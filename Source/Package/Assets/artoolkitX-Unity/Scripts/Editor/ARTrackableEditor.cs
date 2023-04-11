@@ -48,10 +48,6 @@ public class ARTrackableEditor : Editor
 {
     public bool showFilterOptions = false;
 
-	private static TextAsset[] PatternAssets;
-	private static int PatternAssetCount;
-	private static string[] PatternFilenames;
-	
     private static Dictionary<ARController.ARToolKitMatrixCodeType, long> barcodeCounts = new Dictionary<ARController.ARToolKitMatrixCodeType, long>() {
 		{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3, 64},
     	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_PARITY65, 32},
@@ -65,25 +61,6 @@ public class ARTrackableEditor : Editor
     	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592}
 //    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 18446744073709551616}
 	};
-	
-	void OnDestroy()
-	{
-		// Classes inheriting from MonoBehavior need to set all static member variables to null on unload.
-		PatternAssets = null;
-		PatternAssetCount = 0;
-		PatternFilenames = null;
-	}
-	
-	private static void RefreshPatternFilenames() 
-	{
-		PatternAssets = Resources.LoadAll("ardata/markers", typeof(TextAsset)).Cast<TextAsset>().ToArray();
-		PatternAssetCount = PatternAssets.Length;
-		
-		PatternFilenames = new string[PatternAssetCount];
-		for (int i = 0; i < PatternAssetCount; i++) {					
-			PatternFilenames[i] = PatternAssets[i].name;				
-		}
-	}
 	
     public override void OnInspectorGUI()
     {
@@ -106,109 +83,107 @@ public class ARTrackableEditor : Editor
 		
 		// Trackable type		
         ARTrackable.TrackableType t = (ARTrackable.TrackableType)EditorGUILayout.EnumPopup("Type", m.Type);
-        if (m.Type != t) { // Reload on change.
-			m.Unload();
-			m.Type = t;
-			m.Load();
-		}
 		
 		// Description of the type of marker
         EditorGUILayout.LabelField("Description", ARTrackable.TrackableTypeNames[m.Type]);
-		
-        switch (m.Type) {
-			
-            case ARTrackable.TrackableType.Square:	
-            case ARTrackable.TrackableType.SquareBarcode:
-			
-                if (m.Type == ARTrackable.TrackableType.Square) {
-				
+
+		switch (t) {
+
+			case ARTrackable.TrackableType.Square:
+                {
+
 					// For pattern markers, offer a popup with marker pattern file names.
-					RefreshPatternFilenames(); // Update the list of available markers from the resources dir
-					if (PatternFilenames.Length > 0) {
-						int patternFilenameIndex = EditorGUILayout.Popup("Pattern file", m.PatternFilenameIndex, PatternFilenames);
-						string patternFilename = PatternAssets[patternFilenameIndex].name;
-						if (patternFilename != m.PatternFilename) {
-							m.Unload();
-							m.PatternFilenameIndex = patternFilenameIndex;
-							m.PatternFilename = patternFilename;
-							m.PatternContents = PatternAssets[m.PatternFilenameIndex].text;
-							m.Load();
+					string chosenPatternFile = "";
+					List<string> PatternFilenames = Directory.GetFiles(Path.Join(Application.dataPath, "Patterns")).Where(s => !s.EndsWith(".meta")).ToList();
+					if (PatternFilenames.Count > 0)
+					{
+						List<string> popup = new List<string>(PatternFilenames.Select(p => Path.GetFileName(p)));
+						popup.Insert(0, "Choose pattern file");
+						int patternFilenameIndex = EditorGUILayout.Popup("Choose pattern file", 0, popup.ToArray());
+						if (patternFilenameIndex != 0)
+						{
+							chosenPatternFile = PatternFilenames[patternFilenameIndex - 1];
 						}
-					} else {
-						m.PatternFilenameIndex = 0;
-						EditorGUILayout.LabelField("Pattern file", "No patterns available");
-						m.PatternFilename = "";
-						m.PatternContents = "";
 					}
-				
-				} else {
-				
+					else
+					{
+						EditorGUILayout.LabelField("Choose pattern file", "No patterns available");
+					}
+					EditorGUILayout.LabelField("Pattern file", string.IsNullOrEmpty(chosenPatternFile) ? m.PatternFileName : chosenPatternFile);
+					float patternWidth = EditorGUILayout.FloatField("Width", m.PatternWidth);
+					m.UseContPoseEstimation = EditorGUILayout.Toggle("Cont. pose estimation", m.UseContPoseEstimation);
+
+					if (m.Type != t || !string.IsNullOrEmpty(chosenPatternFile) || patternWidth != m.PatternWidth)
+					{
+						m.ConfigureAsSquarePattern(chosenPatternFile, patternWidth);
+						EditorUtility.SetDirty(target);
+					}
+				}
+				break;
+
+			case ARTrackable.TrackableType.SquareBarcode:
+                {
 					// For barcode markers, allow the user to specify the barcode ID.
-                    long BarcodeID = EditorGUILayout.LongField("Barcode ID", m.BarcodeID);
-                    if (BarcodeID < 0) BarcodeID = 0;
-                    ARController arcontroller = Component.FindObjectOfType(typeof(ARController)) as ARController;
-                    if (arcontroller != null) {
-                        long maxBarcodeID = barcodeCounts[arcontroller.MatrixCodeType] - 1;
-                        if (BarcodeID > maxBarcodeID) BarcodeID = maxBarcodeID;
-                        EditorGUILayout.LabelField("(in range 0 to " + (barcodeCounts[arcontroller.MatrixCodeType] - 1) + ")");
-                    }
-	 				if (BarcodeID != m.BarcodeID) {
-						m.Unload();
-						m.BarcodeID = BarcodeID;
-						m.Load();
+					long barcodeID = EditorGUILayout.LongField("Barcode ID", m.BarcodeID);
+					if (barcodeID < 0) barcodeID = 0;
+					if (ARController.Instance)
+					{
+						long maxBarcodeID = barcodeCounts[ARController.Instance.MatrixCodeType] - 1;
+						if (barcodeID > maxBarcodeID) barcodeID = maxBarcodeID;
+						EditorGUILayout.LabelField("(in range 0 to " + maxBarcodeID + ")");
 					}
-				
+
+					float patternWidth = EditorGUILayout.FloatField("Width", m.PatternWidth);
+					m.UseContPoseEstimation = EditorGUILayout.Toggle("Cont. pose estimation", m.UseContPoseEstimation);
+
+					if (m.Type != t || barcodeID != m.BarcodeID || patternWidth != m.PatternWidth)
+					{
+						m.ConfigureAsSquareBarcode(barcodeID, patternWidth);
+						EditorUtility.SetDirty(target);
+					}
 				}
-			
-				float patternWidthPrev = m.PatternWidth;
-				m.PatternWidth = EditorGUILayout.FloatField("Width", m.PatternWidth);
-				if (patternWidthPrev != m.PatternWidth) {
-					m.Unload();
-					m.Load();
-				}
-				m.UseContPoseEstimation = EditorGUILayout.Toggle("Cont. pose estimation", m.UseContPoseEstimation);
-			
 				break;
 			
             case ARTrackable.TrackableType.Multimarker:
-				string MultiConfigFile = EditorGUILayout.TextField("Multimarker config.", m.MultiConfigFile);
-        	    if (MultiConfigFile != m.MultiConfigFile) {
-					m.Unload();
-					m.MultiConfigFile = MultiConfigFile;
-					m.Load();
+                {
+					string multiConfigFile = EditorGUILayout.TextField("Multimarker config.", m.MultiConfigFile);
+					if (m.Type != t || multiConfigFile != m.MultiConfigFile)
+					{
+						m.ConfigureAsMultiSquare(multiConfigFile);
+						EditorUtility.SetDirty(target);
+					}
 				}
-        	    break;
+				break;
 
             case ARTrackable.TrackableType.NFT:
-                string NFTDataSetName = EditorGUILayout.TextField("NFT dataset name", m.NFTDataName);
-				if (NFTDataSetName != m.NFTDataName) {
-					m.Unload();
-					m.NFTDataName = NFTDataSetName;
-					m.Load();
-				}
+                {
+					string nftDataSetName = EditorGUILayout.TextField("NFT dataset name", m.NFTDataName);
+					if (m.Type != t || nftDataSetName != m.NFTDataName)
+					{
+						m.ConfigureAsNFT(nftDataSetName);
+						EditorUtility.SetDirty(target);
+					}
 
-				float nftScalePrev = m.NFTScale;
-				m.NFTScale = EditorGUILayout.FloatField("NFT marker scalefactor", m.NFTScale);
-				if (nftScalePrev != m.NFTScale) {
-					EditorUtility.SetDirty(m);
+					float nftScale = EditorGUILayout.FloatField("NFT marker scalefactor", m.NFTScale);
+					if (nftScale != m.NFTScale)
+					{
+						m.NFTScale = nftScale;
+						EditorUtility.SetDirty(target);
+					}
 				}
 				break;
 
             case ARTrackable.TrackableType.TwoD:
-                string TwoDImageFile = EditorGUILayout.TextField("Image file", m.TwoDImageFile);
-                if (TwoDImageFile != m.TwoDImageFile) {
-                    m.Unload();
-                    m.TwoDImageFile = TwoDImageFile;
-                    m.Load();
-                }
-
-                float twoDImageWidthPrev = m.TwoDImageWidth;
-                m.TwoDImageWidth = EditorGUILayout.FloatField("Image width", m.TwoDImageWidth);
-                if (twoDImageWidthPrev != m.TwoDImageWidth) {
-                    m.Unload();
-                    m.Load();
-                }
-                break;
+                {
+					string twoDImageFile = EditorGUILayout.TextField("Image file", m.TwoDImageFile);
+					float twoDImageWidth = EditorGUILayout.FloatField("Image width", m.TwoDImageWidth);
+					if (m.Type != t || twoDImageFile != m.TwoDImageFile || twoDImageWidth != m.TwoDImageWidth)
+					{
+						m.ConfigureAsTwoD(twoDImageFile, twoDImageWidth);
+						EditorUtility.SetDirty(target);
+					}
+				}
+				break;
         }
 		
         EditorGUILayout.Separator();

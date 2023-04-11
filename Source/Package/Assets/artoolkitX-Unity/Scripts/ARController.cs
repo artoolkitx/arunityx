@@ -82,6 +82,12 @@ public class ARController : MonoBehaviour
     private const int MaximumLogMessages = 1000;
     private const string LogTag = "ARController: ";
 
+    [HideInInspector]
+    public static ARController Instance { get; private set; }
+
+    // Main reference to the plugin functions. Created in OnEnable, destroyed in OnDisable().
+    public IPluginFunctions PluginFunctions { get; private set; }
+
     // Application preferences.
     public bool UseNativeGLTexturingIfAvailable = true;
     public bool AllowNonRGBVideo = false;
@@ -376,10 +382,8 @@ public class ARController : MonoBehaviour
     [SerializeField]
     private AR_LOG_LEVEL currentLogLevel = AR_LOG_LEVEL.AR_LOG_LEVEL_INFO;
 
-    // Main reference to the plugin functions. Created in OnEnable, destroyed in OnDisable().
-    private IPluginFunctions pluginFunctions = null;
-
     private ARVideoConfig arvideoconfig = null;
+
 
     //
     // MonoBehavior methods.
@@ -387,11 +391,12 @@ public class ARController : MonoBehaviour
     void Awake()
     {
         Log(LogTag + "ARController.Awake())");
+        Instance = this;
     }
 
     void OnEnable()
     {
-        pluginFunctions = new PluginFunctionsARX();
+        PluginFunctions = new PluginFunctionsARX();
         arvideoconfig = gameObject.GetComponent<ARVideoConfig>();
 #if !UNITY_EDITOR
 #  if UNITY_IOS
@@ -415,7 +420,7 @@ public class ARController : MonoBehaviour
             case RuntimePlatform.WSAPlayerX86:                     // Unity Player on Windows Store X86.
             case RuntimePlatform.WSAPlayerX64:                     // Unity Player on Windows Store X64.
             case RuntimePlatform.WSAPlayerARM:                     // Unity Player on Windows Store ARM.
-                pluginFunctions.arwRegisterLogCallback(Log);
+                PluginFunctions.arwRegisterLogCallback(Log);
                 break;
             case RuntimePlatform.Android:                          // Unity Player on Android.
             case RuntimePlatform.IPhonePlayer:                     // Unity Player on iOS.
@@ -425,7 +430,7 @@ public class ARController : MonoBehaviour
         }
 
         // ARController is up, so init.
-        if (!pluginFunctions.IsInited())
+        if (!PluginFunctions.IsInited())
         {
             InitializeAR();
         }
@@ -434,57 +439,43 @@ public class ARController : MonoBehaviour
     public List<ARVideoSourceInfoT> GetVideoSourceInfoList(string config)
     {
         List<ARVideoSourceInfoT> l = new List<ARVideoSourceInfoT>();
-        if (pluginFunctions == null)
+        if (PluginFunctions == null)
         {
             return l;
         }
 
-        int count = pluginFunctions.arwCreateVideoSourceInfoList(config);
+        int count = PluginFunctions.arwCreateVideoSourceInfoList(config);
         if (count > 0)
         {
             for (int i = 0; i < count; i++)
             {
                 ARVideoSourceInfoT si = new ARVideoSourceInfoT();
                 int flags;
-                bool ok = pluginFunctions.arwGetVideoSourceInfoListEntry(i, out si.name, out si.model, out si.UID, out flags, out si.open_token);
+                bool ok = PluginFunctions.arwGetVideoSourceInfoListEntry(i, out si.name, out si.model, out si.UID, out flags, out si.open_token);
                 if (ok)
                 {
                     si.flags = (AR_VIDEO_SOURCE_INFO)flags; // Coerce type.
                     l.Add(si);
                 }
             }
-            pluginFunctions.arwDeleteVideoSourceInfoList();
+            PluginFunctions.arwDeleteVideoSourceInfoList();
         }
         return l;
     }
 
     private void InitializeAR()
     {
-        if (!pluginFunctions.IsInited())
+        if (!PluginFunctions.IsInited())
         {
-            if (pluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax))
+            if (PluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax))
             {
                 // artoolkitX version number
-                _version = pluginFunctions.arwGetARToolKitVersion();
+                _version = PluginFunctions.arwGetARToolKitVersion();
                 Log(LogTag + "artoolkitX version " + _version + " initialised.");
             }
             else
             {
                 Log(LogTag + "Error initialising artoolkitX");
-            }
-        }
-
-        // ARTrackables may be loaded once the plugin is initialised. The ARController
-        // is now responsible for letting the ARTrackable know that this is ready by
-        // passing a reference to the plugin.
-        // This code has a matching block in FinalizeAR which undoes the reference.
-        if (pluginFunctions.IsInited())
-        {
-            // Ensure ARTrackable objects that were instantiated/deserialized before the native interface came up are all loaded.
-            ARTrackable[] trackables = FindObjectsOfType<ARTrackable>();
-            foreach (ARTrackable t in trackables)
-            {
-                t.PluginFunctions = pluginFunctions;
             }
         }
     }
@@ -551,7 +542,7 @@ public class ARController : MonoBehaviour
     {
         Log(LogTag + "ARController.OnDisable()");
 
-        if (pluginFunctions.IsInited())
+        if (PluginFunctions.IsInited())
         {
             FinalizeAR();
         }
@@ -567,7 +558,7 @@ public class ARController : MonoBehaviour
             case RuntimePlatform.WindowsPlayer:
             //case RuntimePlatform.LinuxEditor:
             case RuntimePlatform.LinuxPlayer:
-                pluginFunctions.arwRegisterLogCallback(null);
+                PluginFunctions.arwRegisterLogCallback(null);
                 break;
             case RuntimePlatform.Android:
                 break;
@@ -576,12 +567,12 @@ public class ARController : MonoBehaviour
             case RuntimePlatform.WSAPlayerX86:
             case RuntimePlatform.WSAPlayerX64:
             case RuntimePlatform.WSAPlayerARM:
-                pluginFunctions.arwRegisterLogCallback(null);
+                PluginFunctions.arwRegisterLogCallback(null);
                 break;
             default:
                 break;
         }
-        pluginFunctions = null;
+        PluginFunctions = null;
 
     }
 
@@ -592,17 +583,10 @@ public class ARController : MonoBehaviour
             StopAR();
         }
 
-        if (pluginFunctions.IsInited()) {
-            // Ensure ARTrackable objects are all unloaded.
-            ARTrackable[] trackables = FindObjectsOfType<ARTrackable>();
-            foreach (ARTrackable t in trackables)
-            {
-                t.PluginFunctions = null;
-            }
-
+        if (PluginFunctions.IsInited()) {
             Log(LogTag + "Shutting down artoolkitX");
             // arwShutdownAR() causes everything artoolkitX holds to be unloaded.
-            if (!pluginFunctions.arwShutdownAR())
+            if (!PluginFunctions.arwShutdownAR())
             {
                 Log(LogTag + "Error shutting down artoolkitX.");
             }
@@ -635,11 +619,11 @@ public class ARController : MonoBehaviour
         }
 
         // For late startup after configuration, StartAR needs to ensure InitialiseAR has been called.
-        if (!pluginFunctions.IsInited())
+        if (!PluginFunctions.IsInited())
         {
             InitializeAR();
         }
-        if (pluginFunctions.IsInited())
+        if (PluginFunctions.IsInited())
         {
             Log(LogTag + "Starting AR.");
 
@@ -737,12 +721,12 @@ public class ARController : MonoBehaviour
             if (!VideoIsStereo)
             {
                 Log(LogTag + "Starting artoolkitX video with vconf '" + videoConfiguration0 + "'.");
-                _running = pluginFunctions.arwStartRunningB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0));
+                _running = PluginFunctions.arwStartRunningB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0));
             }
             else
             {
                 Log(LogTag + "Starting artoolkitX video with vconfL '" + videoConfiguration0 + "', vconfR '" + videoConfiguration1 + "'.");
-                _running = pluginFunctions.arwStartRunningStereoB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0), videoConfiguration1, cparam1, (cparam1 != null ? cparam1.Length : 0), transL2R, (transL2R != null ? transL2R.Length : 0));
+                _running = PluginFunctions.arwStartRunningStereoB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0), videoConfiguration1, cparam1, (cparam1 != null ? cparam1.Length : 0), transL2R, (transL2R != null ? transL2R.Length : 0));
 
             }
 
@@ -750,7 +734,7 @@ public class ARController : MonoBehaviour
             {
 
                 Log(LogTag + "Error starting running");
-                ARW_ERROR error = (ARW_ERROR)pluginFunctions.arwGetError();
+                ARW_ERROR error = (ARW_ERROR)PluginFunctions.arwGetError();
                 if (error == ARW_ERROR.ARW_ERROR_DEVICE_UNAVAILABLE)
                 {
                     showGUIErrorDialogContent = "Unable to start AR tracking. The camera may be in use by another application.";
@@ -784,10 +768,10 @@ public class ARController : MonoBehaviour
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
         private ScreenOrientation screenOrientation = ScreenOrientation.Unknown;
-#  if UNITY_ANDROID
+#if UNITY_ANDROID
         private int screenWidth = 0;
         private int screenHeight = 0;
-#  endif
+#endif
 #endif
 
 
@@ -814,7 +798,7 @@ public class ARController : MonoBehaviour
 #endif
 
             // Wait for the wrapper to confirm video frames have arrived before configuring our video-dependent stuff.
-            if (!pluginFunctions.arwIsRunning())
+            if (!PluginFunctions.arwIsRunning())
             {
                 if (!_sceneConfiguredForVideoWaitingMessageLogged)
                 {
@@ -834,13 +818,13 @@ public class ARController : MonoBehaviour
 
                     // artoolkitX video size and format.
 
-                    bool ok1 = pluginFunctions.arwGetVideoParams(out _videoWidth0, out _videoHeight0, out _videoPixelSize0, out _videoPixelFormatString0);
+                    bool ok1 = PluginFunctions.arwGetVideoParams(out _videoWidth0, out _videoHeight0, out _videoPixelSize0, out _videoPixelFormatString0);
                     if (!ok1) return false;
                     Log(LogTag + "Video " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + ")");
 
                     // artoolkitX projection matrix adjusted for Unity
                     float[] projRaw = new float[16];
-                    pluginFunctions.arwGetProjectionMatrix(NearPlane, FarPlane, projRaw);
+                    PluginFunctions.arwGetProjectionMatrix(NearPlane, FarPlane, projRaw);
                     _videoProjectionMatrix0 = ARUtilityFunctions.MatrixFromFloatArray(projRaw);
                     Log(LogTag + "Projection matrix: [" + Environment.NewLine + _videoProjectionMatrix0.ToString().Trim() + "]");
                     if (ContentRotate90) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * _videoProjectionMatrix0;
@@ -858,14 +842,14 @@ public class ARController : MonoBehaviour
                 {
 
                     // artoolkitX stereo video size and format.
-                    bool ok1 = pluginFunctions.arwGetVideoParamsStereo(out _videoWidth0, out _videoHeight0, out _videoPixelSize0, out _videoPixelFormatString0, out _videoWidth1, out _videoHeight1, out _videoPixelSize1, out _videoPixelFormatString1);
+                    bool ok1 = PluginFunctions.arwGetVideoParamsStereo(out _videoWidth0, out _videoHeight0, out _videoPixelSize0, out _videoPixelFormatString0, out _videoWidth1, out _videoHeight1, out _videoPixelSize1, out _videoPixelFormatString1);
                     if (!ok1) return false;
                     Log(LogTag + "Video left " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + "), right " + _videoWidth1 + "x" + _videoHeight1 + "@" + _videoPixelSize1 + "Bpp (" + _videoPixelFormatString1 + ")");
 
                     // artoolkitX projection matrices, adjusted for Unity
                     float[] projRaw0 = new float[16];
                     float[] projRaw1 = new float[16];
-                    pluginFunctions.arwGetProjectionMatrixStereo(NearPlane, FarPlane, projRaw0, projRaw1);
+                    PluginFunctions.arwGetProjectionMatrixStereo(NearPlane, FarPlane, projRaw0, projRaw1);
                     _videoProjectionMatrix0 = ARUtilityFunctions.MatrixFromFloatArray(projRaw0);
                     _videoProjectionMatrix1 = ARUtilityFunctions.MatrixFromFloatArray(projRaw1);
                     Log(LogTag + "Projection matrix left: [" + Environment.NewLine + _videoProjectionMatrix0.ToString().Trim() + "], right: [" + Environment.NewLine + _videoProjectionMatrix1.ToString().Trim() + "]");
@@ -930,22 +914,22 @@ public class ARController : MonoBehaviour
         } // !sceneConfiguredForVideo
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-#  if UNITY_IOS
+#if UNITY_IOS
         if (Screen.orientation != screenOrientation) {
             UpdateVideoTexture();
         }
-#  elif UNITY_ANDROID
+#elif UNITY_ANDROID
         if ((Screen.width != screenWidth) || (Screen.height != screenHeight)) {
             UpdateVideoTexture();
         } else if (Screen.orientation != screenOrientation) {
             screenWidth = screenHeight = 0;  // Force video texture update on next pass.
         }
-#  endif
 #endif
-        bool gotFrame = pluginFunctions.arwCapture();
+#endif
+        bool gotFrame = PluginFunctions.arwCapture();
         if (gotFrame)
         {
-            if (!pluginFunctions.arwUpdateAR()) return false;
+            if (!PluginFunctions.arwUpdateAR()) return false;
             if (_sceneConfiguredForVideo && UseVideoBackground)
             {
                 UpdateTexture();
@@ -965,7 +949,7 @@ public class ARController : MonoBehaviour
         Log(LogTag + "Stopping AR.");
 
         // Stop video capture and marker detection.
-        if (!pluginFunctions.arwStopRunning())
+        if (!PluginFunctions.arwStopRunning())
         {
             Log(LogTag + "Error stopping AR.");
         }
@@ -990,10 +974,10 @@ public class ARController : MonoBehaviour
     {
         ScreenOrientation screenOrientation = Screen.orientation;
 
-#  if UNITY_ANDROID
+#if UNITY_ANDROID
         screenWidth = Screen.width;
         screenHeight = Screen.height;
-#  endif
+#endif
         Matrix4x4 deviceRotation;
         int height = _videoHeight0;
         int width = _videoWidth0;
@@ -1040,7 +1024,7 @@ public class ARController : MonoBehaviour
         bool optical;
         ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
         foreach (ARCamera arCamera in arCameras) {
-            bool success = arCamera.SetupCamera(pluginFunctions, NearPlane, FarPlane, deviceRotation * _videoProjectionMatrix0, out optical);
+            bool success = arCamera.SetupCamera(PluginFunctions, NearPlane, FarPlane, deviceRotation * _videoProjectionMatrix0, out optical);
             if(!success){
                 Log(LogTag + "Error setting up ARCamera.");
             }
@@ -1070,12 +1054,12 @@ public class ARController : MonoBehaviour
     {
         get
         {
-            return (pluginFunctions.arwGetVideoDebugMode());
+            return (PluginFunctions.arwGetVideoDebugMode());
         }
 
         set
         {
-            pluginFunctions.arwSetVideoDebugMode(value);
+            PluginFunctions.arwSetVideoDebugMode(value);
         }
     }
 
@@ -1094,7 +1078,7 @@ public class ARController : MonoBehaviour
             int ret;
             if (_running)
             {
-                ret = pluginFunctions.arwGetVideoThresholdMode();
+                ret = PluginFunctions.arwGetVideoThresholdMode();
                 if (ret >= 0) currentThresholdMode = (ARController.ARToolKitThresholdMode)ret;
                 else currentThresholdMode = ARController.ARToolKitThresholdMode.Manual;
             }
@@ -1106,7 +1090,7 @@ public class ARController : MonoBehaviour
             currentThresholdMode = value;
             if (_running)
             {
-                pluginFunctions.arwSetVideoThresholdMode((int)currentThresholdMode);
+                PluginFunctions.arwSetVideoThresholdMode((int)currentThresholdMode);
             }
         }
     }
@@ -1117,7 +1101,7 @@ public class ARController : MonoBehaviour
         {
             if (_running)
             {
-                currentThreshold = pluginFunctions.arwGetVideoThreshold();
+                currentThreshold = PluginFunctions.arwGetVideoThreshold();
                 if (currentThreshold < 0 || currentThreshold > 255) currentThreshold = 100;
             }
             return currentThreshold;
@@ -1128,7 +1112,7 @@ public class ARController : MonoBehaviour
             currentThreshold = value;
             if (_running)
             {
-                pluginFunctions.arwSetVideoThreshold(value);
+                PluginFunctions.arwSetVideoThreshold(value);
             }
         }
     }
@@ -1140,7 +1124,7 @@ public class ARController : MonoBehaviour
             int ret;
             if (_running)
             {
-                ret = pluginFunctions.arwGetLabelingMode();
+                ret = PluginFunctions.arwGetLabelingMode();
                 if (ret >= 0) currentLabelingMode = (ARController.ARToolKitLabelingMode)ret;
                 else currentLabelingMode = ARController.ARToolKitLabelingMode.BlackRegion;
             }
@@ -1152,7 +1136,7 @@ public class ARController : MonoBehaviour
             currentLabelingMode = value;
             if (_running)
             {
-                pluginFunctions.arwSetLabelingMode((int)currentLabelingMode);
+                PluginFunctions.arwSetLabelingMode((int)currentLabelingMode);
             }
         }
     }
@@ -1164,7 +1148,7 @@ public class ARController : MonoBehaviour
             float ret;
             if (_running)
             {
-                ret = pluginFunctions.arwGetBorderSize();
+                ret = PluginFunctions.arwGetBorderSize();
                 if (ret > 0.0f && ret < 0.5f) currentBorderSize = ret;
                 else currentBorderSize = 0.25f;
             }
@@ -1176,7 +1160,7 @@ public class ARController : MonoBehaviour
             currentBorderSize = value;
             if (_running)
             {
-                pluginFunctions.arwSetBorderSize(currentBorderSize);
+                PluginFunctions.arwSetBorderSize(currentBorderSize);
             }
         }
     }
@@ -1216,7 +1200,7 @@ public class ARController : MonoBehaviour
             int ret;
             if (_running)
             {
-                ret = pluginFunctions.arwGetPatternDetectionMode();
+                ret = PluginFunctions.arwGetPatternDetectionMode();
                 if (ret >= 0) currentPatternDetectionMode = (ARController.ARToolKitPatternDetectionMode)ret;
                 else currentPatternDetectionMode = ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR;
             }
@@ -1228,7 +1212,7 @@ public class ARController : MonoBehaviour
             currentPatternDetectionMode = value;
             if (_running)
             {
-                pluginFunctions.arwSetPatternDetectionMode((int)currentPatternDetectionMode);
+                PluginFunctions.arwSetPatternDetectionMode((int)currentPatternDetectionMode);
             }
         }
     }
@@ -1240,7 +1224,7 @@ public class ARController : MonoBehaviour
             int ret;
             if (_running)
             {
-                ret = pluginFunctions.arwGetMatrixCodeType();
+                ret = PluginFunctions.arwGetMatrixCodeType();
                 if (ret >= 0) currentMatrixCodeType = (ARController.ARToolKitMatrixCodeType)ret;
                 else currentMatrixCodeType = ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3;
             }
@@ -1252,7 +1236,7 @@ public class ARController : MonoBehaviour
             currentMatrixCodeType = value;
             if (_running)
             {
-                pluginFunctions.arwSetMatrixCodeType((int)currentMatrixCodeType);
+                PluginFunctions.arwSetMatrixCodeType((int)currentMatrixCodeType);
             }
         }
     }
@@ -1264,7 +1248,7 @@ public class ARController : MonoBehaviour
             int ret;
             if (_running)
             {
-                ret = pluginFunctions.arwGetImageProcMode();
+                ret = PluginFunctions.arwGetImageProcMode();
                 if (ret >= 0) currentImageProcMode = (ARController.ARToolKitImageProcMode)ret;
                 else currentImageProcMode = ARController.ARToolKitImageProcMode.AR_IMAGE_PROC_FRAME_IMAGE;
             }
@@ -1276,7 +1260,7 @@ public class ARController : MonoBehaviour
             currentImageProcMode = value;
             if (_running)
             {
-                pluginFunctions.arwSetImageProcMode((int)currentImageProcMode);
+                PluginFunctions.arwSetImageProcMode((int)currentImageProcMode);
             }
         }
     }
@@ -1287,7 +1271,7 @@ public class ARController : MonoBehaviour
         {
             if (_running)
             {
-                currentNFTMultiMode = pluginFunctions.arwGetNFTMultiMode();
+                currentNFTMultiMode = PluginFunctions.arwGetNFTMultiMode();
             }
             return currentNFTMultiMode;
         }
@@ -1297,7 +1281,7 @@ public class ARController : MonoBehaviour
             currentNFTMultiMode = value;
             if (_running)
             {
-                pluginFunctions.arwSetNFTMultiMode(currentNFTMultiMode);
+                PluginFunctions.arwSetNFTMultiMode(currentNFTMultiMode);
             }
         }
     }
@@ -1308,7 +1292,7 @@ public class ARController : MonoBehaviour
         {
             if (_running)
             {
-                currentTwoDMaxMarkersToTrack = pluginFunctions.arwGet2DMaxMarkersToTrack();
+                currentTwoDMaxMarkersToTrack = PluginFunctions.arwGet2DMaxMarkersToTrack();
             }
             return currentTwoDMaxMarkersToTrack;
         }
@@ -1318,7 +1302,7 @@ public class ARController : MonoBehaviour
             currentTwoDMaxMarkersToTrack = value;
             if (_running)
             {
-                pluginFunctions.arwSet2DMaxMarkersToTrack(currentTwoDMaxMarkersToTrack);
+                PluginFunctions.arwSet2DMaxMarkersToTrack(currentTwoDMaxMarkersToTrack);
             }
         }
     }
@@ -1333,7 +1317,7 @@ public class ARController : MonoBehaviour
         set
         {
             currentLogLevel = value;
-            pluginFunctions.arwSetLogLevel((int)currentLogLevel);
+            PluginFunctions.arwSetLogLevel((int)currentLogLevel);
         }
     }
 
@@ -1393,7 +1377,7 @@ public class ARController : MonoBehaviour
             {
                 if (_videoColor32Array0 != null)
                 {
-                    bool updatedTexture = pluginFunctions.arwUpdateTexture32(_videoColor32Array0);
+                    bool updatedTexture = PluginFunctions.arwUpdateTexture32(_videoColor32Array0);
                     if (updatedTexture)
                     {
                         _videoTexture0.SetPixels32(_videoColor32Array0);
@@ -1418,7 +1402,7 @@ public class ARController : MonoBehaviour
                 if (_videoColor32Array0 != null && _videoColor32Array1 != null)
                 {
 
-                    bool updatedTexture = pluginFunctions.arwUpdateTexture32Stereo(_videoColor32Array0, _videoColor32Array1);
+                    bool updatedTexture = PluginFunctions.arwUpdateTexture32Stereo(_videoColor32Array0, _videoColor32Array1);
                     if (updatedTexture)
                     {
                         _videoTexture0.SetPixels32(_videoColor32Array0);
@@ -1783,18 +1767,18 @@ public class ARController : MonoBehaviour
             if (!arc.Stereo)
             {
                 // A mono display.
-                ok = arc.SetupCamera(pluginFunctions, NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
+                ok = arc.SetupCamera(PluginFunctions, NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
             }
             else
             {
                 // One eye of a stereo display.
                 if (arc.StereoEye == ARCamera.ViewEye.Left)
                 {
-                    ok = arc.SetupCamera(pluginFunctions, NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
+                    ok = arc.SetupCamera(PluginFunctions, NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
                 }
                 else
                 {
-                    ok = arc.SetupCamera(pluginFunctions, NearPlane, FarPlane, (VideoIsStereo ? _videoProjectionMatrix1 : _videoProjectionMatrix0), out optical);
+                    ok = arc.SetupCamera(PluginFunctions, NearPlane, FarPlane, (VideoIsStereo ? _videoProjectionMatrix1 : _videoProjectionMatrix0), out optical);
                 }
             }
             if (!ok)

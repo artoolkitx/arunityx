@@ -50,11 +50,7 @@ class ARTrackedObjectGizmo
     private static Color MarkerEdgeUnselected = new Color(0.75f, 0.75f, 0.75f, 0.5f);
 
 
-#if UNITY_4_5 || UNITY_4_6
-    [DrawGizmo(GizmoType.NotSelected | GizmoType.Pickable)] // Draw the gizmo if it is not selected and also no parent/ancestor object is selected. The gizmo can be picked in the editor. First argument of method is the type for which the Gizmo will be drawn.
-#else
     [DrawGizmo(GizmoType.NotInSelectionHierarchy | GizmoType.Pickable)] // Draw the gizmo if it is not selected and also no parent/ancestor object is selected. The gizmo can be picked in the editor. First argument of method is the type for which the Gizmo will be drawn.
-#endif
     static void RenderARTrackedObjectGizmo(ARTrackedObject to, GizmoType gizmoType)
     {
         DrawMarker(to, (gizmoType & GizmoType.Active) != 0);

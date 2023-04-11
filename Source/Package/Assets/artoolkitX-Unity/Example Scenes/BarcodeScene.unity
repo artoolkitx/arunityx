@@ -214,6 +214,7 @@ MonoBehaviour:
   currentImageProcMode: 0
   currentUseVideoBackground: 1
   currentNFTMultiMode: 0
+  currentTwoDMaxMarkersToTrack: 1
   currentLogLevel: 1
   scrollPosition: {x: 0, y: 0}
 --- !u!4 &10
@@ -291,17 +292,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c16ddf38594f4ae78c7b37f56f16d57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 1
-  Tag: barcode1
-  PatternFilenameIndex: 0
-  PatternFilename: 
-  PatternContents: 
-  PatternWidth: 0.08
-  BarcodeID: 0
-  MultiConfigFile: 
-  NFTDataName: 
-  TwoDImageFile: 
-  TwoDImageWidth: 1
+  <Type>k__BackingField: 1
+  Tag: barcode0
+  <TwoDImageFile>k__BackingField: 
+  <TwoDImageWidth>k__BackingField: 1
+  <PatternFileName>k__BackingField: 
+  <PatternContents>k__BackingField: 
+  <BarcodeID>k__BackingField: 0
+  <PatternWidth>k__BackingField: 0.08
+  <MultiConfigFile>k__BackingField: 
+  <NFTDataName>k__BackingField: 
   currentUseContPoseEstimation: 0
   currentFiltered: 0
   currentFilterSampleRate: 30
@@ -419,7 +419,7 @@ MonoBehaviour:
     inputSelectionMethod: 4
     position: 8
     index: 0
-    VideoSourceInfoListOpenToken: -uid=obs-virtual-cam-device
+    VideoSourceInfoListOpenToken: -uid=0x8020000005ac8514
     width: 0
     height: 0
     AVFoundationPreset: 0
@@ -834,4 +834,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   secondsToRemainVisible: 0
   eventReceiver: {fileID: 0}
-  _trackableTag: barcode1
+  _trackableTag: barcode0
