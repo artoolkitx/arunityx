@@ -384,7 +384,7 @@ public class ARTrackable : MonoBehaviour
                 #endif
 
                 if (!string.IsNullOrEmpty(dir) && !string.IsNullOrEmpty(TwoDImageFile)) {
-                    cfg = "2d;" + System.IO.Path.Combine(dir, TwoDImageFile) + ";" + TwoDImageWidth;
+                    cfg = "2d;" + System.IO.Path.Combine(dir, TwoDImageFile) + ";" + TwoDImageWidth * 1000.0f;
                 }
                 break;
 
