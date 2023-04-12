@@ -1525,6 +1525,7 @@ MonoBehaviour:
   currentImageProcMode: 0
   currentUseVideoBackground: 1
   currentNFTMultiMode: 0
+  currentTwoDMaxMarkersToTrack: 1
   currentLogLevel: 1
   scrollPosition: {x: 0, y: 0}
 --- !u!114 &1965431133
@@ -1539,17 +1540,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c16ddf38594f4ae78c7b37f56f16d57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  type: 2
+  <Type>k__BackingField: 2
   Tag: trackable1
-  PatternFilenameIndex: 0
-  PatternFilename: 
-  PatternContents: 
-  PatternWidth: 0.08
-  BarcodeID: 0
-  MultiConfigFile: multi-barcode-4x3.dat
-  NFTDataName: 
-  TwoDImageFile: 
-  TwoDImageWidth: 1
+  <TwoDImageFile>k__BackingField: 
+  <TwoDImageWidth>k__BackingField: 1
+  <PatternFileName>k__BackingField: 
+  <PatternContents>k__BackingField: 
+  <BarcodeID>k__BackingField: 0
+  <PatternWidth>k__BackingField: 0.08
+  <MultiConfigFile>k__BackingField: multi-barcode-4x3.dat
+  <NFTDataName>k__BackingField: 
   currentUseContPoseEstimation: 0
   currentFiltered: 0
   currentFilterSampleRate: 30
