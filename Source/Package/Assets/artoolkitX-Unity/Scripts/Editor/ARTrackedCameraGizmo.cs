@@ -85,14 +85,17 @@ class ARTrackedCameraGizmo
             case ARTrackable.TrackableType.Multimarker:
 				DrawMultiMarker(m, pose, selected);
 			    break;
-			
-            case ARTrackable.TrackableType.NFT:
-            case ARTrackable.TrackableType.TwoD:
-				DrawNFTMarker(m, pose, selected);
-			    break;
 
-        }
-    }
+			case ARTrackable.TrackableType.NFT:
+				DrawNFTMarker(m, pose, selected, new Vector2(0.5f, 0.5f));
+				break;
+
+			case ARTrackable.TrackableType.TwoD:
+				DrawNFTMarker(m, pose, selected, new Vector2(0.5f, -0.5f));
+				break;
+
+		}
+	}
 
     private static void DrawSingleMarker(ARTrackable m, Matrix4x4 mat, bool selected) 
     {
@@ -138,31 +141,38 @@ class ARTrackedCameraGizmo
         //Gizmos.DrawGUITexture(new Rect(origin.x, origin.y, 20, 20), m.MarkerImage);
     }
 
-	private static void DrawNFTMarker(ARTrackable m, Matrix4x4 mat, bool selected) 
+	private static void DrawNFTMarker(ARTrackable m, Matrix4x4 mat, bool selected, Vector2 centreRelativeToOrigin) 
     {
-        float pattWidth = m.NFTWidth;
-		float pattHeight = m.NFTHeight;
-		//Debug.Log("DrawNFTMarker got pattWidth=" + pattWidth + ", pattHeight=" + pattHeight + ".");
-		if (pattWidth > 0.0f && pattHeight > 0.0f) {
+		if (m.Patterns == null || m.UID == ARTrackable.NO_ID)
+		{
+			return;
+		}
 
-			float biggestSide = Math.Max(pattWidth, pattHeight);
-			Vector3 origin = mat.GetColumn(3);
-			Vector3 right = mat.GetColumn(0);
-			Vector3 up = mat.GetColumn(1);
-			Vector3 centre = origin + right*0.5f*pattWidth + up*0.5f*pattHeight;
+		for (int i = 0; i < m.Patterns.Length; i++)
+		{
+			Matrix4x4 mat1 = mat * m.Patterns[i].matrix;
+			float pattWidth = m.Patterns[i].width;
+			float pattHeight = m.Patterns[i].height;
+			//Debug.Log("DrawNFTMarker got pattWidth=" + pattWidth + ", pattHeight=" + pattHeight + ".");
+			if (pattWidth > 0.0f && pattHeight > 0.0f)
+			{
+				float biggestSide = Math.Max(pattWidth, pattHeight);
+				Vector3 origin = mat1.GetColumn(3);
+				Vector3 right = mat1.GetColumn(0);
+				Vector3 up = mat1.GetColumn(1);
+				Vector3 centre = origin + right * centreRelativeToOrigin.x * pattWidth + up * centreRelativeToOrigin.y * pattHeight;
 
-        	//float d = selected ? 1.0f : 0.0f;
-     
-			DrawRectangle(centre, up, right, pattWidth, pattHeight, selected ? MarkerBorderSelected : MarkerBorderUnselected);
-			DrawRectangle(centre, up, right, pattWidth + biggestSide*0.05f, pattHeight + biggestSide*0.05f, selected ? MarkerEdgeSelected : MarkerEdgeUnselected);
+				//float d = selected ? 1.0f : 0.0f;
 
-        	//Gizmos.DrawGUITexture(new Rect(centre.x, centre.y, 20, 20), m.MarkerImage);
-		
-			float wordUnitSize = pattHeight * 0.02f;
-			DrawWord(m.Tag, wordUnitSize, centre - up*(pattHeight*0.6f + (wordUnitSize*4)) - right*pattWidth*0.525f, up, right*0.5f);
+				DrawRectangle(centre, up, right, pattWidth, pattHeight, selected ? MarkerBorderSelected : MarkerBorderUnselected);
+				DrawRectangle(centre, up, right, pattWidth + biggestSide * 0.05f, pattHeight + biggestSide * 0.05f, selected ? MarkerEdgeSelected : MarkerEdgeUnselected);
+
+				float wordUnitSize = pattHeight * 0.02f;
+				DrawWord(m.Tag + (m.Patterns.Length > 1 ? "(" + i + ")" : ""), wordUnitSize, centre - up * (pattHeight * 0.6f + (wordUnitSize * 4)) - right * pattWidth * 0.525f, up, right * 0.5f);
+			}
 		}
 	}
-	
+
 	private static void DrawRectangle(Vector3 centre, Vector3 up, Vector3 right, float width, float height, Color color) 
 	{
 

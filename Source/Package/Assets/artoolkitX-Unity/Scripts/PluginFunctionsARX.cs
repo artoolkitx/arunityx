@@ -239,9 +239,9 @@ public class PluginFunctionsARX : IPluginFunctions
         return ARX_pinvoke.arwGetTrackablePatternConfig(markerID, patternID, matrix, out width, out height, out imageSizeX, out imageSizeY);
     }
 
-    override public bool arwGetTrackablePatternImage(int markerID, int patternID, [In, Out]Color[] colors)
+    override public bool arwGetTrackablePatternImage(int markerID, int patternID, [In, Out]Color32[] colors32)
     {
-        return ARX_pinvoke.arwGetTrackablePatternImage(markerID, patternID, colors);
+        return ARX_pinvoke.arwGetTrackablePatternImage(markerID, patternID, colors32);
     }
 
     override public bool arwGetTrackableOptionBool(int markerID, int option)
