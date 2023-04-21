@@ -63,7 +63,7 @@ public abstract class IPluginFunctions
     abstract public int arwGetTrackableOptionInt(int markerID, int option);
     abstract public bool arwGetTrackablePatternConfig(int markerID, int patternID, float[] matrix, out float width, out float height, out int imageSizeX, out int imageSizeY);
     abstract public int arwGetTrackablePatternCount(int markerID);
-    abstract public bool arwGetTrackablePatternImage(int markerID, int patternID, [In, Out] Color[] colors);
+    abstract public bool arwGetTrackablePatternImage(int markerID, int patternID, [In, Out] Color32[] colors32);
     abstract public int arwGetMatrixCodeType();
     abstract public bool arwGetNFTMultiMode();
     abstract public void arwSet2DMaxMarkersToTrack(int maxMarkersToTrack);

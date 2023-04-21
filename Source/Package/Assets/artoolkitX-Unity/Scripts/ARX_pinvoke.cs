@@ -215,7 +215,7 @@ public static class ARX_pinvoke
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 #endif
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
-	public static extern bool arwGetTrackablePatternImage(int trackableId, int patternID, [In, Out]Color[] colors);
+	public static extern bool arwGetTrackablePatternImage(int trackableId, int patternID, [In, Out]Color32[] colors32);
 
 
 	

@@ -195,16 +195,22 @@ public class ARTrackableEditor : Editor
 			m.FilterCutoffFreq = EditorGUILayout.Slider("Cutoff freq.:", m.FilterCutoffFreq, 1.0f, 30.0f);
 		}
 
-        EditorGUILayout.BeginHorizontal();
+        //EditorGUILayout.BeginHorizontal();
 
         // Draw all the marker images
         if (m.Patterns != null) {
             for (int i = 0; i < m.Patterns.Length; i++) {
-                GUILayout.Label(new GUIContent("Pattern " + i + ", " + m.Patterns[i].width.ToString("n3") + " m", m.Patterns[i].texture), GUILayout.ExpandWidth(false)); // n3 -> 3 decimal places.
+				float imageMinWidth = Math.Max(m.Patterns[i].imageSizeX, 32);
+				float imageMinHeight = Math.Max(m.Patterns[i].imageSizeY, 32);
+				GUILayout.Label(new GUIContent("Pattern " + i + ", " + m.Patterns[i].width.ToString("n3") + " m")); // n3 -> 3 decimal places.
+				Rect r = EditorGUILayout.GetControlRect(false, imageMinHeight + 4.0f, GUILayout.MinWidth(4.0f + imageMinWidth));
+				Rect r0 = new Rect(r.x + 2.0f, r.y + 2.0f, imageMinWidth, imageMinHeight);
+				GUI.DrawTexture(r, m.Patterns[i].getTexture(), ScaleMode.ScaleToFit, false);
+                //GUILayout.Label(new GUIContent("Pattern " + i + ", " + m.Patterns[i].width.ToString("n3") + " m", m.Patterns[i].getTexture()), GUILayout.ExpandWidth(false)); // n3 -> 3 decimal places.
             }
         }
 		
-        EditorGUILayout.EndHorizontal();
+        //EditorGUILayout.EndHorizontal();
 		EditorGUILayout.EndVertical();
 
     }

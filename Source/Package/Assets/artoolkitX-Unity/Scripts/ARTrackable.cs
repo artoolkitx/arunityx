@@ -117,6 +117,7 @@ public class ARTrackable : MonoBehaviour
     public float TwoDImageWidth { get; private set; } = 1.0f;
     public void ConfigureAsTwoD(string imageFilePath, float imageWidth)
     {
+        Unload();
         Type = TrackableType.TwoD;
         if (!string.IsNullOrEmpty(imageFilePath)) TwoDImageFile = imageFilePath;
         if (imageWidth > 0.0f) TwoDImageWidth = imageWidth;
@@ -138,6 +139,7 @@ public class ARTrackable : MonoBehaviour
     public float PatternWidth { get; private set; } = 0.08f;
     public void ConfigureAsSquarePattern(string patternFilePath, float width)
     {
+        Unload();
         Type = TrackableType.Square;
         if (!string.IsNullOrEmpty(patternFilePath))
         {
@@ -150,6 +152,7 @@ public class ARTrackable : MonoBehaviour
     }
     public void ConfigureAsSquareBarcode(long barcodeID, float width)
     {
+        Unload();
         Type = TrackableType.SquareBarcode;
         if (barcodeID >= 0) BarcodeID = barcodeID;
         if (width > 0.0f) PatternWidth = width;
@@ -162,6 +165,7 @@ public class ARTrackable : MonoBehaviour
     public string MultiConfigFile { get; private set; } = "";
     public void ConfigureAsMultiSquare(string multiConfigFilePath)
     {
+        Unload();
         Type = TrackableType.Multimarker;
         if (!string.IsNullOrEmpty(multiConfigFilePath)) MultiConfigFile = multiConfigFilePath;
         loadError = false;
@@ -177,6 +181,7 @@ public class ARTrackable : MonoBehaviour
 #endif
     public void ConfigureAsNFT(string nftDataName)
     {
+        Unload();
         Type = TrackableType.NFT;
         if (!string.IsNullOrEmpty(nftDataName)) NFTDataName = nftDataName;
         loadError = false;
@@ -198,11 +203,6 @@ public class ARTrackable : MonoBehaviour
     private float currentFilterCutoffFreq = 15.0f;
     [SerializeField]
     private float currentNFTScale = 1.0f;                                    // NFT marker only; scale factor applied to marker size.
-
-    [NonSerialized]
-    public float NFTWidth; //> Once marker is loaded, this holds the width of the marker in Unity units.
-    [NonSerialized]
-    public float NFTHeight; //> Once marker is loaded, this holds the height of the marker in Unity units.
 
     // Realtime tracking information
     private bool visible = false;                                           // Trackable is visible or not
@@ -405,34 +405,25 @@ public class ARTrackable : MonoBehaviour
                     // Trackable loaded. Do any additional configuration.
                     //ARController.Log("Added marker with cfg='" + cfg + "'");
 
+                    // Any additional trackable-type-specific config not included in the trackable config string used at load time.
                     if (Type == TrackableType.Square || Type == TrackableType.SquareBarcode) UseContPoseEstimation = currentUseContPoseEstimation;
+                    if (Type == TrackableType.NFT) NFTScale = currentNFTScale;
+
+                    // Any additional config.
                     Filtered = currentFiltered;
                     FilterSampleRate = currentFilterSampleRate;
                     FilterCutoffFreq = currentFilterCutoffFreq;
 
-                    // Retrieve any required information from the configured native ARTrackable.
-                    if (Type == TrackableType.NFT || Type == TrackableType.TwoD) {
-                        if (Type == TrackableType.NFT) NFTScale = currentNFTScale;
-
-                        int imageSizeX, imageSizeY;
-                        ARController.Instance.PluginFunctions.arwGetTrackablePatternConfig(UID, 0, null, out NFTWidth, out NFTHeight, out imageSizeX, out imageSizeY);
-                        NFTWidth *= 0.001f;
-                        NFTHeight *= 0.001f;
-                        //ARController.Log("Got NFTWidth=" + NFTWidth + ", NFTHeight=" + NFTHeight + ".");
-                    
-                    } else {
-
-                        // Create array of patterns. A single marker will have array length 1.
-                        int numPatterns = ARController.Instance.PluginFunctions.arwGetTrackablePatternCount(UID);
-                        //ARController.Log("Trackable with UID=" + UID + " has " + numPatterns + " patterns.");
-                        if (numPatterns > 0) {
-                            patterns = new ARPattern[numPatterns];
-                            for (int i = 0; i < numPatterns; i++) {
-                                patterns[i] = new ARPattern(UID, i);
-                            }
+                    // Create array of patterns. A single marker will have array length 1.
+                    int numPatterns = ARController.Instance.PluginFunctions.arwGetTrackablePatternCount(UID);
+                    //ARController.Log("Trackable with UID=" + UID + " has " + numPatterns + " patterns.");
+                    if (numPatterns > 0) {
+                        patterns = new ARPattern[numPatterns];
+                        for (int i = 0; i < numPatterns; i++) {
+                            patterns[i] = new ARPattern(UID, i);
                         }
-
                     }
+
                 }
             }
         }
