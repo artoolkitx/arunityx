@@ -90,7 +90,7 @@ public class ARController : MonoBehaviour
 
     // Application preferences.
     public bool UseNativeGLTexturingIfAvailable = true;
-    public bool AllowNonRGBVideo = false;
+    public bool AllowNonRGBVideo = true;
     public bool QuitOnEscOrBack = true;
     public bool AutoStartAR = true;
 
@@ -109,7 +109,6 @@ public class ARController : MonoBehaviour
     private bool _sceneConfiguredForVideo = false;
     private bool _sceneConfiguredForVideoWaitingMessageLogged = false;
     private bool _useNativeGLTexturing = false;
-    private bool _useColor32 = true;
 
     //
     // Video source 0.
@@ -632,14 +631,7 @@ public class ARController : MonoBehaviour
             // Check rendering device.
             string renderDevice = SystemInfo.graphicsDeviceVersion;
             _useNativeGLTexturing = !renderDevice.StartsWith("Direct") && UseNativeGLTexturingIfAvailable;
-            if (_useNativeGLTexturing)
-            {
-                Log(LogTag + "Render device: " + renderDevice + ", using native GL texturing.");
-            }
-            else
-            {
-                Log(LogTag + "Render device: " + renderDevice + ", using Unity texturing.");
-            }
+            Log(LogTag + "Render device: " + renderDevice + (_useNativeGLTexturing ? ", using native GL texturing." : ", using Unity texturing."));
 
             CreateClearCamera();
 
@@ -651,10 +643,11 @@ public class ARController : MonoBehaviour
             {
                 case RuntimePlatform.OSXEditor:
                 case RuntimePlatform.OSXPlayer:
+                case RuntimePlatform.IPhonePlayer:
                     if (_useNativeGLTexturing || !AllowNonRGBVideo)
                     {
-                        if (videoConfiguration0.IndexOf("-device=QuickTime7") != -1 || videoConfiguration0.IndexOf("-device=QUICKTIME") != -1) videoConfiguration0 += " -pixelformat=BGRA";
-                        if (videoConfiguration1.IndexOf("-device=QuickTime7") != -1 || videoConfiguration1.IndexOf("-device=QUICKTIME") != -1) videoConfiguration1 += " -pixelformat=BGRA";
+                        if (videoConfiguration0.IndexOf("-device=AVFoundation") != -1) videoConfiguration0 += " -format=BGRA";
+                        if (videoConfiguration1.IndexOf("-device=AVFoundation") != -1) videoConfiguration1 += " -format=BGRA";
                     }
                     break;
                 case RuntimePlatform.WindowsEditor:
@@ -666,12 +659,13 @@ public class ARController : MonoBehaviour
                     }
                     break;
                 case RuntimePlatform.Android:
-                    videoConfiguration0 += " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
-                    videoConfiguration1 += " -cachedir=\"" + Application.temporaryCachePath + "\"" + (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=RGBA" : "");
-                    break;
-                case RuntimePlatform.IPhonePlayer:
-                    videoConfiguration0 += (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
-                    videoConfiguration1 += (_useNativeGLTexturing || !AllowNonRGBVideo ? " -format=BGRA" : "");
+                    videoConfiguration0 += " -cachedir=\"" + Application.temporaryCachePath + "\"";
+                    videoConfiguration1 += " -cachedir=\"" + Application.temporaryCachePath + "\"";
+                    if (_useNativeGLTexturing || !AllowNonRGBVideo)
+                    {
+                        videoConfiguration0 += " -format=RGBA";
+                        videoConfiguration1 += " -format=RGBA";
+                    }
                     break;
                 //case RuntimePlatform.LinuxEditor:
                 case RuntimePlatform.LinuxPlayer:
@@ -1463,17 +1457,9 @@ public class ARController : MonoBehaviour
         vbmgo.layer = layer; // Belongs in the background layer.
 
         // Work out size of required texture.
-        int textureWidth;
-        int textureHeight;
-        /*if ((!_useNativeGLTexturing && _useColor32) || Application.platform == RuntimePlatform.IPhonePlayer) {*/
-        textureWidth = w;
-        textureHeight = h;
-        /*} else {
-            textureWidth = Mathf.ClosestPowerOfTwo(w);
-            if (textureWidth < w) textureWidth *= 2;
-            textureHeight = Mathf.ClosestPowerOfTwo(h);
-            if (textureHeight < h) textureHeight *= 2;
-        }*/
+        // OK to use NPOT textures everywhere now.
+        int textureWidth = w;
+        int textureHeight = h;
         Log(LogTag + "Video size " + w + "x" + h + " will use texture size " + textureWidth + "x" + textureHeight + ".");
 
         float textureScaleU = (float)w / (float)textureWidth;
@@ -1483,25 +1469,16 @@ public class ARController : MonoBehaviour
         // Create stuff for video texture.
         if (!_useNativeGLTexturing)
         {
-            if (_useColor32)
-            {
-                vbca = null;
-                vbc32a = new Color32[w * h];
-            }
-            else
-            {
-                vbca = new Color[w * h];
-                vbc32a = null;
-            }
+             vbca = null;
+             vbc32a = new Color32[w * h];
         }
         else
         {
             vbca = null;
             vbc32a = null;
         }
-        if (!_useNativeGLTexturing && _useColor32) vbt = new Texture2D(textureWidth, textureHeight, TextureFormat.ARGB32, false);
-        //else vbt = new Texture2D(textureWidth, textureHeight, TextureFormat.RGBA32, false);
-        else vbt = new Texture2D(textureWidth, textureHeight, TextureFormat.ARGB32, false);
+        vbt = new Texture2D(textureWidth, textureHeight, TextureFormat.ARGB32, false);
+        //vbt = new Texture2D(textureWidth, textureHeight, TextureFormat.RGBA32, false);
         vbt.hideFlags = HideFlags.HideAndDontSave;
         vbt.filterMode = FilterMode.Bilinear;
         vbt.wrapMode = TextureWrapMode.Clamp;
@@ -1739,15 +1716,15 @@ public class ARController : MonoBehaviour
         switch (ContentMode)
         {
             case ContentMode.Fit:
-                ContentMode = ContentMode.Stretch;
-                //ContentMode = ContentMode.Fill; // Fill and OneToOne mode can potentially result in negative values for viewport x and y. Unity can't handle that.
+                ContentMode = ContentMode.Fill; // Fill and OneToOne mode can potentially result in negative values for viewport x and y. Unity can't handle that.
                 break;
-            //case ContentMode.Fill:
-            //    ContentMode = ContentMode.Stretch;
-            //    break;
-            //case ContentMode.Stretch:
-            //    ContentMode = ContentMode.OneToOne;
-            //    break;
+            case ContentMode.Fill:
+                ContentMode = ContentMode.Stretch;
+                break;
+            case ContentMode.Stretch:
+                ContentMode = ContentMode.OneToOne;
+                break;
+            case ContentMode.OneToOne:
             default:
                 ContentMode = ContentMode.Fit;
                 break;

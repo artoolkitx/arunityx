@@ -54,6 +54,20 @@ public class ARControllerEditor : Editor
 	public bool showNFTTrackingOptions = false;
 	public bool showApplicationOptions = false;
 
+    protected SerializedProperty videoCParamName0;
+    protected SerializedProperty BackgroundLayer0;
+    protected SerializedProperty VideoIsStereo;
+    protected SerializedProperty videoCParamName1;
+    protected SerializedProperty BackgroundLayer1;
+    protected SerializedProperty transL2RName;
+    protected SerializedProperty UseNativeGLTexturingIfAvailable;
+    protected SerializedProperty AllowNonRGBVideo;
+    protected SerializedProperty ContentRotate90;
+    protected SerializedProperty ContentFlipV;
+    protected SerializedProperty ContentFlipH;
+    protected SerializedProperty NearPlane;
+    protected SerializedProperty FarPlane;
+
     private readonly static Dictionary<ARController.ARToolKitThresholdMode, string> thresholdModeDescriptions = new Dictionary<ARController.ARToolKitThresholdMode, string>
     {
         {ARController.ARToolKitThresholdMode.Manual, "Uses a fixed threshold value"},
@@ -63,8 +77,27 @@ public class ARControllerEditor : Editor
         {ARController.ARToolKitThresholdMode.Bracketing, "Automatically adjusts threshold using bracketed threshold values"}
     };
 
+    protected virtual void OnEnable()
+    {
+        videoCParamName0 = serializedObject.FindProperty("videoCParamName0");
+        BackgroundLayer0 = serializedObject.FindProperty("BackgroundLayer0");
+        VideoIsStereo = serializedObject.FindProperty("VideoIsStereo");
+        videoCParamName1 = serializedObject.FindProperty("videoCParamName1");
+        BackgroundLayer1 = serializedObject.FindProperty("BackgroundLayer1");
+        transL2RName = serializedObject.FindProperty("transL2RName");
+        UseNativeGLTexturingIfAvailable = serializedObject.FindProperty("UseNativeGLTexturingIfAvailable");
+        AllowNonRGBVideo = serializedObject.FindProperty("AllowNonRGBVideo");
+        ContentRotate90 = serializedObject.FindProperty("ContentRotate90");
+        ContentFlipV = serializedObject.FindProperty("ContentFlipV");
+        ContentFlipH = serializedObject.FindProperty("ContentFlipH");
+        NearPlane = serializedObject.FindProperty("NearPlane");
+        FarPlane = serializedObject.FindProperty("FarPlane");
+    }
+
     public override void OnInspectorGUI()
     {
+        serializedObject.Update();
+
         ARController arcontroller = (ARController)target;
         if (arcontroller == null) return;
 
@@ -75,53 +108,58 @@ public class ARControllerEditor : Editor
         showVideoOptions = EditorGUILayout.Foldout(showVideoOptions, "Video Options");
         if (showVideoOptions)
         {
-            arcontroller.videoCParamName0 = EditorGUILayout.TextField("Camera parameters", arcontroller.videoCParamName0);
-            if (!string.IsNullOrEmpty(arcontroller.videoCParamName0))
+            EditorGUILayout.PropertyField(videoCParamName0, new GUIContent("Camera parameters" + (VideoIsStereo.boolValue ? " (L)" : "")));
+            if (!string.IsNullOrEmpty(videoCParamName0.stringValue))
             {
                 EditorGUILayout.HelpBox("Automatic camera parameters (if available) will be overridden.", MessageType.Info);
             }
-            arcontroller.BackgroundLayer0 = EditorGUILayout.LayerField("Layer", arcontroller.BackgroundLayer0);
+            BackgroundLayer0.intValue = EditorGUILayout.LayerField("Layer" + (VideoIsStereo.boolValue ? " (L)" : ""), BackgroundLayer0.intValue);
 
-            arcontroller.VideoIsStereo = EditorGUILayout.Toggle("Video source is stereo", arcontroller.VideoIsStereo);
-            if (arcontroller.VideoIsStereo)
+            EditorGUILayout.PropertyField(VideoIsStereo, new GUIContent("Video source is stereo"));
+            if (VideoIsStereo.boolValue)
             {
-                arcontroller.videoCParamName1 = EditorGUILayout.TextField("Camera parameters (R)", arcontroller.videoCParamName1);
-                if (!string.IsNullOrEmpty(arcontroller.videoCParamName1))
+                EditorGUILayout.PropertyField(videoCParamName1, new GUIContent("Camera parameters (R)"));
+                if (!string.IsNullOrEmpty(videoCParamName1.stringValue))
                 {
                     EditorGUILayout.HelpBox("Automatic camera parameters (if available) will be overridden.", MessageType.Info);
                 }
-                arcontroller.BackgroundLayer1 = EditorGUILayout.LayerField("Layer (R)", arcontroller.BackgroundLayer1);
-                arcontroller.transL2RName = EditorGUILayout.TextField("Stereo parameters", arcontroller.transL2RName);
+                BackgroundLayer1.intValue = EditorGUILayout.LayerField("Layer (R)", BackgroundLayer1.intValue);
+                EditorGUILayout.PropertyField(transL2RName, new GUIContent("Stereo parameters"));
             }
 
-            arcontroller.UseNativeGLTexturingIfAvailable = EditorGUILayout.Toggle("Use native GL texturing (if available)", arcontroller.UseNativeGLTexturingIfAvailable);
-            if (arcontroller.UseNativeGLTexturingIfAvailable)
-            {
-                EditorGUI.BeginDisabledGroup(true);
-                EditorGUILayout.Toggle("Allow non-RGB video internally.", false);
-                EditorGUI.EndDisabledGroup();
-            }
-            else
-            {
-                arcontroller.AllowNonRGBVideo = EditorGUILayout.Toggle("Allow non-RGB video internally.", arcontroller.AllowNonRGBVideo);
-            }
+            // Commented-out, as native GL texturing is currently unsupported.
+            //EditorGUILayout.PropertyField(UseNativeGLTexturingIfAvailable, new GUIContent("Use native GL texturing (if available)"));
+            //if (UseNativeGLTexturingIfAvailable.boolValue)
+            //{
+            //    EditorGUI.BeginDisabledGroup(true);
+            //    EditorGUILayout.Toggle("Allow non-RGB video internally.", false);
+            //    EditorGUI.EndDisabledGroup();
+            //}
+            //else
+            //{
+                EditorGUILayout.PropertyField(AllowNonRGBVideo, new GUIContent("Allow non-RGB video internally.",
+                    "If enabled, ARToolKit may use an optimised video format for video stream image acquisition and tracking. If disabled, video stream acquisition and tracking will be forced to an RGB format."));
+            //}
 
 
             ContentMode currentContentMode = arcontroller.ContentMode;
             ContentMode newContentMode = (ContentMode)EditorGUILayout.EnumPopup("Content mode", currentContentMode);
             if (newContentMode != currentContentMode)
             {
+                Undo.RecordObject(arcontroller, "Set content mode");
                 arcontroller.ContentMode = newContentMode;
             }
-            arcontroller.ContentRotate90 = EditorGUILayout.Toggle("Rotate 90 deg.", arcontroller.ContentRotate90);
-            arcontroller.ContentFlipV = EditorGUILayout.Toggle("Flip vertically", arcontroller.ContentFlipV);
-            arcontroller.ContentFlipH = EditorGUILayout.Toggle("Flip horizontally.", arcontroller.ContentFlipH);
+            EditorGUILayout.PropertyField(ContentRotate90, new GUIContent("Rotate 90 deg."));
+            EditorGUILayout.PropertyField(ContentFlipV, new GUIContent("Flip vertically"));
+            EditorGUILayout.PropertyField(ContentFlipH, new GUIContent("Flip horizontally."));
         } // showVideoOptions
 
         EditorGUILayout.Separator();
 
-        arcontroller.NearPlane = EditorGUILayout.FloatField("Near plane", arcontroller.NearPlane);
-        arcontroller.FarPlane = EditorGUILayout.FloatField("Far plane", arcontroller.FarPlane);
+        EditorGUILayout.PropertyField(NearPlane, new GUIContent("Near plane",
+            "For maximum depth-buffer precision, set this to the largest acceptable value that is less than \"Far plane\", while taking into account that content closer than this to the camera will not be rendered."));
+        EditorGUILayout.PropertyField(FarPlane, new GUIContent("Far plane",
+            "For maximum depth-buffer precision, set this to the smallest acceptable value that is greater than \"Near plane\", while taking into account that content farther than this from the camera will not be rendered."));
 
         EditorGUILayout.Separator();
 
@@ -238,7 +276,6 @@ public class ARControllerEditor : Editor
             {
                 Undo.RecordObject(arcontroller, "Set max. number of markers to track");
                 arcontroller.TwoDMaxMarkersToTrack = n;
-
             }
         }
 
@@ -266,5 +303,7 @@ public class ARControllerEditor : Editor
 			else EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will be ignored.", MessageType.Info);
 			arcontroller.LogLevel = (ARController.AR_LOG_LEVEL)EditorGUILayout.EnumPopup("Log level:", arcontroller.LogLevel);
 		}
+
+        serializedObject.ApplyModifiedProperties();
     }
 }
