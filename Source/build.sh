@@ -24,7 +24,8 @@
 
 # Get our location.
 OURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ARUNITYX_HOME=$OURDIR/..
+ARUNITYX_HOME="$OURDIR/.."
+PLUGINS_BASE="${ARUNITYX_HOME}/Source/Package/Assets/artoolkitX-Unity/Plugins"
 
 function usage {
     echo "Usage: $(basename $0) [--debug] (macos | windows | ios | linux | android) [--dev]"
@@ -130,31 +131,21 @@ refresh_plugin_for_platform_from_source() {
     PLATFORM=$1
     SOURCE="$2"
     if [ "$PLATFORM" = "Android" ] ; then
-        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libc++_shared.so"
-        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libARX.so"
-        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libc++_shared.so"
-        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libARX.so"
-        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86/libc++_shared.so"
-        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86/libARX.so"
-        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86_64/libc++_shared.so"
-        rm -f "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86_64/libARX.so"
-        cp "${SOURCE}/SDK/lib/armeabi-v7a/libc++_shared.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/"
-        cp "${SOURCE}/SDK/lib/armeabi-v7a/libARX.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/"
-        cp "${SOURCE}/SDK/lib/arm64-v8a/libc++_shared.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/"
-        cp "${SOURCE}/SDK/lib/arm64-v8a/libARX.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/"
-        cp "${SOURCE}/SDK/lib/x86/libc++_shared.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86/"
-        cp "${SOURCE}/SDK/lib/x86/libARX.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86/"
-        cp "${SOURCE}/SDK/lib/x86_64/libc++_shared.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86_64/"
-        cp "${SOURCE}/SDK/lib/x86_64/libARX.so" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/Android/libs/x86_64/"
+        for ABI in armeabi-v7a arm64-v8a x86 x86_64; do
+            for LIB in libc++_shared.so libARX.so; do
+                rm -f "${PLUGINS_BASE}/Android/libs/${ABI}/${LIB}"
+                cp "${SOURCE}/SDK/lib/${ABI}/${LIB}" "${PLUGINS_BASE}/Android/libs/${ABI}"
+            done
+        done
     elif [ "$PLATFORM" = "iOS" ] ; then
-        rm -rf "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/iOS/libARX.a"
-        cp -rf "${SOURCE}/SDK/lib/libARX.a" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/iOS/"
+        rm -f "${PLUGINS_BASE}/iOS/libARX.a"
+        cp "${SOURCE}/SDK/lib/libARX.a" "${PLUGINS_BASE}/iOS/"
     elif [ "$PLATFORM" = "macOS" ] ; then
-        rm -rf "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/ARX.bundle"
-        cp -rf "${SOURCE}/SDK/Plugins/ARX.bundle" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/"
+        rm -rf "${PLUGINS_BASE}/ARX.bundle"
+        cp -r "${SOURCE}/SDK/Plugins/ARX.bundle" "${PLUGINS_BASE}/"
     elif [ "$PLATFORM" = "Windows" ] ; then
-        rm -rf "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/x86_64/ARX.dll"
-        cp -rf "${SOURCE}/SDK/bin/ARX.dll" "${ARUNITYX_HOME}/Source/Package/Assets/Plugins/x86_64/"
+        rm -f "${PLUGINS_BASE}/x86_64/ARX.dll"
+        cp "${SOURCE}/SDK/bin/ARX.dll" "${PLUGINS_BASE}/x86_64/"
     fi
 }
 
