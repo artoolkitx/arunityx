@@ -9,17 +9,25 @@ As a quick start with Unity and artoolkitX you can use one of the example scenes
 
 - [Unity](https://store.unity.com/) - the free, Personal Edition, is sufficient for a start. Version 2021.3 was used at the time of this writing. The Unity Editor is supported on the desktop platforms of macOS and Windows.
 
-### Build arunityX
-You need to run the build script before you can use this repository. The reason for this is, that arunityX does not ship with the artoolkitX libraries, but it downloads them when you run the build script. It is designed this way to assure arunityX always uses a stable and up to date release of artoolkitX libraries. The version in question is noted in the artoolkitx-version.txt in the root of this repository.
+### Build or fetch artoolkitX libraries
+
+If using the artoolkitX for Unity package from source, please note that the source repository does not include the compiled artoolkitX native plugins, so it is necessary to fetch the artoolkitX libraries, or alternately build artoolkitX from source. The `build.sh` script controls this. Normally it downloads the version of artoolkitX as listed in the artoolkitx-version.txt in the root of this repository:
 
 1. Open Terminal on macOS or Git Bash on Windows
-2. ```cd Source```
-3. Run ```./build.sh [Target platform]```. ```[Target platform]``` can be one or several of *macos, ios, android, windows*
+2. `cd Source`
+3. Run `./build.sh [Target platform(s)]`, where `[Target platform(s)]` is one or more of *macos, ios, android, windows*.
 
 This will fetch all the dependencies and place them inside the ```Plugins``` directory.
 
+Alernately, if you wish to build artoolkitX from source (e.g. if modifying the native plugin source, or doing native debugging), then you can get artoolkitX via the git submodule and build it as below:
+1. Open Terminal on macOS or Git Bash on Windows
+2. `cd Source`
+3. `git submodule init`
+4. `git submodule update`
+5. `./build.sh --dev [Target platform(s)]`, where `[Target platform(s)]` is one or more of *macos, ios, android, windows*. Note that you will only be able to build for mac OS or iOS on a mac OS host, for Windows on a Windows host, and Linux on a Linux host. Android can be built on any host platform. 
+
 ### Bundle the arunityX.unitpackage
-To create a arunityX.unitypackage, which can be imported into other Unity3D projects, one needs to run ```./package.sh``` located inside the ```packaging``` directory.
+To create a arunityX.unitypackage, which can be imported into other Unity3D projects, one needs to run `./package.sh` located inside the `packaging` directory.
 
 
 ### Import the arunityX.unitypackge Plugin
@@ -46,7 +54,3 @@ Navigate to:
 * Select the 'Play'-Button to run the scene inside the Unity3D Editor
 * Present on or multiple of the trackables to the camera. A cube should appear on the trackable.
 
-### Building for iOS with XCode
-
-You may get `Error: Undefined symbols for architecture arm64:   "_vImageRotate90_ARGB8888"` which means you need to add the Accelerate.framework to your build:
-In the project settings editor, select the "Build Phases" tab, and click the small triangle next to "Link Binary With Libraries" to view all of the frameworks in your application. Click the "+" below the list of frameworks and add the `Accelerate.framework`
