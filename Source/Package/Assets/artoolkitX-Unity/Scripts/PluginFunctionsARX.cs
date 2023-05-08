@@ -45,8 +45,8 @@ using UnityEngine;
 
 /// <summary>
 /// A concrete implentation of the IPluginFunctions interface that calls into a local
-/// instance of the ARX library via P/Invoke. This library performs the appropriate
-/// marshalling between managed and unmanaged code.
+/// instance of the ARX library via P/Invoke. This class performs any marshalling required
+/// between managed and unmanaged code.
 /// </summary>
 public class PluginFunctionsARX : IPluginFunctions
 {
@@ -56,6 +56,8 @@ public class PluginFunctionsARX : IPluginFunctions
     // Delegate instance.
     private PluginFunctionsLogCallback logCallback = null;
     private GCHandle logCallbackGCH;
+    private PluginFunctionsTrackableEventCallback trackableEventCallback = null;
+    private GCHandle trackableEventCallbackGCH;
 
     private readonly static int ARW_TRACKER_OPTION_NFT_MULTIMODE = 0,                 ///< bool.
                        ARW_TRACKER_OPTION_SQUARE_THRESHOLD = 1,                       ///< Threshold value used for image binarization. int in range [0-255].
@@ -69,7 +71,9 @@ public class PluginFunctionsARX : IPluginFunctions
                        ARW_TRACKER_OPTION_SQUARE_PATTERN_SIZE = 9,                    ///< Number of rows and columns in square template (pattern) markers. Defaults to AR_PATT_SIZE1, which is 16 in all versions of ARToolKit prior to 5.3. int.
                        ARW_TRACKER_OPTION_SQUARE_PATTERN_COUNT_MAX = 10,              ///< Maximum number of square template (pattern) markers that may be loaded at once. Defaults to AR_PATT_NUM_MAX, which is at least 25 in all versions of ARToolKit prior to 5.3. int.
                        /*ARW_TRACKER_OPTION_2D_TRACKER_FEATURE_TYPE = 11,*/           ///< Feature detector type used in the 2d Tracker - 0 AKAZE, 1 ORB, 2 BRISK, 3 KAZE
-                       ARW_TRACKER_OPTION_2D_MAXIMUM_MARKERS_TO_TRACK = 12;           ///< Maximum number of markers able to be tracked simultaneously. Defaults to 1. Should not be set higher than the number of 2D markers loaded.
+                       ARW_TRACKER_OPTION_2D_MAXIMUM_MARKERS_TO_TRACK = 12,           ///< Maximum number of markers able to be tracked simultaneously. Defaults to 1. Should not be set higher than the number of 2D markers loaded.
+                       ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES = 13, ///< If true, when the square tracker is detecting matrix (barcode) markers, new trackables will be created for unmatched markers. Defaults to false. bool.
+                       ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES_DEFAULT_WIDTH = 14; ///< If ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES is true, this value will be used for the initial width of new trackables for unmatched markers. Defaults to 80.0f. float.
 
     override public bool IsConfigured()
     {
@@ -438,5 +442,30 @@ public class PluginFunctionsARX : IPluginFunctions
     override public void arwDeleteVideoSourceInfoList()
     {
         ARX_pinvoke.arwDeleteVideoSourceInfoList();
+    }
+
+    override public void arwSetSquareMatrixModeAutocreateNewTrackables(bool on, float defaultWidth = 0.08f, PluginFunctionsTrackableEventCallback tecb = null)
+    {
+        if (!on) tecb = null;
+        trackableEventCallback = tecb; // Set or unset.
+        if (tecb != null)
+        { // If setting, create the callback stub prior to registering the callback on the native side.
+            trackableEventCallbackGCH = GCHandle.Alloc(trackableEventCallback); // Does not need to be pinned, see http://stackoverflow.com/a/19866119/316487 
+        }
+        ARX_pinvoke.arwRegisterTrackableEventCallback(trackableEventCallback);
+        if (tecb == null)
+        { // If unsetting, free the callback stub after deregistering the callback on the native side.
+            trackableEventCallbackGCH.Free();
+        }
+        ARX_pinvoke.arwSetTrackerOptionFloat(ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES_DEFAULT_WIDTH, defaultWidth * 1000.0f);
+        ARX_pinvoke.arwSetTrackerOptionBool(ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES, on);
+    }
+
+    override public bool arwGetSquareMatrixModeAutocreateNewTrackables(out bool on, out float defaultWidth, out PluginFunctionsTrackableEventCallback tecb)
+    {
+        on = ARX_pinvoke.arwGetTrackerOptionBool(ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES);
+        defaultWidth = ARX_pinvoke.arwGetTrackerOptionFloat(ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES_DEFAULT_WIDTH) * 0.001f;
+        tecb = trackableEventCallback;
+        return true;
     }
 }

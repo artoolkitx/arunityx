@@ -246,7 +246,7 @@ public class ARController : MonoBehaviour
         AR_MATRIX_CODE_5x5_BCH_22_12_5 = 0x05 | 0x400,
         AR_MATRIX_CODE_5x5_BCH_22_7_7 = 0x05 | 0x500,
         AR_MATRIX_CODE_6x6 = 0x06,
-        //        AR_MATRIX_CODE_GLOBAL_ID = 0x0e | 0xb00
+        AR_MATRIX_CODE_GLOBAL_ID = 0x0e | 0xb00
     };
 
     public enum ARToolKitImageProcMode
@@ -380,6 +380,10 @@ public class ARController : MonoBehaviour
     private int currentTwoDMaxMarkersToTrack = 1;
     [SerializeField]
     private AR_LOG_LEVEL currentLogLevel = AR_LOG_LEVEL.AR_LOG_LEVEL_INFO;
+    [SerializeField]
+    private bool currentSquareMatrixModeAutocreateNewTrackables = false;
+    [SerializeField]
+    private float currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth = 0.08f;
 
     private ARVideoConfig arvideoconfig = null;
 
@@ -752,6 +756,8 @@ public class ARController : MonoBehaviour
             ImageProcMode = currentImageProcMode;
             NFTMultiMode = currentNFTMultiMode;
             TwoDMaxMarkersToTrack = currentTwoDMaxMarkersToTrack;
+            SquareMatrixModeAutocreateNewTrackables = currentSquareMatrixModeAutocreateNewTrackables;
+            SquareMatrixModeAutocreateNewTrackablesDefaultWidth = currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth;
 
             // Prevent display sleep.
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
@@ -1348,6 +1354,32 @@ public class ARController : MonoBehaviour
             if (clearCamera != null) clearCamera.backgroundColor = new Color(0.0f, 0.0f, 0.0f, (currentUseVideoBackground ? 1.0f : 0.0f));
             if (_videoBackgroundCamera0 != null) _videoBackgroundCamera0.enabled = currentUseVideoBackground;
             if (_videoBackgroundCamera1 != null) _videoBackgroundCamera1.enabled = currentUseVideoBackground;
+        }
+    }
+
+    public bool SquareMatrixModeAutocreateNewTrackables
+    {
+        get => currentSquareMatrixModeAutocreateNewTrackables;
+        set
+        {
+            currentSquareMatrixModeAutocreateNewTrackables = value;
+            if (_running)
+            {
+                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(value, currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth, ARTrackable.OnTrackableEvent);
+            }
+        }
+    }
+
+    public float SquareMatrixModeAutocreateNewTrackablesDefaultWidth
+    {
+        get => currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth;
+        set
+        {
+            currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth = value;
+            if (_running)
+            {
+                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(currentSquareMatrixModeAutocreateNewTrackables, value, ARTrackable.OnTrackableEvent);
+            }
         }
     }
 

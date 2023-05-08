@@ -198,21 +198,6 @@ public class ARControllerEditor : Editor
 
             EditorGUILayout.Separator();
 
-            int currentTemplateSize = arcontroller.TemplateSize;
-            int newTemplateSize = EditorGUILayout.IntField("Template size: ", currentTemplateSize);
-            if (newTemplateSize != currentTemplateSize && newTemplateSize >= 16 && newTemplateSize <= 64)
-            {
-                Undo.RecordObject(arcontroller, "Set template size");
-                arcontroller.TemplateSize = newTemplateSize;
-            }
-            int currentTemplateCountMax = arcontroller.TemplateCountMax;
-            int newTemplateCountMax = EditorGUILayout.IntField("Template count max.: ", currentTemplateCountMax);
-            if (newTemplateCountMax != currentTemplateCountMax && newTemplateCountMax > 0)
-            {
-                Undo.RecordObject(arcontroller, "Set template count max.");
-                arcontroller.TemplateCountMax = newTemplateCountMax;
-            }
-
             // Labeling mode selection.
             ARController.ARToolKitLabelingMode currentLabelingMode = arcontroller.LabelingMode;
             ARController.ARToolKitLabelingMode newLabelingMode = (ARController.ARToolKitLabelingMode)EditorGUILayout.EnumPopup("Trackable borders:", currentLabelingMode);
@@ -220,15 +205,6 @@ public class ARControllerEditor : Editor
             {
                 Undo.RecordObject(arcontroller, "Set labeling mode");
                 arcontroller.LabelingMode = newLabelingMode;
-            }
-
-            // Border size selection.
-            float currentBorderSize = arcontroller.BorderSize;
-            float newBorderSize = UnityEngine.Mathf.Clamp(EditorGUILayout.FloatField("Border size:", currentBorderSize), 0.0f, 0.5f);
-            if (newBorderSize != currentBorderSize)
-            {
-                Undo.RecordObject(arcontroller, "Set border size");
-                arcontroller.BorderSize = newBorderSize;
             }
 
             // Pattern detection mode selection.
@@ -240,18 +216,67 @@ public class ARControllerEditor : Editor
                 arcontroller.PatternDetectionMode = newPatternDetectionMode;
             }
 
-            // Matrix code type selection (only when in one of the matrix modes).
-            if (newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_MATRIX_CODE_DETECTION
+            bool doTemplateMatching = newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR
+                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO;
+            bool doMatrixMatching = newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_MATRIX_CODE_DETECTION
                 || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX
-                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX)
-            {
+                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX;
 
+            if (doTemplateMatching)
+            {
+                int currentTemplateSize = arcontroller.TemplateSize;
+                int newTemplateSize = EditorGUILayout.IntField("Template size: ", currentTemplateSize);
+                if (newTemplateSize != currentTemplateSize && newTemplateSize >= 16 && newTemplateSize <= 64)
+                {
+                    Undo.RecordObject(arcontroller, "Set template size");
+                    arcontroller.TemplateSize = newTemplateSize;
+                }
+                int currentTemplateCountMax = arcontroller.TemplateCountMax;
+                int newTemplateCountMax = EditorGUILayout.IntField("Template count max.: ", currentTemplateCountMax);
+                if (newTemplateCountMax != currentTemplateCountMax && newTemplateCountMax > 0)
+                {
+                    Undo.RecordObject(arcontroller, "Set template count max.");
+                    arcontroller.TemplateCountMax = newTemplateCountMax;
+                }
+            }
+
+            // Matrix code type selection (only when in one of the matrix modes).
+            if (doMatrixMatching)
+            {
                 ARController.ARToolKitMatrixCodeType currentMatrixCodeType = arcontroller.MatrixCodeType;
                 ARController.ARToolKitMatrixCodeType newMatrixCodeType = (ARController.ARToolKitMatrixCodeType)EditorGUILayout.EnumPopup("Matrix code type:", currentMatrixCodeType);
                 if (newMatrixCodeType != currentMatrixCodeType)
                 {
                     Undo.RecordObject(arcontroller, "Set matrix code type");
                     arcontroller.MatrixCodeType = newMatrixCodeType;
+                }
+
+                bool m = EditorGUILayout.Toggle("Auto-create new trackables", arcontroller.SquareMatrixModeAutocreateNewTrackables);
+                if (m != arcontroller.SquareMatrixModeAutocreateNewTrackables)
+                {
+                    Undo.RecordObject(arcontroller, "Set auto-create new trackables");
+                    arcontroller.SquareMatrixModeAutocreateNewTrackables = m;
+                }
+                if (m)
+                {
+                    float w = EditorGUILayout.FloatField("Default size of auto-created trackables.", arcontroller.SquareMatrixModeAutocreateNewTrackablesDefaultWidth);
+                    if (w != arcontroller.SquareMatrixModeAutocreateNewTrackablesDefaultWidth)
+                    {
+                        Undo.RecordObject(arcontroller, "Set auto-create new trackables default width");
+                        arcontroller.SquareMatrixModeAutocreateNewTrackablesDefaultWidth = w;
+                    }
+                }
+            }
+
+            // Border size selection.
+            if (!doMatrixMatching || arcontroller.MatrixCodeType != ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID)
+            {
+                float currentBorderSize = arcontroller.BorderSize;
+                float newBorderSize = UnityEngine.Mathf.Clamp(EditorGUILayout.FloatField("Border size:", currentBorderSize), 0.0f, 0.5f);
+                if (newBorderSize != currentBorderSize)
+                {
+                    Undo.RecordObject(arcontroller, "Set border size");
+                    arcontroller.BorderSize = newBorderSize;
                 }
             }
 

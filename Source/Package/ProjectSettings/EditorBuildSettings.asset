@@ -8,6 +8,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/artoolkitX-Unity/Example Scenes/TwoMarkerScene.unity
     guid: 2de9db8029065464ab5202cac04a1878
-  - enabled: 1
+  - enabled: 0
     path: Assets/artoolkitX-Unity/Example Scenes/SimpleScene.unity
     guid: 156500a6c4c2c4808a2583d8b15d923f
+  - enabled: 1
+    path: Assets/artoolkitX-Unity/Example Scenes/2DScene.unity
+    guid: 6d39e3ec99d754e5d813bf88f69c6e9e
+  m_configObjects: {}

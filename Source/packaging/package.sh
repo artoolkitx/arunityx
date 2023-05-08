@@ -35,7 +35,9 @@ UNITY_VERSION=$1
 
 # Get our location.
 OURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ARUNITYX_HOME=$OURDIR/../.. 
+ARUNITYX_HOME="$OURDIR/../.."
+PROJECT_PATH="${ARUNITYX_HOME}/Source/Package"
+PLUGINS_BASE="${PROJECT_PATH}/Assets/artoolkitX-Unity/Plugins"
 
 OS=$(uname -s)
 WINPATH=cygpath
@@ -61,8 +63,6 @@ then
     # git-bash on Windows
     OS='Windows'
 fi
-
-PROJECT_PATH="${ARUNITYX_HOME}/Source/Package"
 
 # Host-platform dependent options.
 if [ "$OS" = "Windows" ]
@@ -90,13 +90,13 @@ VERSION_TINY=${VERSION_TINY:-0}
 VERSION_BUILD=${VERSION_BUILD:-0}
 
 # Check if the plugins are available
-if [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/arm64-v8a/libARX.so ] && \
-   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/libARX.so ] && \
-   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86/libARX.so ] && \
-   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/Android/libs/x86_64/libARX.so ] && \
-   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/iOS/libARX.a ] && \
-   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/x86_64/ARX.dll ] && \
-   [ ! -f $ARUNITYX_HOME/Source/Package/Assets/Plugins/ARX.bundle ] ; then
+if [ ! -f "${PLUGINS_BASE}/Android/libs/arm64-v8a/libARX.so" ] && \
+   [ ! -f "${PLUGINS_BASE}/Android/libs/armeabi-v7a/libARX.so" ] && \
+   [ ! -f "${PLUGINS_BASE}/Android/libs/x86/libARX.so" ] && \
+   [ ! -f "${PLUGINS_BASE}/Android/libs/x86_64/libARX.so" ] && \
+   [ ! -f "${PLUGINS_BASE}/iOS/libARX.a" ] && \
+   [ ! -f "${PLUGINS_BASE}/x86_64/ARX.dll" ] && \
+   [ ! -f "${PLUGINS_BASE}/ARX.bundle" ] ; then
     echo "You need to run ./build.sh <platform> before packaging."
     exit 1
 fi

@@ -55,15 +55,15 @@ Source/Package/UserSettings
 
 #### Plugin source packages and binaries
 Source/artoolkit[xX]-*.zip
-Source/artoolKitX.*.dmg
-Source/Package/Assets/Plugins/ARX.bundle
-Source/Package/Assets/Plugins/ARX.bundle.meta
-Source/Package/Assets/Plugins/Android/libs/arm64-v8a/*.so
-Source/Package/Assets/Plugins/Android/libs/armeabi-v7a/*.so
-Source/Package/Assets/Plugins/Android/libs/x86/*.so
-Source/Package/Assets/Plugins/Android/libs/x86_64/*.so
-Source/Package/Assets/Plugins/iOS/*.a
-Source/Package/Assets/Plugins/x86/*.dll
-Source/Package/Assets/Plugins/x86_64/*.dll
+Source/artoolkit[xX]*.dmg
+Source/Package/Assets/artoolkitX-Unity/Plugins/ARX.bundle
+Source/Package/Assets/artoolkitX-Unity/Plugins/ARX.bundle.meta
+Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/arm64-v8a/*.so
+Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/armeabi-v7a/*.so
+Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/x86/*.so
+Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/x86_64/*.so
+Source/Package/Assets/artoolkitX-Unity/Plugins/iOS/*.a
+Source/Package/Assets/artoolkitX-Unity/Plugins/x86/*.dll
+Source/Package/Assets/artoolkitX-Unity/Plugins/x86_64/*.dll
 
 #### Other

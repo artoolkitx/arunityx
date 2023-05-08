@@ -55,22 +55,30 @@ public class ARTrackable : MonoBehaviour
 {
     public enum TrackableType
     {
-        Square,              // A square template (pattern) marker.
-        SquareBarcode,      // A square matrix (2D barcode) marker.
-        Multimarker,        // Multiple square markers treated as a single marker.
-        NFT,                // A legacy NFT marker.
-        TwoD                // An artoolkitX 2D textured trackable.
+        Unknown = -1,       ///< Type not known, e.g. autocreated trackable.
+        Square = 0,         ///< A square template (pattern) marker.
+        SquareBarcode = 1,  ///< A square matrix (2D barcode) marker.
+        Multimarker = 2,    ///< Multiple square markers treated as a single marker.
+        NFT = 3,            ///< A legacy NFT marker.
+        TwoD = 4,           ///< An artoolkitX 2D textured trackable.
     }
 
     public enum ARWTrackableOption : int
     {
-        ARW_TRACKABLE_OPTION_FILTERED = 1,
-        ARW_TRACKABLE_OPTION_FILTER_SAMPLE_RATE = 2,
-        ARW_TRACKABLE_OPTION_FILTER_CUTOFF_FREQ = 3,
-        ARW_TRACKABLE_OPTION_SQUARE_USE_CONT_POSE_ESTIMATION = 4,
-        ARW_TRACKABLE_OPTION_SQUARE_CONFIDENCE = 5,
-        ARW_TRACKABLE_OPTION_SQUARE_CONFIDENCE_CUTOFF = 6,
-        ARW_TRACKABLE_OPTION_NFT_SCALE = 7
+        ARW_TRACKABLE_OPTION_TYPE = 0,                             ///< readonly int enum, trackable type as per ARW_TRACKABLE_TYPE_* enum .
+        ARW_TRACKABLE_OPTION_FILTERED = 1,                         ///< bool, true for filtering enabled.
+        ARW_TRACKABLE_OPTION_FILTER_SAMPLE_RATE = 2,               ///< float, sample rate for filter calculations.
+        ARW_TRACKABLE_OPTION_FILTER_CUTOFF_FREQ = 3,               ///< float, cutoff frequency of filter.
+        ARW_TRACKABLE_OPTION_SQUARE_USE_CONT_POSE_ESTIMATION = 4,  ///< bool, true to use continuous pose estimate.
+        ARW_TRACKABLE_OPTION_SQUARE_CONFIDENCE = 5,                ///< float, confidence value of most recent marker match
+        ARW_TRACKABLE_OPTION_SQUARE_CONFIDENCE_CUTOFF = 6,         ///< float, minimum allowable confidence value used in marker matching.
+        ARW_TRACKABLE_OPTION_NFT_SCALE = 7,                        ///< float, scale factor applied to NFT marker size.
+        ARW_TRACKABLE_OPTION_MULTI_MIN_SUBMARKERS = 8,             ///< int, minimum number of submarkers for tracking to be valid.
+        ARW_TRACKABLE_OPTION_MULTI_MIN_CONF_MATRIX = 9,            ///< float, minimum confidence value for submarker matrix tracking to be valid.
+        ARW_TRACKABLE_OPTION_MULTI_MIN_CONF_PATTERN = 10,          ///< float, minimum confidence value for submarker pattern tracking to be valid.
+        ARW_TRACKABLE_OPTION_MULTI_MIN_INLIER_PROB = 11,           ///< float, minimum inlier probability value for robust multimarker pose estimation (range 1.0 - 0.0).
+        ARW_TRACKABLE_OPTION_SQUARE_WIDTH = 12,                    ///< float, square marker width
+        ARW_TRACKABLE_OPTION_2D_SCALE = 13,                        ///< float, 2D trackable scale (i.e. width).
     }
 
     public readonly static Dictionary<TrackableType, string> TrackableTypeNames = new Dictionary<TrackableType, string>
@@ -79,7 +87,15 @@ public class ARTrackable : MonoBehaviour
         {TrackableType.SquareBarcode, "Single AR barcode"},
         {TrackableType.Multimarker, "Multimarker AR configuration"},
         {TrackableType.NFT, "NFT dataset"},
-        {TrackableType.TwoD, "2D image texture"}
+        {TrackableType.TwoD, "2D image texture"},
+        {TrackableType.Unknown, "Unknown"}
+    };
+
+    public enum ARW_TRACKABLE_EVENT_TYPE
+    {
+        ARW_TRACKABLE_EVENT_TYPE_NONE = 0,
+        ARW_TRACKABLE_EVENT_TYPE_AUTOCREATED = 1,
+        ARW_TRACKABLE_EVENT_TYPE_AUTOREMOVED = 2,
     };
 
     private const string LogTag = "ARTrackable: ";
@@ -134,7 +150,7 @@ public class ARTrackable : MonoBehaviour
     [field: SerializeField]
     public string PatternContents { get; private set; } = ""; // Set by the editor.
     [field: SerializeField]
-    public long BarcodeID { get; private set; } = 0;
+    public ulong BarcodeID { get; private set; } = 0;
     [field: SerializeField]
     public float PatternWidth { get; private set; } = 0.08f;
     public void ConfigureAsSquarePattern(string patternFilePath, float width)
@@ -150,7 +166,7 @@ public class ARTrackable : MonoBehaviour
         loadError = false;
         Load();
     }
-    public void ConfigureAsSquareBarcode(long barcodeID, float width)
+    public void ConfigureAsSquareBarcode(ulong barcodeID, float width)
     {
         Unload();
         Type = TrackableType.SquareBarcode;
@@ -240,7 +256,7 @@ public class ARTrackable : MonoBehaviour
         return t;
     }
 
-    static ARTrackable AddSquareBarcode(long barcodeID, float patternWidth)
+    static ARTrackable AddSquareBarcode(ulong barcodeID, float patternWidth)
     {
         if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return null;
         ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
@@ -262,6 +278,39 @@ public class ARTrackable : MonoBehaviour
         ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
         t.ConfigureAsNFT(dataFilename);
         return t;
+    }
+
+    /// <summary>
+    /// Adds an ARTrackable for an auto-created trackable.
+    /// </summary>
+    /// <param name="UID"></param>
+    /// <returns></returns>
+    public static void OnTrackableEvent(int eventType, int UID)
+    {
+        switch ((ARW_TRACKABLE_EVENT_TYPE)eventType)
+        {
+            case ARW_TRACKABLE_EVENT_TYPE.ARW_TRACKABLE_EVENT_TYPE_AUTOCREATED:
+                if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return;
+                ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
+                t.uid = UID;
+                t.Type = (TrackableType)ARController.Instance.PluginFunctions.arwGetTrackableOptionInt(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_TYPE);
+                t.hideFlags = HideFlags.NotEditable | HideFlags.DontSaveInEditor;
+                break;
+            case ARW_TRACKABLE_EVENT_TYPE.ARW_TRACKABLE_EVENT_TYPE_AUTOREMOVED:
+                if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return;
+                ARTrackable[] ts = FindObjectsOfType<ARTrackable>();
+                foreach (ARTrackable t1 in ts)
+                {
+                    if (t1.UID == UID)
+                    {
+                        Destroy(t1.gameObject);
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     public void OnDisable()
