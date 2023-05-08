@@ -124,7 +124,7 @@ public class ARTrackableEditor : Editor
 			case ARTrackable.TrackableType.SquareBarcode:
                 {
 					// For barcode markers, allow the user to specify the barcode ID.
-					long barcodeID = EditorGUILayout.LongField("Barcode ID", m.BarcodeID);
+					long barcodeID = EditorGUILayout.LongField("Barcode ID", (long)m.BarcodeID);
 					if (barcodeID < 0) barcodeID = 0;
 					if (ARController.Instance)
 					{
@@ -136,9 +136,9 @@ public class ARTrackableEditor : Editor
 					float patternWidth = EditorGUILayout.FloatField("Width", m.PatternWidth);
 					m.UseContPoseEstimation = EditorGUILayout.Toggle("Cont. pose estimation", m.UseContPoseEstimation);
 
-					if (m.Type != t || barcodeID != m.BarcodeID || patternWidth != m.PatternWidth)
+					if (m.Type != t || (ulong)barcodeID != m.BarcodeID || patternWidth != m.PatternWidth)
 					{
-						m.ConfigureAsSquareBarcode(barcodeID, patternWidth);
+						m.ConfigureAsSquareBarcode((ulong)barcodeID, patternWidth);
 						EditorUtility.SetDirty(target);
 					}
 				}

@@ -40,6 +40,8 @@ using UnityEngine;
 // Delegate type declaration for log callback.
 public delegate void PluginFunctionsLogCallback([MarshalAs(UnmanagedType.LPStr)] string msg);
 
+public delegate void PluginFunctionsTrackableEventCallback(int trackableEventType, int trackableUID);
+
 /// <summary>
 /// Defines a plugin interface via which artoolkitX functionality can be invoked.
 /// Concrete subclasses might e.g. implement this via a local DLL, or might instead
@@ -47,6 +49,17 @@ public delegate void PluginFunctionsLogCallback([MarshalAs(UnmanagedType.LPStr)]
 /// </summary>
 public abstract class IPluginFunctions
 {
+    [StructLayout(LayoutKind.Sequential, Pack=4)]
+    public struct ARWTrackableStatus
+    {
+        int uid;
+        bool visible;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public float[] matrix;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        public float[] matrixR;
+    }
+
     abstract public bool IsConfigured();
     abstract public bool Configure(string config);
     abstract public bool IsInited();
@@ -109,4 +122,6 @@ public abstract class IPluginFunctions
     abstract public int arwCreateVideoSourceInfoList(string config);
     abstract public bool arwGetVideoSourceInfoListEntry(int index, out string name, out string model, out string UID, out int flags, out string openToken);
     abstract public void arwDeleteVideoSourceInfoList();
+    abstract public void arwSetSquareMatrixModeAutocreateNewTrackables(bool on, float defaultWidth = 0.08f, PluginFunctionsTrackableEventCallback tecb = null);
+    abstract public bool arwGetSquareMatrixModeAutocreateNewTrackables(out bool on, out float defaultWidth, out PluginFunctionsTrackableEventCallback tecb);
 }

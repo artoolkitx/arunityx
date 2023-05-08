@@ -378,5 +378,27 @@ public static class ARX_pinvoke
 	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 #endif
 	public static extern void arwDeleteVideoSourceInfoList();
+
+#if UNITY_IOS
+	[DllImport("__Internal")]
+#else
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+#endif
+	public static extern int arwGetTrackableCount();
+
+#if UNITY_IOS
+	[DllImport("__Internal")]
+#else
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+#endif
+	[return: MarshalAsAttribute(UnmanagedType.I1)]
+	public static extern bool arwGetTrackableStatuses([In, Out]IPluginFunctions.ARWTrackableStatus[] statuses, int statusesCount);
+
+#if UNITY_IOS
+	[DllImport("__Internal")]
+#else
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+#endif
+	public static extern void arwRegisterTrackableEventCallback(PluginFunctionsTrackableEventCallback callback);
 }
 
