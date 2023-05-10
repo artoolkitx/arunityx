@@ -96,10 +96,13 @@ public class ARControllerEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        serializedObject.Update();
 
         ARController arcontroller = (ARController)target;
         if (arcontroller == null) return;
+
+        serializedObject.Update();
+        using (new EditorGUI.DisabledScope(true))
+            EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
 
         EditorGUILayout.LabelField("Version", "artoolkitX " + arcontroller.Version);
 

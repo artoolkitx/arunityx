@@ -52,7 +52,10 @@ public class AROriginEditor : Editor
 		// Get the AROrigin that this panel will edit.
         AROrigin o = (AROrigin)target;
         if (o == null) return;
-		
+
+		using (new EditorGUI.DisabledScope(true))
+			EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
+
 		// Find mode		
 		o.findTrackableMode = (AROrigin.FindMode)EditorGUILayout.EnumPopup("ARTrackable find mode", o.findTrackableMode);
 		

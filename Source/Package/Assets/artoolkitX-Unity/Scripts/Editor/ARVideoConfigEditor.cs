@@ -51,6 +51,10 @@ public class ARVideoConfigEditor : Editor
     {
         ARVideoConfig arvideoconfig = (ARVideoConfig)target;
         if (arvideoconfig == null) return;
+
+        using (new EditorGUI.DisabledScope(true))
+            EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
+
         bool needSave = false;
 
         // Init the per-platform turndown arrows.

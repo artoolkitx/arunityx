@@ -65,12 +65,15 @@ public class ARTrackableEditor : Editor
     public override void OnInspectorGUI()
     {
    
-        EditorGUILayout.BeginVertical();
-		
 		// Get the ARTrackable that this panel will edit.
         ARTrackable m = (ARTrackable)target;
         if (m == null) return;
-		
+
+		EditorGUILayout.BeginVertical();
+
+		using (new EditorGUI.DisabledScope(true))
+			EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
+
 		// Attempt to load. Might not work out if e.g. for a single marker, pattern hasn't been
 		// assigned yet, or for an NFT marker, dataset hasn't been specified.
 		if (m.UID == ARTrackable.NO_ID) m.Load(); 

@@ -49,21 +49,27 @@ public class ARTrackedCameraEditor : ARCameraEditor
     {
 		ARTrackedCamera artc = (ARTrackedCamera)target;
 		if (artc == null) return;
-		artc.MarkerTag = EditorGUILayout.TextField("Marker tag", artc.MarkerTag);
 
-		ARTrackable marker = artc.GetTrackable();
-		EditorGUILayout.LabelField("Got marker", marker == null ? "no" : "yes");
-		if (marker != null) {
-			string type = ARTrackable.TrackableTypeNames[marker.Type];
-			EditorGUILayout.LabelField("Marker UID", (marker.UID != ARTrackable.NO_ID ? marker.UID.ToString() : "Not loaded") + " (" + type + ")");	
+		this.serializedObject.Update();
+		using (new EditorGUI.DisabledScope(true))
+			EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("_trackableTag"), true);
+
+		ARTrackable trackable = artc.GetTrackable();
+		EditorGUILayout.LabelField("Found trackable", trackable == null ? "no" : "yes");
+		if (trackable != null) {
+			string type = ARTrackable.TrackableTypeNames[trackable.Type];
+			EditorGUILayout.LabelField("Trackable UID", (trackable.UID != ARTrackable.NO_ID ? trackable.UID.ToString() : "Not loaded") + " (" + type + ")");	
 		}
-		
+
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("secondsToRemainVisible"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedCameraFound"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedCameraTracked"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedCameraLost"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("eventReceiver"), true);
+		this.serializedObject.ApplyModifiedProperties();
+
 		EditorGUILayout.Separator();
-		artc.eventReceiver = (GameObject)EditorGUILayout.ObjectField("Event Receiver:", artc.eventReceiver, typeof(GameObject), true);
-		
-		EditorGUILayout.Separator();
-		artc.secondsToRemainVisible = EditorGUILayout.FloatField("Stay visible", artc.secondsToRemainVisible);
-		
 		base.OnInspectorGUI();
 	}
 }

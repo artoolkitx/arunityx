@@ -50,21 +50,23 @@ public class ARTrackedObjectEditor : Editor
 		ARTrackedObject arto = (ARTrackedObject)target;
 		if (arto == null) return;
 
-		arto.TrackableTag = EditorGUILayout.TextField(new GUIContent("Marker tag", "Set the marker tag to the same value defined in the ARTrackable object that defines this object's pose."), arto.TrackableTag);
+		this.serializedObject.Update();
+		using (new EditorGUI.DisabledScope(true))
+			EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("_trackableTag"), true);
 
-        ARTrackable trackable = arto.GetTrackable();
-		EditorGUILayout.LabelField("Got marker", trackable == null ? "no" : "yes");
+		ARTrackable trackable = arto.GetTrackable();
+		EditorGUILayout.LabelField("Found trackable", trackable == null ? "no" : "yes");
 		if (trackable != null) {
 			string type = ARTrackable.TrackableTypeNames[trackable.Type];
-			EditorGUILayout.LabelField("Marker UID", (trackable.UID != ARTrackable.NO_ID ? trackable.UID.ToString() : "Not loaded") + " (" + type + ")");	
+			EditorGUILayout.LabelField("Trackable UID", (trackable.UID != ARTrackable.NO_ID ? trackable.UID.ToString() : "Not loaded") + " (" + type + ")");	
 		}
-		
-		EditorGUILayout.Separator();
-		
-		arto.secondsToRemainVisible = EditorGUILayout.FloatField(new GUIContent("Stay visible", "The number of seconds this object should remain visible when the associated ARTrackable object is no longer visible."), arto.secondsToRemainVisible);
-		
-		EditorGUILayout.Separator();
-		
-		arto.eventReceiver = (GameObject)EditorGUILayout.ObjectField("Event Receiver:", arto.eventReceiver, typeof(GameObject), true);
+
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("secondsToRemainVisible"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedObjectFound"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedObjectTracked"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedObjectLost"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("eventReceiver"), true);
+		this.serializedObject.ApplyModifiedProperties();
 	}
 }

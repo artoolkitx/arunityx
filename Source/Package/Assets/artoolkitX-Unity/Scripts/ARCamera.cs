@@ -36,9 +36,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 /// <summary>
@@ -101,8 +98,6 @@ public class ARCamera : MonoBehaviour
 	protected float timeLastUpdate = 0;				// Time when tracking was last updated.
 	[NonSerialized]
 	protected float timeTrackingLost = 0;			// Time when tracking was last lost.
-	
-	public GameObject eventReceiver;
 	
 	// Stereo settings.
 	public bool Stereo = false;

@@ -50,31 +50,35 @@ public class ARTrackedObject : MonoBehaviour
 	private AROrigin _origin = null;
     private ARTrackable _trackable = null;
 
-	private bool visible = false;					// Current visibility from tracking
-	private float timeTrackingLost = 0;				// Time when tracking was last lost
-	public float secondsToRemainVisible = 0.0f;		// How long to remain visible after tracking is lost (to reduce flicker)
-	private bool visibleOrRemain = false;			// Whether to show the content (based on above variables)
-
-	public GameObject eventReceiver;
-
-	// Private fields with accessors.
 	[SerializeField]
-    private string _trackableTag = "";					// Unique tag for the marker to get tracking from
-	
-	
+	[Tooltip("Set this to the same value defined in the ARTrackable object that defines this object's pose.")]
+	private string _trackableTag = "";                  // Unique tag for the marker to get tracking from
 	public string TrackableTag
 	{
 		get
 		{
 			return _trackableTag;
 		}
-		
+
 		set
 		{
-            _trackableTag = value;
+			_trackableTag = value;
 			_trackable = null;
 		}
 	}
+
+	private bool visible = false;                   // Current visibility from tracking
+	private float timeTrackingLost = 0;             // Time when tracking was last lost
+	[Tooltip("The number of seconds this object should remain visible when the associated ARTrackable object is no longer visible.")]
+	public float secondsToRemainVisible = 0.0f;		// How long to remain visible after tracking is lost (to reduce flicker)
+	private bool visibleOrRemain = false;           // Whether to show the content (based on above variables)
+
+	public ARUnityEventUnityObject OnTrackedObjectFound;
+	public ARUnityEventUnityObject OnTrackedObjectTracked;
+	public ARUnityEventUnityObject OnTrackedObjectLost;
+
+	[Tooltip("Legecy event mechanism using Unity messaging. Event methods will be called on the referenced object and all children.")]
+	public GameObject eventReceiver;
 
 	// Return the trackable associated with this component.
 	// Uses cached value if available, otherwise performs a find operation.
@@ -108,10 +112,13 @@ public class ARTrackedObject : MonoBehaviour
 	{
 		//ARController.Log(LogTag + "Start()");
 
-		if (Application.isPlaying) {
+		if (Application.isPlaying)
+		{
 			// In Player, set initial visibility to not visible.
 			for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
-		} else {
+		}
+		else
+		{
 			// In Editor, set initial visibility to visible.
 			for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
 		}
@@ -124,57 +131,69 @@ public class ARTrackedObject : MonoBehaviour
 		transform.localScale = Vector3.one;
 		
 		// Update tracking if we are running in the Player.
-		if (Application.isPlaying) {
-
+		if (Application.isPlaying)
+		{
 			// Sanity check, make sure we have an AROrigin in parent hierachy.
 			AROrigin origin = GetOrigin();
 			if (origin == null) {
 				//visible = visibleOrRemain = false;
-
-			} else {
-
+			}
+			else
+			{
 				// Sanity check, make sure we have an ARTrackable assigned.
                 ARTrackable trackable = GetTrackable();
-				if (trackable == null) {
+				if (trackable == null)
+				{
 					//visible = visibleOrRemain = false;
-				} else {
-
+				}
+				else
+				{
 					// Note the current time
 					float timeNow = Time.realtimeSinceStartup;
 					
                     ARTrackable baseTrackable = origin.GetBaseTrackable();
-					if (baseTrackable != null && trackable.Visible) {
-
-						if (!visible) {
+					if (baseTrackable != null && trackable.Visible)
+					{
+						if (!visible)
+						{
 							// Trackable was hidden but now is visible.
 							visible = visibleOrRemain = true;
+							OnTrackedObjectFound.Invoke(this);
 							if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", trackable, SendMessageOptions.DontRequireReceiver);
 
 							for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
 						}
 
                         Matrix4x4 pose;
-                        if (trackable == baseTrackable) {
+                        if (trackable == baseTrackable)
+						{
                             // If this marker is the base, no need to take base inverse etc.
                             pose = origin.transform.localToWorldMatrix;
-                        } else {
+                        }
+						else
+						{
 						    pose = (origin.transform.localToWorldMatrix * baseTrackable.TransformationMatrix.inverse * trackable.TransformationMatrix);
 						}
 						transform.position = ARUtilityFunctions.PositionFromMatrix(pose);
 						transform.rotation = ARUtilityFunctions.QuaternionFromMatrix(pose);
 
+						OnTrackedObjectTracked.Invoke(this);
 						if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", trackable, SendMessageOptions.DontRequireReceiver);
 
-					} else {
-
-						if (visible) {
+					}
+					else
+					{
+						if (visible)
+						{
 							// Trackable was visible but now is hidden.
 							visible = false;
 							timeTrackingLost = timeNow;
 						}
 
-						if (visibleOrRemain && (timeNow - timeTrackingLost >= secondsToRemainVisible)) {
+						if (visibleOrRemain && (timeNow - timeTrackingLost >= secondsToRemainVisible))
+						{
 							visibleOrRemain = false;
+							OnTrackedObjectLost.Invoke(this);
 							if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", trackable, SendMessageOptions.DontRequireReceiver);
 							for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
 						}

@@ -42,7 +42,7 @@ using System.Text;
 using UnityEngine;
 
 /// <summary>
-/// A class which directly associates an ARMarker with a Unity Camera object.
+/// A class which directly associates an ARTrackable with a Unity Camera object.
 /// 
 /// To get a list of foreground Camera objects, do:
 ///
@@ -59,31 +59,37 @@ public class ARTrackedCamera : ARCamera
 {
 	private const string LogTag = "ARTrackedCamera: ";
 
-	public float secondsToRemainVisible = 0.0f;		// How long to remain visible after tracking is lost (to reduce flicker)
-
 	[NonSerialized]
 	protected int cullingMask = -1;					// Correct culling mask for content (set to 0 when not visible)
 
-	private bool lastArVisible = false;
-	
-	// Private fields with accessors.
 	[SerializeField]
-	private string _markerTag = "";					// Unique tag for the marker to get tracking from
-	
-	public string MarkerTag
+	[Tooltip("Set this to the same value defined in the ARTrackable object that defines this camera's pose.")]
+	private string _trackableTag = "";                  // Unique tag for the marker to get tracking from
+	public string TrackableTag
 	{
 		get
 		{
-			return _markerTag;
+			return _trackableTag;
 		}
-		
+
 		set
 		{
-			_markerTag = value;
+			_trackableTag = value;
 			_trackable = null;
 		}
 	}
-	
+
+	private bool lastArVisible = false;
+	[Tooltip("The number of seconds this object should remain visible when the associated ARTrackable object is no longer visible.")]
+	public float secondsToRemainVisible = 0.0f;     // How long to remain visible after tracking is lost (to reduce flicker)
+
+	public ARUnityEventUnityObject OnTrackedCameraFound;
+	public ARUnityEventUnityObject OnTrackedCameraTracked;
+	public ARUnityEventUnityObject OnTrackedCameraLost;
+	[Tooltip("Legacy event mechanism using Unity messaging. Event methods will be called on the referenced object and all children.")]
+	/// </summary>
+	public GameObject eventReceiver;
+
 	// Return the marker associated with this component.
 	// Uses cached value if available, otherwise performs a find operation.
 	public override ARTrackable GetTrackable()
@@ -92,7 +98,7 @@ public class ARTrackedCamera : ARCamera
 			// Locate the marker identified by the tag
 			ARTrackable[] ms = FindObjectsOfType<ARTrackable>();
 			foreach (ARTrackable m in ms) {
-				if (m.Tag == _markerTag) {
+				if (m.Tag == _trackableTag) {
 					_trackable = m;
 					break;
 				}
@@ -113,18 +119,24 @@ public class ARTrackedCamera : ARCamera
 
 	protected override void ApplyTracking()
 	{
-		if (arVisible || (timeLastUpdate - timeTrackingLost < secondsToRemainVisible)) {
+		if (arVisible || (timeLastUpdate - timeTrackingLost < secondsToRemainVisible))
+		{
 			if (arVisible != lastArVisible) {
 				this.gameObject.GetComponent<Camera>().cullingMask = cullingMask;
+				OnTrackedCameraFound.Invoke(this);
 				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", GetTrackable(), SendMessageOptions.DontRequireReceiver);
 			}
 			transform.localPosition = arPosition; // TODO: Change to transform.position = PositionFromMatrix(origin.transform.localToWorldMatrix * pose) etc;
 			transform.localRotation = arRotation;
-            if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", GetTrackable(), SendMessageOptions.DontRequireReceiver);
-		} else {
+			OnTrackedCameraTracked.Invoke(this);
+			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", GetTrackable(), SendMessageOptions.DontRequireReceiver);
+		}
+		else
+		{
 			if (arVisible != lastArVisible) {
 				this.gameObject.GetComponent<Camera>().cullingMask = 0;
-                if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", GetTrackable(), SendMessageOptions.DontRequireReceiver);
+                OnTrackedCameraLost.Invoke(this);
+				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", GetTrackable(), SendMessageOptions.DontRequireReceiver);
 			}
 		}
 		lastArVisible = arVisible;
