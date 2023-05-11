@@ -2008,7 +2008,10 @@ public class ARController : MonoBehaviour
         GUILayout.BeginVertical();
         GUILayout.Label(showGUIErrorDialogContent);
         GUILayout.FlexibleSpace();
-        if (GUILayout.Button("OK")) showGUIErrorDialog = false;
+        if (GUILayout.Button("OK"))
+        {
+            showGUIErrorDialog = false;
+        }
         GUILayout.EndVertical();
     }
 

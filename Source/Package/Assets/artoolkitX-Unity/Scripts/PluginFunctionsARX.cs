@@ -92,14 +92,24 @@ public class PluginFunctionsARX : IPluginFunctions
 
     override public void arwRegisterLogCallback(PluginFunctionsLogCallback lcb)
     {
-	    logCallback = lcb; // Set or unset.
-	    if (lcb != null) { // If setting, create the callback stub prior to registering the callback on the native side.
-            logCallbackGCH = GCHandle.Alloc(logCallback); // Does not need to be pinned, see http://stackoverflow.com/a/19866119/316487 
+        if (lcb != null)
+        {
+            // If setting, create the callback stub prior to registering the callback on the native side.
+            if (logCallback != null)
+            {
+                // But if already set, unset first.
+                ARX_pinvoke.arwRegisterLogCallback(null);
+                logCallbackGCH.Free();
+            }
+            logCallbackGCH = GCHandle.Alloc(lcb); // Does not need to be pinned, see http://stackoverflow.com/a/19866119/316487
         }
-        ARX_pinvoke.arwRegisterLogCallback(logCallback);
-        if (lcb == null) { // If unsetting, free the callback stub after deregistering the callback on the native side.
-            logCallbackGCH.Free();
+        ARX_pinvoke.arwRegisterLogCallback(lcb);
+        if (lcb == null && logCallback != null)
+        {
+            // If unsetting, free the callback stub after deregistering the callback on the native side.
+            if (logCallbackGCH != null) logCallbackGCH.Free();
         }
+        logCallback = lcb;
     }
 
     override public void arwSetLogLevel(int logLevel)
@@ -447,16 +457,24 @@ public class PluginFunctionsARX : IPluginFunctions
     override public void arwSetSquareMatrixModeAutocreateNewTrackables(bool on, float defaultWidth = 0.08f, PluginFunctionsTrackableEventCallback tecb = null)
     {
         if (!on) tecb = null;
-        trackableEventCallback = tecb; // Set or unset.
         if (tecb != null)
-        { // If setting, create the callback stub prior to registering the callback on the native side.
-            trackableEventCallbackGCH = GCHandle.Alloc(trackableEventCallback); // Does not need to be pinned, see http://stackoverflow.com/a/19866119/316487 
+        {
+            // If setting, create the callback stub prior to registering the callback on the native side.
+            if (trackableEventCallback != null)
+            {
+                // But if already set, unset first.
+                ARX_pinvoke.arwRegisterTrackableEventCallback(null);
+                trackableEventCallbackGCH.Free();
+            }
+            trackableEventCallbackGCH = GCHandle.Alloc(tecb); // Does not need to be pinned, see http://stackoverflow.com/a/19866119/316487 
         }
-        ARX_pinvoke.arwRegisterTrackableEventCallback(trackableEventCallback);
-        if (tecb == null)
-        { // If unsetting, free the callback stub after deregistering the callback on the native side.
+        ARX_pinvoke.arwRegisterTrackableEventCallback(tecb);
+        if (tecb == null && trackableEventCallback != null)
+        {
+            // If unsetting, free the callback stub after deregistering the callback on the native side.
             trackableEventCallbackGCH.Free();
         }
+        trackableEventCallback = tecb;
         ARX_pinvoke.arwSetTrackerOptionFloat(ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES_DEFAULT_WIDTH, defaultWidth * 1000.0f);
         ARX_pinvoke.arwSetTrackerOptionBool(ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES, on);
     }
