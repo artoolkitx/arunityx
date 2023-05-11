@@ -37,13 +37,12 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
+using UnityEngine.Android;
+using UnityEngine.Rendering;
 
 public enum ContentMode
 {
@@ -491,10 +490,7 @@ public class ARController : MonoBehaviour
         // Player start.
         if (AutoStartAR)
         {
-            if (!StartAR()) 
-            {
-                //Application.Quit(); 
-            }
+            StartCoroutine(StartAR());
         }
     }
 
@@ -513,7 +509,7 @@ public class ARController : MonoBehaviour
         {
             if (_runOnUnpause)
             {
-                StartAR();
+                StartCoroutine(StartAR());
                 _runOnUnpause = false;
             }
         }
@@ -612,13 +608,13 @@ public class ARController : MonoBehaviour
     // User-callable AR methods.
     //
 
-    public bool StartAR()
+    public IEnumerator StartAR()
     {
         // Catch attempts to inadvertently call StartAR() twice.
         if (_running)
         {
             Log(LogTag + "WARNING: StartAR() called while already running. Ignoring.\n");
-            return false;
+            yield break;
         }
 
         // For late startup after configuration, StartAR needs to ensure InitialiseAR has been called.
@@ -630,12 +626,35 @@ public class ARController : MonoBehaviour
         {
             Log(LogTag + "Starting AR.");
 
+#if UNITY_ANDROID
+            bool haveCameraPermission = Permission.HasUserAuthorizedPermission(Permission.Camera);
+            Log(LogTag + $"haveCameraPermission={haveCameraPermission}");
+            if (!haveCameraPermission)
+            {
+                PermissionCallbacks pcs = new PermissionCallbacks();
+                pcs.PermissionGranted += (string permissionName) => StartCoroutine(StartAR());
+                pcs.PermissionDenied += (string permissionName) => {
+                    showGUIErrorDialogContent = "As you have denied camera access, unable to start AR tracking.";
+                    showGUIErrorDialog = true;
+                };
+                pcs.PermissionDeniedAndDontAskAgain += (string permissionName) => {
+                    showGUIErrorDialogContent = "As you have denied camera access, unable to start AR tracking.";
+                    showGUIErrorDialog = true;
+                };
+                Permission.RequestUserPermission(Permission.Camera, pcs);
+                yield break;
+            }
+#endif
+
             _sceneConfiguredForVideo = _sceneConfiguredForVideoWaitingMessageLogged = false;
 
             // Check rendering device.
-            string renderDevice = SystemInfo.graphicsDeviceVersion;
-            _useNativeGLTexturing = !renderDevice.StartsWith("Direct") && UseNativeGLTexturingIfAvailable;
-            Log(LogTag + "Render device: " + renderDevice + (_useNativeGLTexturing ? ", using native GL texturing." : ", using Unity texturing."));
+            string renderDeviceVersion = SystemInfo.graphicsDeviceVersion;
+            GraphicsDeviceType renderDeviceType = SystemInfo.graphicsDeviceType;
+            bool usingOpenGL = renderDeviceType == GraphicsDeviceType.OpenGLCore || renderDeviceType == GraphicsDeviceType.OpenGLES2 || renderDeviceType == GraphicsDeviceType.OpenGLES3;
+            //_useNativeGLTexturing = usingOpenGL && UseNativeGLTexturingIfAvailable;
+            _useNativeGLTexturing = false; // TODO: reinstate native texturing support.
+            Log(LogTag + "Render device: " + renderDeviceVersion + (_useNativeGLTexturing ? ", using native GL texturing." : ", using Unity texturing."));
 
             CreateClearCamera();
 
@@ -688,7 +707,7 @@ public class ARController : MonoBehaviour
                 {
                     // Error - the camera_para.dat file isn't in the right place            
                     Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName0 + ".bytes");
-                    return (false);
+                    yield break;
                 }
                 cparam0 = ta.bytes;
             }
@@ -701,7 +720,7 @@ public class ARController : MonoBehaviour
                     {
                         // Error - the camera_para.dat file isn't in the right place            
                         Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName1 + ".bytes");
-                        return (false);
+                        yield break;
                     }
                     cparam1 = ta.bytes;
                 }
@@ -710,7 +729,7 @@ public class ARController : MonoBehaviour
                 {
                     // Error - the transL2R.dat file isn't in the right place            
                     Log(LogTag + "StartAR(): Error: The stereo calibration file not found at Resources/ardata/" + transL2RName + ".bytes");
-                    return (false);
+                    yield break;
                 }
                 transL2R = ta1.bytes;
             }
@@ -742,7 +761,7 @@ public class ARController : MonoBehaviour
                     showGUIErrorDialogContent = "Unable to start AR tracking. Please check that you have a camera connected.";
                 }
                 showGUIErrorDialog = true;
-                return false;
+                yield break;
             }
 
             // After calling arwStartRunningB/arwStartRunningStereoB, set artoolkitX configuration.
@@ -763,7 +782,6 @@ public class ARController : MonoBehaviour
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
         }
         // Remaining Unity setup happens in UpdateAR().
-        return true;
     }
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
@@ -777,13 +795,9 @@ public class ARController : MonoBehaviour
 
     bool UpdateAR()
     {
-        // For late startup after configuration, UpdateAR needs to ensure StartAR has been called.
         if (!_running)
         {
-            StartAR();
-            if (!_running) {
-                return true;
-            }
+            return true;
         }
 
         if (!_sceneConfiguredForVideo)
