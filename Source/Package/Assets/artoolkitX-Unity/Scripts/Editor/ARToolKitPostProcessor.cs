@@ -38,6 +38,8 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using System.IO;
+using UnityEditor.Android;
+using System.Xml;
 
 public class ARToolKitPostProcessor {
 #if UNITY_STANDALONE_WIN
@@ -200,3 +202,141 @@ public class ARToolKitPostProcessor {
 
 #endif
 }
+
+class ARToolKitAndroidManifestPostProcessor : IPostGenerateGradleAndroidProject
+{
+    const string k_AndroidUri = "http://schemas.android.com/apk/res/android";
+
+    const string k_AndroidManifestPath = "/src/main/AndroidManifest.xml";
+
+    XmlNode FindFirstChild(XmlNode node, string tag)
+    {
+        if (node.HasChildNodes)
+        {
+            for (int i = 0; i < node.ChildNodes.Count; ++i)
+            {
+                var child = node.ChildNodes[i];
+                if (child.Name == tag)
+                    return child;
+            }
+        }
+
+        return null;
+    }
+
+    void AppendNewAttribute(XmlDocument doc, XmlElement element, string attributeName, string attributeValue)
+    {
+        var attribute = doc.CreateAttribute(attributeName, k_AndroidUri);
+        attribute.Value = attributeValue;
+        element.Attributes.Append(attribute);
+    }
+
+    void FindOrCreateTagWithAttribute(XmlDocument doc, XmlNode containingNode, string tagName,
+        string attributeName, string attributeValue)
+    {
+        if (containingNode.HasChildNodes)
+        {
+            for (int i = 0; i < containingNode.ChildNodes.Count; ++i)
+            {
+                var child = containingNode.ChildNodes[i];
+                if (child.Name == tagName)
+                {
+                    var childElement = child as XmlElement;
+                    if (childElement != null && childElement.HasAttributes)
+                    {
+                        var attribute = childElement.GetAttributeNode(attributeName, k_AndroidUri);
+                        if (attribute != null && attribute.Value == attributeValue)
+                            return;
+                    }
+                }
+            }
+        }
+
+        // Didn't find it, so create it
+        var element = doc.CreateElement(tagName);
+        AppendNewAttribute(doc, element, attributeName, attributeValue);
+        containingNode.AppendChild(element);
+    }
+
+    void FindOrCreateTagWithAttributes(XmlDocument doc, XmlNode containingNode, string tagName,
+        string firstAttributeName, string firstAttributeValue, string secondAttributeName, string secondAttributeValue)
+    {
+        if (containingNode.HasChildNodes)
+        {
+            for (int i = 0; i < containingNode.ChildNodes.Count; ++i)
+            {
+                var childNode = containingNode.ChildNodes[i];
+                if (childNode.Name == tagName)
+                {
+                    var childElement = childNode as XmlElement;
+                    if (childElement != null && childElement.HasAttributes)
+                    {
+                        var firstAttribute = childElement.GetAttributeNode(firstAttributeName, k_AndroidUri);
+                        if (firstAttribute == null || firstAttribute.Value != firstAttributeValue)
+                            continue;
+
+                        var secondAttribute = childElement.GetAttributeNode(secondAttributeName, k_AndroidUri);
+                        if (secondAttribute != null)
+                        {
+                            secondAttribute.Value = secondAttributeValue;
+                            return;
+                        }
+
+                        // Create it
+                        AppendNewAttribute(doc, childElement, secondAttributeName, secondAttributeValue);
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Didn't find it, so create it
+        var element = doc.CreateElement(tagName);
+        AppendNewAttribute(doc, element, firstAttributeName, firstAttributeValue);
+        AppendNewAttribute(doc, element, secondAttributeName, secondAttributeValue);
+        containingNode.AppendChild(element);
+    }
+
+    // This ensures the Android Manifest includes support for the camera.
+    public void OnPostGenerateGradleAndroidProject(string path)
+    {
+        // TODO: add a check as to whether ARX is enabled.
+        //if (!ARX.enabled)
+        //    return;
+
+        Debug.Log("Inserting artoolkitX required attributes into AndroidManifest.xml");
+
+        string manifestPath = path + k_AndroidManifestPath;
+        var manifestDoc = new XmlDocument();
+        manifestDoc.Load(manifestPath);
+
+        var manifestNode = FindFirstChild(manifestDoc, "manifest");
+        if (manifestNode == null)
+            return;
+
+        var applicationNode = FindFirstChild(manifestNode, "application");
+        if (applicationNode == null)
+            return;
+
+        FindOrCreateTagWithAttribute(manifestDoc, manifestNode, "uses-permission", "name", "android.permission.CAMERA");
+        FindOrCreateTagWithAttribute(manifestDoc, manifestNode, "uses-permission", "name", "android.permission.ACCESS_NETWORK_STATE");
+        FindOrCreateTagWithAttribute(manifestDoc, manifestNode, "uses-permission", "name", "android.permission.INTERNET");
+        FindOrCreateTagWithAttributes(manifestDoc, applicationNode, "meta-data", "name", "unityplayer.SkipPermissionsDialog", "value", "true");
+        FindOrCreateTagWithAttributes(manifestDoc, manifestNode, "uses-feature", "name", "android.hardware.camera.any", "required", "true");
+        FindOrCreateTagWithAttributes(manifestDoc, manifestNode, "uses-feature", "name", "android.hardware.camera", "required", "false");
+        FindOrCreateTagWithAttributes(manifestDoc, manifestNode, "uses-feature", "name", "android.hardware.camera.autofocus", "required", "false");
+
+        manifestDoc.Save(manifestPath);
+    }
+
+    void DebugPrint(XmlDocument doc)
+    {
+        var sw = new System.IO.StringWriter();
+        var xw = XmlWriter.Create(sw);
+        doc.Save(xw);
+        Debug.Log(sw);
+    }
+
+    public int callbackOrder => 2;
+}
+
