@@ -1,5 +1,6 @@
 fileFormatVersion: 2
-guid: 91d38f0c7597c46769edaa83cf06d9db
+guid: 00429c5d28740491da61249ea9220995
+folderAsset: yes
 PluginImporter:
   externalObjects: {}
   serializedVersion: 2
@@ -47,7 +48,7 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        CPU: AnyCPU
+        CPU: None
   - first:
       Standalone: OSXUniversal
     second:
@@ -59,13 +60,13 @@ PluginImporter:
     second:
       enabled: 0
       settings:
-        CPU: x86
+        CPU: None
   - first:
       Standalone: Win64
     second:
       enabled: 0
       settings:
-        CPU: x86_64
+        CPU: None
   - first:
       iPhone: iOS
     second:
@@ -74,7 +75,7 @@ PluginImporter:
         AddToEmbeddedBinaries: false
         CPU: AnyCPU
         CompileFlags: 
-        FrameworkDependencies: OpenGLES;Accelerate;
+        FrameworkDependencies: 
   userData: 
   assetBundleName: 
   assetBundleVariant: 

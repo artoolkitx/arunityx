@@ -403,7 +403,7 @@ public class ARController : MonoBehaviour
 #if !UNITY_EDITOR
 #  if UNITY_IOS
         ARX_pinvoke.aruRequestCamera();
-        Thread.Sleep(2000);
+        System.Threading.Thread.Sleep(2000);
 #  endif
 #endif // !UNITY_EDITOR
 
@@ -785,10 +785,11 @@ public class ARController : MonoBehaviour
     }
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-        private ScreenOrientation screenOrientation = ScreenOrientation.Unknown;
+    // Keep track of screen parameters so we can detect device oritentation changes.
+    private ScreenOrientation screenOrientation = ScreenOrientation.LandscapeLeft;
 #if UNITY_ANDROID
-        private int screenWidth = 0;
-        private int screenHeight = 0;
+    private int screenWidth = 0;
+    private int screenHeight = 0;
 #endif
 #endif
 
@@ -1025,7 +1026,6 @@ public class ARController : MonoBehaviour
             width = _videoHeight0;
             break;
 
-        case ScreenOrientation.Unknown:
         default:
             Log(LogTag + "ScreenOrientation.Unknown");
             deviceRotation = Matrix4x4.identity;
