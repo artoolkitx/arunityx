@@ -63,6 +63,7 @@ Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/armeabi-v7a/*.so
 Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/x86/*.so
 Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/x86_64/*.so
 Source/Package/Assets/artoolkitX-Unity/Plugins/iOS/*.a
+Source/Package/Assets/artoolkitX-Unity/Plugins/iOS/*.framework
 Source/Package/Assets/artoolkitX-Unity/Plugins/x86/*.dll
 Source/Package/Assets/artoolkitX-Unity/Plugins/x86_64/*.dll
 

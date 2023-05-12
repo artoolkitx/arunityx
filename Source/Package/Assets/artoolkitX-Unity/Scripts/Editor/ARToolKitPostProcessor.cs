@@ -40,15 +40,41 @@ using UnityEditor.Callbacks;
 using System.IO;
 using UnityEditor.Android;
 using System.Xml;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using System;
+using UnityEditor.iOS.Xcode;
 
-public class ARToolKitPostProcessor {
+public class ARToolKitPostProcessor : IPostprocessBuildWithReport
+{
 #if UNITY_STANDALONE_WIN
-	private const  string   EXE           = ".exe";
+    private const  string   EXE           = ".exe";
 	private const  string   RELATIVE_PATH = "{0}_Data/Plugins/";
 	private static string[] REDIST_FILES  = { "pthreadVC2.dll", "vcredist.exe" };
 	private const string FILE_NAME_STATUS = "ARToolKit Post Process Build Player: Operating of file {0}.";
-	[PostProcessBuild(int.MaxValue)]
-    public static void OnPostProcessBuild(BuildTarget target, string appPath) {
+#elif UNITY_IPHONE
+
+    // Framework name, weakref.
+    private static Tuple<string, bool>[] IosFrameworks =
+    {
+        //new Tuple<string, bool>("Accelerate.framework", false),
+    };
+
+    // Setting name, value to add.
+    private static Tuple<string, string>[] IosBuildValues = {
+        new Tuple<string, string>("OTHER_LDFLAGS", "-lsqlite3"),
+    };
+
+    private static StreamWriter streamWriter = null;
+#endif
+
+    int IOrderedCallback.callbackOrder => int.MaxValue;
+
+    public void OnPostprocessBuild(BuildReport report) {
+        BuildTarget target = report.summary.platform;
+        string appPath = report.summary.outputPath;
+
+#if UNITY_STANDALONE_WIN
 		string[] pathSplit     = appPath.Split('/');
 		string   fileName      = pathSplit[pathSplit.Length - 1];
 		string   pathDirectory = appPath.TrimEnd(fileName.ToCharArray());
@@ -57,7 +83,7 @@ public class ARToolKitPostProcessor {
 		
 		string fromPath = Path.Combine(pathDirectory, string.Format(RELATIVE_PATH, fileName));
 		if (Directory.Exists(string.Format(RELATIVE_PATH, fileName))) {
-			Debug.LogError("ARTOOLKIT BUILD ERROR: Couldn't data directory!");
+			Debug.LogError("ARTOOLKIT BUILD ERROR: Couldn't find data directory!");
 			Debug.LogError("Please move DLLs from [appname]_data/Plugins to the same directory as the exe!");
 			return;
 		}
@@ -72,57 +98,9 @@ public class ARToolKitPostProcessor {
 		}
 	}
 #elif UNITY_IPHONE
-    private class IosFramework {
-        public  string Name, Id, RefId, LastKnownFileType, FormattedName, Path, SourceTree;
+        const string LOGFILE_NAME = "postprocess.log";
 
-        public IosFramework(string name, string id, string refId, string lastKnownFileType, string formattedName, string path, string sourceTree) {
-            Name              = name;
-            Id                = id;
-            RefId             = refId;
-            LastKnownFileType = lastKnownFileType;
-            Path              = path;
-            SourceTree        = sourceTree;
-            FormattedName     = formattedName;
-        }
-    }
-
-    private delegate void ProcessTask(ref string source);
-
-    private const string LOGFILE_NAME                          = "postprocess.log";
-    private const string PBXJPROJ_FILE_PATH                    = "Unity-iPhone.xcodeproj/project.pbxproj";
-
-    private const string PBXBUILDFILE_SECTION_END              = "/* End PBXBuildFile section */";
-    private const string PBXBUILDFILE_STRING_FORMAT            = "\t\t{0} /* {1} in Frameworks */ = {{isa = PBXBuildFile; fileRef = {2} /* {1} */; }};\n";
-
-    private const string PBXFILEREFERENCE_SECTION_END          = "/* End PBXFileReference section */";
-    private const string PBXFILEREFERENCE_STRING_FORMAT        = "\t\t{0} /* {1} */ = {{isa = PBXFileReference; lastKnownFileType = {2}; name = {3}; path = {4}; sourceTree = {5}; }};\n";
-    
-    private const string PBXFRAMEWORKSBUILDPHASE_SECTION_BEGIN = "/* Begin PBXFrameworksBuildPhase section */";
-    private const string PBXFRAMEWORKSBUILDPHASE_SUBSET        = "files = (";
-    private const string PBXFRAMEWORKSBUILDPHASE_STRING_FORMAT = "\n\t\t\t\t{0} /* {1} in Frameworks */,";
-
-    private const string PBXGROUP_SECTION_BEGIN                = "/* Begin PBXGroup section */";
-    private const string PBXGROUP_SUBSET_1                     = "/* Frameworks */ = {";
-    private const string PBXGROUP_SUBSET_2                     = "children = (";
-    private const string PBXGROUP_STRING_FORMAT                = "\n\t\t\t\t{0} /* {1} */,";
-
-    private const string ENABLE_BITCODE                        = "ENABLE_BITCODE = YES";
-    private const string DISABLE_BITCODE                       = "ENABLE_BITCODE = NO";
-
-    private static IosFramework[] iosFrameworks = {
-        new IosFramework("libstdc++.6.dylib",    "E0005ED91B047A0C00FEB577", "E0005ED81B047A0C00FEB577", "\"compiled.mach-o.dylib\"",
-                         "\"libstdc++.6.dylib\"", "\"usr/lib/libstdc++.6.dylib\"",                  "SDKROOT"),
-        new IosFramework("libsqlite3.dylib",     "E0005ED91B047FF800FEB577", "E0005ED81B047FF800FEB577", "\"compiled.mach-o.dylib\"",
-                         "\"libsqlite3.dylib\"", "\"usr/lib/libsqlite3.dylib\"", "SDKROOT"),
-        new IosFramework("libz.dylib",           "4A38B1721E4BE21000C2919E", "4A38B1711E4BE21000C2919E", "\"compiled.mach-o.dylib\"",
-                         "\"libz.dylib\"",       "\"usr/lib/libz.dylib\"", "SDKROOT")
-    };
-
-    private static StreamWriter streamWriter = null;
-
-    [PostProcessBuild(int.MaxValue)]
-    public static void OnPostProcessBuild(BuildTarget target, string path) {
-        string logPath = Path.Combine(path, LOGFILE_NAME);
+        string logPath = Path.Combine(appPath, LOGFILE_NAME);
         if (target != BuildTarget.iOS) {
             Debug.LogError("ARToolKitPostProcessor::OnIosPostProcess - Called on non iOS build target!");
             return;
@@ -138,53 +116,28 @@ public class ARToolKitPostProcessor {
             streamWriter.WriteLine("OnIosPostProcess - Beginning iOS post-processing.");
 
             try {
-                string pbxprojPath = Path.Combine(path, PBXJPROJ_FILE_PATH);
+
+                string pbxprojPath = PBXProject.GetPBXProjectPath(appPath);
                 if (File.Exists(pbxprojPath)) {
-                    string pbxproj = File.ReadAllText(pbxprojPath);
-                      
+                    PBXProject project = new PBXProject();
+                    project.ReadFromFile(pbxprojPath);
+
+                    string g = project.GetUnityFrameworkTargetGuid();
+
                     streamWriter.WriteLine("OnIosPostProcess - Modifying file at " + pbxprojPath);
-                      
-                    string pbxBuildFile            = string.Empty;
-                    string pbxFileReference        = string.Empty;
-                    string pbxFrameworksBuildPhase = string.Empty;
-                    string pbxGroup                = string.Empty;
-                    for (int i = 0; i < iosFrameworks.Length; ++i) {
-                        if (pbxproj.Contains(iosFrameworks[i].Path)) {
-                            streamWriter.WriteLine("OnIosPostProcess - Project already contains reference to " + iosFrameworks[i].Name + " - skipping.");
-                            continue;
-                        }
-                        pbxBuildFile            += string.Format(PBXBUILDFILE_STRING_FORMAT,            new object[] { iosFrameworks[i].Id,            iosFrameworks[i].Name, iosFrameworks[i].RefId });
-                        pbxFileReference        += string.Format(PBXFILEREFERENCE_STRING_FORMAT,        new object[] { iosFrameworks[i].RefId,         iosFrameworks[i].Name, iosFrameworks[i].LastKnownFileType,
-                                                                                                                       iosFrameworks[i].FormattedName, iosFrameworks[i].Path, iosFrameworks[i].SourceTree });
-                        pbxFrameworksBuildPhase += string.Format(PBXFRAMEWORKSBUILDPHASE_STRING_FORMAT, new object[] { iosFrameworks[i].Id,            iosFrameworks[i].Name });
-                        pbxGroup                += string.Format(PBXGROUP_STRING_FORMAT,                new object[] { iosFrameworks[i].RefId,         iosFrameworks[i].Name });
-                        streamWriter.WriteLine("OnPostProcessBuild - Processed " + iosFrameworks[i].Name);
+
+                    foreach (var f in IosFrameworks)
+                    {
+                        project.AddFrameworkToProject(g, f.Item1, f.Item2);
                     }
 
-                    int index = pbxproj.IndexOf(PBXBUILDFILE_SECTION_END);
-                    pbxproj = pbxproj.Insert(index, pbxBuildFile);
-                    streamWriter.WriteLine("OnPostProcessBuild - Injected PBXBUILDFILE");
+                    foreach (var bv in IosBuildValues)
+                    {
+                        project.AddBuildProperty(g, bv.Item1, bv.Item2);
+                        //project.UpdateBuildProperty(g, bv.Item1, new string[] { bv.Item2 }, new string[] { });
+                    }
 
-                    index = pbxproj.IndexOf(PBXFILEREFERENCE_SECTION_END);
-                    pbxproj = pbxproj.Insert(index, pbxFileReference);
-                    streamWriter.WriteLine("OnPostProcessBuild - Injected PBXFILEREFERENCE");
-
-                    index = pbxproj.IndexOf(PBXFRAMEWORKSBUILDPHASE_SECTION_BEGIN);
-                    index = pbxproj.IndexOf(PBXFRAMEWORKSBUILDPHASE_SUBSET, index) + PBXFRAMEWORKSBUILDPHASE_SUBSET.Length;
-                    pbxproj = pbxproj.Insert(index, pbxFrameworksBuildPhase);
-                    streamWriter.WriteLine("OnPostProcessBuild - Injected PBXFRAMEWORKSBUILDPHASE");
-
-                    index = pbxproj.IndexOf(PBXGROUP_SECTION_BEGIN);
-                    index = pbxproj.IndexOf(PBXGROUP_SUBSET_1, index);
-                    index = pbxproj.IndexOf(PBXGROUP_SUBSET_2, index) + PBXGROUP_SUBSET_2.Length;
-                    pbxproj = pbxproj.Insert(index, pbxGroup);
-                    streamWriter.WriteLine("OnPostProcessBuild - Injected PBXGROUP");
-
-                    pbxproj = pbxproj.Replace(ENABLE_BITCODE, DISABLE_BITCODE);
-                    streamWriter.WriteLine("OnPostProcessBuild - Disabled Bitcode");
-
-                    File.Delete(pbxprojPath);
-                    File.WriteAllText(pbxprojPath, pbxproj);
+                    project.WriteToFile(pbxprojPath);
 
                     streamWriter.WriteLine("OnIosPostProcess - Ending iOS post-processing successfully.");
                 } else {
@@ -199,7 +152,6 @@ public class ARToolKitPostProcessor {
             }
         }
     }
-
 #endif
 }
 
