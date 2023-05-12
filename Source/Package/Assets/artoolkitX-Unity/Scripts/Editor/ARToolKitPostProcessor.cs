@@ -151,8 +151,8 @@ public class ARToolKitPostProcessor : IPostprocessBuildWithReport
                 streamWriter = null;
             }
         }
-    }
 #endif
+    }
 }
 
 class ARToolKitAndroidManifestPostProcessor : IPostGenerateGradleAndroidProject
