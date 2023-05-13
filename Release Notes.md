@@ -1,6 +1,19 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.1.8
+### 2023-05-14
+
+Changes:
+ * Add UnityEvent bindings to ARTrackedObject's events (found, tracked, lost) (and also legacy ARTrackedCamera). The legacy broadcast event bindings are still available but the UnityEvent interface offers better performance and flexibility.
+ * Fixed callback stub handling in the plugin interface.
+ * Restored Android and iOS camera permissions requests in StartAR (that were lost in the update to v1.1.2).
+ * ARController.StartAR is now a co-routine, and will no longer be called from ARController.UpdateAR.
+ * On Android, removed AndroidManifest.xml and replaced with build post-processor to insert required permissions and features into the Unity-provided manifest.
+ * Tweak built sample app packge ID.
+ * Fixed iOS build by adding ARX's dependent libs, plus overhauled post-processor to add linking to sqlite.
+Also tidied up ScreenOrienation warning.
+
 ## Version 1.1.7
 ### 2023-05-08
 
