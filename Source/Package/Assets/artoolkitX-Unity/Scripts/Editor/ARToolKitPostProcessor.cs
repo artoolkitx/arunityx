@@ -38,12 +38,15 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using System.IO;
-using UnityEditor.Android;
 using System.Xml;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using System;
+#if UNITY_ANDROID
+using UnityEditor.Android;
+#elif UNITY_IPHONE
 using UnityEditor.iOS.Xcode;
+#endif
 
 public class ARToolKitPostProcessor : IPostprocessBuildWithReport
 {
@@ -155,6 +158,7 @@ public class ARToolKitPostProcessor : IPostprocessBuildWithReport
     }
 }
 
+#if UNITY_ANDROID
 class ARToolKitAndroidManifestPostProcessor : IPostGenerateGradleAndroidProject
 {
     const string k_AndroidUri = "http://schemas.android.com/apk/res/android";
@@ -291,4 +295,4 @@ class ARToolKitAndroidManifestPostProcessor : IPostGenerateGradleAndroidProject
 
     public int callbackOrder => 2;
 }
-
+#endif
