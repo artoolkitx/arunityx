@@ -104,7 +104,6 @@ public class ARToolKitPostProcessor : IPostprocessBuildWithReport
 		foreach (string redistFile in REDIST_FILES) {
 			File.Move(Path.Combine(fromPath, redistFile), Path.Combine(pathDirectory, redistFile));
 		}
-	}
 #elif UNITY_IPHONE
         const string LOGFILE_NAME = "postprocess.log";
 
