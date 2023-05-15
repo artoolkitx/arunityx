@@ -28,9 +28,10 @@
  *  are not obligated to do so. If you do not wish to do so, delete this exception
  *  statement from your version.
  *
+ *  Copyright 2023 Philip Lamb
  *  Copyright 2015 Daqri, LLC.
  *
- *  Author(s): Wally Young
+ *  Author(s): Wally Young, Philip Lamb
  *
  */
 
@@ -64,8 +65,12 @@ public class ARToolKitPostProcessor : IPostprocessBuildWithReport
     };
 
     // Setting name, value to add.
-    private static Tuple<string, string>[] IosBuildValues = {
+    private static Tuple<string, string>[] IosBuildValuesToAdd = {
         new Tuple<string, string>("OTHER_LDFLAGS", "-lsqlite3"),
+    };
+
+    private static Tuple<string, string>[] IosBuildValuesToSetInProject = {
+        new Tuple<string, string>("ENABLE_BITCODE", "NO"),
     };
 
     private static StreamWriter streamWriter = null;
@@ -125,19 +130,24 @@ public class ARToolKitPostProcessor : IPostprocessBuildWithReport
                     PBXProject project = new PBXProject();
                     project.ReadFromFile(pbxprojPath);
 
-                    string g = project.GetUnityFrameworkTargetGuid();
+                    string unityFrameworkGUID = project.GetUnityFrameworkTargetGuid();
 
                     streamWriter.WriteLine("OnIosPostProcess - Modifying file at " + pbxprojPath);
 
                     foreach (var f in IosFrameworks)
                     {
-                        project.AddFrameworkToProject(g, f.Item1, f.Item2);
+                        project.AddFrameworkToProject(unityFrameworkGUID, f.Item1, f.Item2);
                     }
 
-                    foreach (var bv in IosBuildValues)
+                    foreach (var bv in IosBuildValuesToAdd)
                     {
-                        project.AddBuildProperty(g, bv.Item1, bv.Item2);
+                        project.AddBuildProperty(unityFrameworkGUID, bv.Item1, bv.Item2);
                         //project.UpdateBuildProperty(g, bv.Item1, new string[] { bv.Item2 }, new string[] { });
+                    }
+
+                    foreach (var bv in IosBuildValuesToSetInProject)
+                    {
+                        project.SetBuildProperty(project.ProjectGuid(), bv.Item1, bv.Item2);
                     }
 
                     project.WriteToFile(pbxprojPath);
