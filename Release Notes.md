@@ -1,6 +1,13 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.1.9
+### 2023-05-15
+
+Changes:
+ * Updated the Unity project to Unity 2021.3.25f1.
+ * Updated the native plugin to artoolkitX v1.1.8.
+
 ## Version 1.1.8
 ### 2023-05-14
 
