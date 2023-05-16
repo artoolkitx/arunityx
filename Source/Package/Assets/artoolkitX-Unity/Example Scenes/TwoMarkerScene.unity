@@ -268,7 +268,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ac62947536a3704295fb870f025f1e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventReceiver: {fileID: 0}
   Stereo: 0
   StereoEye: 1
   Optical: 0
@@ -638,6 +637,8 @@ MonoBehaviour:
   currentNFTMultiMode: 0
   currentTwoDMaxMarkersToTrack: 1
   currentLogLevel: 1
+  currentSquareMatrixModeAutocreateNewTrackables: 0
+  currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth: 0.08
   scrollPosition: {x: 0, y: 0}
 --- !u!4 &1192976671
 Transform:
@@ -1098,9 +1099,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e02d1ce5da0c446acaea956b6ae07690, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  secondsToRemainVisible: 0
-  eventReceiver: {fileID: 0}
   _trackableTag: kanji
+  secondsToRemainVisible: 0
+  OnTrackedObjectFound:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTrackedObjectTracked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTrackedObjectLost:
+    m_PersistentCalls:
+      m_Calls: []
+  eventReceiver: {fileID: 0}
 --- !u!1 &1562006351
 GameObject:
   m_ObjectHideFlags: 0
@@ -1240,9 +1250,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e02d1ce5da0c446acaea956b6ae07690, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  secondsToRemainVisible: 0
-  eventReceiver: {fileID: 0}
   _trackableTag: hiro
+  secondsToRemainVisible: 0
+  OnTrackedObjectFound:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTrackedObjectTracked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTrackedObjectLost:
+    m_PersistentCalls:
+      m_Calls: []
+  eventReceiver: {fileID: 0}
 --- !u!1 &2045854512
 GameObject:
   m_ObjectHideFlags: 0

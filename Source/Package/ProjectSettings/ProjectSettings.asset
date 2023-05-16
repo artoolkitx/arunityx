@@ -533,7 +533,8 @@ PlayerSettings:
   enableInternalProfiler: 0
   logObjCUncaughtExceptions: 1
   enableCrashReportAPI: 0
-  cameraUsageDescription: For AR tracking
+  cameraUsageDescription: Required for AR tracking. Video is used in realtime, and
+    is not stored or transmitted outside the app.
   locationUsageDescription: 
   microphoneUsageDescription: 
   bluetoothUsageDescription: 
