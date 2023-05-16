@@ -26,6 +26,7 @@
 #
 
 # Define UNITY_EDITOR to path to Unity Editor executable, or default will be used.
+# Define UNITY_WITH_GPU (e.g. 'UNITY_WITH_GPU=') to disabled Unity's "-nographics" switch.
 
 # -e = exit on errors
 set -e -x
@@ -108,7 +109,7 @@ sed -Ei "" "s/artoolkitX for Unity Version (([0-9]+\.[0-9]+)(\.[0-9]+)?(r[0-9]+)
 "${UNITY_EDITOR}" \
     -quit \
     -batchmode \
-    -nographics \
+    ${UNITY_WITH_GPU--nographics} \
     -stackTraceLogType Full \
     -projectPath "${UNITY_PROJECT_PATH}" \
     -arunityxpackagename arunityX-${VERSION}.unitypackage \
