@@ -73,7 +73,8 @@ public class PluginFunctionsARX : IPluginFunctions
                        /*ARW_TRACKER_OPTION_2D_TRACKER_FEATURE_TYPE = 11,*/           ///< Feature detector type used in the 2d Tracker - 0 AKAZE, 1 ORB, 2 BRISK, 3 KAZE
                        ARW_TRACKER_OPTION_2D_MAXIMUM_MARKERS_TO_TRACK = 12,           ///< Maximum number of markers able to be tracked simultaneously. Defaults to 1. Should not be set higher than the number of 2D markers loaded.
                        ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES = 13, ///< If true, when the square tracker is detecting matrix (barcode) markers, new trackables will be created for unmatched markers. Defaults to false. bool.
-                       ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES_DEFAULT_WIDTH = 14; ///< If ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES is true, this value will be used for the initial width of new trackables for unmatched markers. Defaults to 80.0f. float.
+                       ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES_DEFAULT_WIDTH = 14, ///< If ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES is true, this value will be used for the initial width of new trackables for unmatched markers. Defaults to 80.0f. float.
+                       ARW_TRACKER_OPTION_2D_THREADED = 15;                           ///< bool, If false, 2D tracking updates synchronously, and arwUpdateAR will not return until 2D tracking is complete. If true, 2D tracking updates asychronously on a secondary thread, and arwUpdateAR will not block if the track is busy. Defaults to true.
 
     override public bool IsConfigured()
     {
@@ -381,6 +382,16 @@ public class PluginFunctionsARX : IPluginFunctions
     override public void arwSet2DMaxMarkersToTrack(int maxMarkersToTrack)
     {
         ARX_pinvoke.arwSetTrackerOptionInt(ARW_TRACKER_OPTION_2D_MAXIMUM_MARKERS_TO_TRACK, maxMarkersToTrack);
+    }
+
+    override public bool arwGet2DThreaded()
+    {
+        return ARX_pinvoke.arwGetTrackerOptionBool(ARW_TRACKER_OPTION_2D_THREADED);
+    }
+
+    override public void arwSet2DThreaded(bool threaded)
+    {
+        ARX_pinvoke.arwSetTrackerOptionBool(ARW_TRACKER_OPTION_2D_THREADED, threaded);
     }
 
     override public int arwGet2DMaxMarkersToTrack()

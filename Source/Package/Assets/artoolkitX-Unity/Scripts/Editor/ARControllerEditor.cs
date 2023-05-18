@@ -67,6 +67,8 @@ public class ARControllerEditor : Editor
     protected SerializedProperty ContentFlipH;
     protected SerializedProperty NearPlane;
     protected SerializedProperty FarPlane;
+    protected SerializedProperty TwoDMaxMarkersToTrack;
+    protected SerializedProperty TwoDThreaded;
 
     private readonly static Dictionary<ARController.ARToolKitThresholdMode, string> thresholdModeDescriptions = new Dictionary<ARController.ARToolKitThresholdMode, string>
     {
@@ -92,6 +94,8 @@ public class ARControllerEditor : Editor
         ContentFlipH = serializedObject.FindProperty("ContentFlipH");
         NearPlane = serializedObject.FindProperty("NearPlane");
         FarPlane = serializedObject.FindProperty("FarPlane");
+        TwoDMaxMarkersToTrack = serializedObject.FindProperty("currentTwoDMaxMarkersToTrack"); ;
+        TwoDThreaded = serializedObject.FindProperty("currentTwoDThreaded"); ;
     }
 
     public override void OnInspectorGUI()
@@ -299,12 +303,8 @@ public class ARControllerEditor : Editor
         show2DTrackingOptions = EditorGUILayout.Foldout(show2DTrackingOptions, "2D Tracking Options");
         if (show2DTrackingOptions)
         {
-            int n = EditorGUILayout.IntField("Max. number of markers to track", arcontroller.TwoDMaxMarkersToTrack);
-            if (n != arcontroller.TwoDMaxMarkersToTrack)
-            {
-                Undo.RecordObject(arcontroller, "Set max. number of markers to track");
-                arcontroller.TwoDMaxMarkersToTrack = n;
-            }
+            EditorGUILayout.PropertyField(TwoDMaxMarkersToTrack, new GUIContent("Max. number of markers to track"), null);
+            EditorGUILayout.PropertyField(TwoDThreaded, new GUIContent("Threaded"), null);
         }
 
         EditorGUILayout.Separator();

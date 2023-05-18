@@ -1,6 +1,11 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.1.10
+### 2023-05-18
+
+* Support for asynchronous tracking (on a secondary thread) has been added to the 2D tracker. When enabled, the tracking rate can run slower than the video capture frame rate. This results in increased smoothness of the display of video frames, at the expense of some memory usage and a possible lag on lower-powered devices between the displayed frame and the tracking results. It has been enabled by default, and can be adjusted using the control on ARController under "2D tracking options".
+
 ## Version 1.1.9
 ### 2023-05-15
 

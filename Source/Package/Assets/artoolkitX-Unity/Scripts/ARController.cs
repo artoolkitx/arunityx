@@ -375,8 +375,12 @@ public class ARController : MonoBehaviour
     private bool currentUseVideoBackground = true;
     [SerializeField]
     private bool currentNFTMultiMode = false;
+    [Tooltip("The max. number of markers to track simultaneously. If fewer than this number are found, then detection will run each frame, as well as tracking for any detected markers.")]
     [SerializeField]
     private int currentTwoDMaxMarkersToTrack = 1;
+    [Tooltip("If set, detection and tracking will run independently from frame capture and display on a separate thread.")]
+    [SerializeField]
+    private bool currentTwoDThreaded = true;
     [SerializeField]
     private AR_LOG_LEVEL currentLogLevel = AR_LOG_LEVEL.AR_LOG_LEVEL_INFO;
     [SerializeField]
@@ -775,6 +779,7 @@ public class ARController : MonoBehaviour
             ImageProcMode = currentImageProcMode;
             NFTMultiMode = currentNFTMultiMode;
             TwoDMaxMarkersToTrack = currentTwoDMaxMarkersToTrack;
+            TwoDThreaded = currentTwoDThreaded;
             SquareMatrixModeAutocreateNewTrackables = currentSquareMatrixModeAutocreateNewTrackables;
             SquareMatrixModeAutocreateNewTrackablesDefaultWidth = currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth;
 
@@ -1296,6 +1301,27 @@ public class ARController : MonoBehaviour
             if (_running)
             {
                 PluginFunctions.arwSetNFTMultiMode(currentNFTMultiMode);
+            }
+        }
+    }
+
+    public bool TwoDThreaded
+    {
+        get
+        {
+            if (_running)
+            {
+                currentTwoDThreaded = PluginFunctions.arwGet2DThreaded();
+            }
+            return currentTwoDThreaded;
+        }
+
+        set
+        {
+            currentTwoDThreaded = value;
+            if (_running)
+            {
+                PluginFunctions.arwSet2DThreaded(currentTwoDThreaded);
             }
         }
     }
