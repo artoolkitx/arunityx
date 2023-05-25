@@ -118,8 +118,10 @@ public class ARTransitionalCamera : ARTrackedCamera
 		vrObserverOffset = Vector3.zero;
     }
 
-    public void Update()
+    protected override void Update()
     {
+        base.Update();
+
         if (Input.GetKeyDown(KeyCode.I)) {
             transitionIn();
         }
