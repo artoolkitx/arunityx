@@ -47,10 +47,13 @@ using UnityEngine;
 /// initialised.
 /// To find markers from elsewhere in the Unity environment:
 ///   ARTrackable[] markers = FindObjectsOfType<ARTrackable>(); // (or FindObjectsOfType(typeof(ARTrackable)) as ARTrackable[]);
-/// 
+///
+/// Script execution order is set to -100 on this component, to ensure that the updated pose information is available
+/// to scene game objects during their Update(), particularly game objects with ARCamera or ARTrackedOject components attached.
 /// </summary>
 /// 
 [ExecuteInEditMode]
+[DefaultExecutionOrder(-100)]
 public class ARTrackable : MonoBehaviour
 {
     public enum TrackableType
@@ -489,9 +492,8 @@ public class ARTrackable : MonoBehaviour
         }
     }
 
-    // We use Update() here, but be aware that unless ARController has been configured to
-    // execute first (Unity Editor->Edit->Project Settings->Script Execution Order) then
-    // state produced by this update may lag by one frame.
+    // Note that [DefaultExecutionOrder] is used on ARController to ensure that a tracking update has completed before we try
+    // to fetch our transformation here.
     void Update()
     {
         // Only query visibility if we are running in the Player.

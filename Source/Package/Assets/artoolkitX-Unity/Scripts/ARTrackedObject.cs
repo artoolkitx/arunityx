@@ -124,8 +124,8 @@ public class ARTrackedObject : MonoBehaviour
 		}
 	}
 
-	// Use LateUpdate to be sure the ARTrackable has updated before we try and use the transformation.
-	void LateUpdate()
+	// Note that [DefaultExecutionOrder] is used on ARTrackable to ensure the base ARTrackable has updated before we try and use the transformation.
+	void Update()
 	{
 		// Local scale is always 1 for now
 		transform.localScale = Vector3.one;

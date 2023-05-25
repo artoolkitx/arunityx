@@ -251,8 +251,8 @@ public class ARCamera : MonoBehaviour
 		}
 	}
 	
-	// Use LateUpdate to be sure the ARMarker has updated before we try and use the transformation.
-	protected virtual void LateUpdate()
+	// Note that [DefaultExecutionOrder] is used on ARTrackable to ensure the base ARTrackable has updated before we try and use the transformation.
+	protected virtual void Update()
 	{
 		// Local scale is always 1 for now
 		transform.localScale = Vector3.one;

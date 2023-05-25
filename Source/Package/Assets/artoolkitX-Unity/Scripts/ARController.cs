@@ -67,9 +67,14 @@ public enum ContentAlign
 
 /// <summary>
 /// Manages core ARToolKit behaviour.
-/// </summary>
+///
+/// There should be exactly one instance of this component in the scene to provide ARToolKit functionality.
 /// 
+/// Script execution order is set to -101 on this component, to ensure that a tracking update has completed
+/// prior to ARTrackable components fetching their pose information.
+/// </summary>
 [ExecuteInEditMode]
+[DefaultExecutionOrder(-101)]
 [RequireComponent(typeof(ARVideoConfig))]
 public class ARController : MonoBehaviour
 {
