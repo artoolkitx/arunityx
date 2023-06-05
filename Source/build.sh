@@ -164,7 +164,7 @@ find_or_fetch_artoolkitx() {
 # If a DEV build is running the script uses the path to artoolkitX source to build artoolkitX plugin-libraries from there.
 # If no dev build is running (default) the artoolkitX libraries are downloaded from GitHub release using the version provided.
 #
-if [ $DEV ] ; then 
+if [ $DEV ] ; then
 
     if [ "$OS" = "Darwin" ] ; then
     # ======================================================================
@@ -173,42 +173,42 @@ if [ $DEV ] ; then
 
         locate_artoolkitx
 
-        if [ $BUILD_ANDROID ] ; then 
+        if [ $BUILD_ANDROID ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh android
+            ./build.sh ${DEBUG+--debug} android
             refresh_plugin_for_platform_from_source Android  "${ARTOOLKITX_HOME}"
         fi
         if [ $BUILD_IOS ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh ios
+            ./build.sh ${DEBUG+--debug} ios
             refresh_plugin_for_platform_from_source iOS "${ARTOOLKITX_HOME}"
         fi
         if [ $BUILD_MACOS ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh macos
+            ./build.sh ${DEBUG+--debug} macos
             refresh_plugin_for_platform_from_source macOS "${ARTOOLKITX_HOME}"
         fi
     fi
 
-    if [ "$OS" = "Windows" ] ; then 
+    if [ "$OS" = "Windows" ] ; then
     # ======================================================================
     #  Build platforms hosted by windows
     # ======================================================================
 
         locate_artoolkitx
 
-        if [ $BUILD_ANDROID ] ; then 
+        if [ $BUILD_ANDROID ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh android
+            ./build.sh ${DEBUG+--debug} android
             refresh_plugin_for_platform_from_source Android "${ARTOOLKITX_HOME}"
         fi
         if [ $BUILD_WINDOWS ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh windows
+            ./build.sh ${DEBUG+--debug} windows
             refresh_plugin_for_platform_from_source Windows "${ARTOOLKITX_HOME}"
         fi
     fi
-else 
+else
     # ======================================================================
     #  Download plugins (Android, iOS, macOS, Windows)
     # ======================================================================
@@ -222,7 +222,7 @@ else
         refresh_plugin_for_platform_from_source Android "${MOUNTPOINT}/artoolkitX"
         rm -rf "${MOUNTPOINT}"
     fi
-    if [ $BUILD_IOS ] ; then 
+    if [ $BUILD_IOS ] ; then
         cd "${OURDIR}"
         MOUNTPOINT=mnt$$
         IMAGE="artoolkitX.for.iOS.v${ARTOOLKITX_VERSION}.dmg"
@@ -233,7 +233,7 @@ else
         hdiutil detach "${MOUNTPOINT}" -quiet -force
         rmdir "${MOUNTPOINT}"
     fi
-    if [ $BUILD_MACOS ] ; then 
+    if [ $BUILD_MACOS ] ; then
         cd "${OURDIR}"
         MOUNTPOINT=mnt$$
         IMAGE="artoolkitX.for.macOS.v${ARTOOLKITX_VERSION}.dmg"

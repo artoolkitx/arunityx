@@ -441,6 +441,7 @@ public class ARController : MonoBehaviour
             default:
                 break;
         }
+        PluginFunctions.arwSetLogLevel((int)currentLogLevel);
 
         // ARController is up, so init.
         if (!PluginFunctions.IsInited())
@@ -533,7 +534,13 @@ public class ARController : MonoBehaviour
 
         // Player update.
         if (Input.GetKeyDown(KeyCode.Menu) || Input.GetKeyDown(KeyCode.Return)) showGUIDebug = !showGUIDebug;
-        if (QuitOnEscOrBack && Input.GetKeyDown(KeyCode.Escape)) Application.Quit(); // On Android, maps to "back" button.
+        if (QuitOnEscOrBack && Input.GetKeyDown(KeyCode.Escape)) // On Android, maps to "back" button.
+        {
+            Application.Quit();
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        }
 
         CalculateFPS();
 

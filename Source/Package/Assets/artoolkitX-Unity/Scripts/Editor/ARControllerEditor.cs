@@ -70,6 +70,8 @@ public class ARControllerEditor : Editor
     protected SerializedProperty TwoDMaxMarkersToTrack;
     protected SerializedProperty TwoDThreaded;
     protected SerializedProperty NFTMultiMode;
+    protected SerializedProperty AutoStartAR;
+    protected SerializedProperty QuitOnEscOrBack;
 
     private readonly static Dictionary<ARController.ARToolKitThresholdMode, string> thresholdModeDescriptions = new Dictionary<ARController.ARToolKitThresholdMode, string>
     {
@@ -98,6 +100,8 @@ public class ARControllerEditor : Editor
         TwoDMaxMarkersToTrack = serializedObject.FindProperty("currentTwoDMaxMarkersToTrack");
         TwoDThreaded = serializedObject.FindProperty("currentTwoDThreaded");
         NFTMultiMode = serializedObject.FindProperty("currentNFTMultiMode");
+        AutoStartAR = serializedObject.FindProperty("AutoStartAR");
+        QuitOnEscOrBack = serializedObject.FindProperty("QuitOnEscOrBack");
     }
 
     public override void OnInspectorGUI()
@@ -322,13 +326,18 @@ public class ARControllerEditor : Editor
 		EditorGUILayout.Separator();
 		showApplicationOptions = EditorGUILayout.Foldout(showApplicationOptions, "Application Options");
 		if (showApplicationOptions) {
-			arcontroller.AutoStartAR = EditorGUILayout.Toggle("Auto-start AR.", arcontroller.AutoStartAR);
-			if (arcontroller.AutoStartAR) EditorGUILayout.HelpBox("ARController.StartAR() will be called during MonoBehavior.Start().", MessageType.Info);
+            EditorGUILayout.PropertyField(AutoStartAR, new GUIContent("Auto-start AR."));
+			if (AutoStartAR.boolValue) EditorGUILayout.HelpBox("ARController.StartAR() will be called during MonoBehavior.Start().", MessageType.Info);
 			else EditorGUILayout.HelpBox("ARController.StartAR() will not be called during MonoBehavior.Start(); you must call it yourself.", MessageType.Info);
-			arcontroller.QuitOnEscOrBack = EditorGUILayout.Toggle("Quit on [Esc].", arcontroller.QuitOnEscOrBack);
-			if (arcontroller.QuitOnEscOrBack) EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will quit the app.", MessageType.Info);
+            EditorGUILayout.PropertyField(QuitOnEscOrBack, new GUIContent("Quit on [Esc]."));
+            if (QuitOnEscOrBack.boolValue) EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will quit the app.", MessageType.Info);
 			else EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will be ignored by artoolkitX.", MessageType.Info);
-			arcontroller.LogLevel = (ARController.AR_LOG_LEVEL)EditorGUILayout.EnumPopup("Log level:", arcontroller.LogLevel);
+			ARController.AR_LOG_LEVEL newLogLevel = (ARController.AR_LOG_LEVEL)EditorGUILayout.EnumPopup("Log level:", arcontroller.LogLevel);
+            if (newLogLevel != arcontroller.LogLevel)
+            {
+                Undo.RecordObject(arcontroller, "Set log level");
+                arcontroller.LogLevel = newLogLevel;
+            }
 		}
 
         serializedObject.ApplyModifiedProperties();
