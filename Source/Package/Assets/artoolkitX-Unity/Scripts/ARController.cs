@@ -40,6 +40,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Android;
 using UnityEngine.Rendering;
@@ -74,6 +75,7 @@ public enum ContentAlign
 /// prior to ARTrackable components fetching their pose information.
 /// </summary>
 [ExecuteInEditMode]
+[DisallowMultipleComponent]
 [DefaultExecutionOrder(-101)]
 [RequireComponent(typeof(ARVideoConfig))]
 public class ARController : MonoBehaviour
@@ -393,8 +395,8 @@ public class ARController : MonoBehaviour
     [SerializeField]
     private float currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth = 0.08f;
 
+    // Links to other components.
     private ARVideoConfig arvideoconfig = null;
-
 
     //
     // MonoBehavior methods.
@@ -439,6 +441,7 @@ public class ARController : MonoBehaviour
             default:
                 break;
         }
+        PluginFunctions.arwSetLogLevel((int)currentLogLevel);
 
         // ARController is up, so init.
         if (!PluginFunctions.IsInited())
@@ -531,7 +534,13 @@ public class ARController : MonoBehaviour
 
         // Player update.
         if (Input.GetKeyDown(KeyCode.Menu) || Input.GetKeyDown(KeyCode.Return)) showGUIDebug = !showGUIDebug;
-        if (QuitOnEscOrBack && Input.GetKeyDown(KeyCode.Escape)) Application.Quit(); // On Android, maps to "back" button.
+        if (QuitOnEscOrBack && Input.GetKeyDown(KeyCode.Escape)) // On Android, maps to "back" button.
+        {
+            Application.Quit();
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#endif
+        }
 
         CalculateFPS();
 
@@ -695,8 +704,8 @@ public class ARController : MonoBehaviour
                     videoConfiguration1 += " -cachedir=\"" + Application.temporaryCachePath + "\"";
                     if (_useNativeGLTexturing || !AllowNonRGBVideo)
                     {
-                        videoConfiguration0 += " -format=RGBA";
-                        videoConfiguration1 += " -format=RGBA";
+                        if (videoConfiguration0.IndexOf("-device=Android") != -1) videoConfiguration0 += " -format=RGBA";
+                        if (videoConfiguration0.IndexOf("-device=Android") != -1) videoConfiguration1 += " -format=RGBA";
                     }
                     break;
                 //case RuntimePlatform.LinuxEditor:
@@ -980,8 +989,11 @@ public class ARController : MonoBehaviour
         }
 
         // Clean up.
-        DestroyVideoBackground();
-        DestroyClearCamera();
+        if (_sceneConfiguredForVideo)
+        {
+            DestroyVideoBackground();
+            DestroyClearCamera();
+        }
 
         // Reset display sleep.
         Screen.sleepTimeout = SleepTimeout.SystemSetting;

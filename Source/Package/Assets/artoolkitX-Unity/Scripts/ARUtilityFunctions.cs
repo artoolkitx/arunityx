@@ -39,6 +39,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 public static class ARUtilityFunctions
@@ -140,6 +142,14 @@ public static class ARUtilityFunctions
 		lhm[3, 3] =  rhm[3, 3];
 
 		return lhm;
+	}
+
+	public static IntPtr GetIntPtr<T>(this NativeArray<T> array) where T : struct
+	{
+		unsafe
+        {
+			return new IntPtr(NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(array));
+		}
 	}
 
 }

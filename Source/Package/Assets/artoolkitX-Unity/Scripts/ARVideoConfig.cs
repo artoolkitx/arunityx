@@ -39,6 +39,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteInEditMode]
+[DisallowMultipleComponent]
 [RequireComponent(typeof(ARController))]
 public class ARVideoConfig : MonoBehaviour
 {
@@ -64,6 +65,17 @@ public class ARVideoConfig : MonoBehaviour
         AVFoundation,
         Android,
         WinMF,
+        External,
+    }
+
+    /// <summary>
+    /// Unity video input sources.
+    /// </summary>
+    [Serializable]
+    public enum ARVideoUnityVideoSource
+    {
+        None = 0,
+        WebcamTexture,
     }
 
     /// <summary>
@@ -280,6 +292,27 @@ public class ARVideoConfig : MonoBehaviour
                 sizeSelectionStrategy = ARVideoSizeSelectionStrategy.WidthAndHeight,
             }
         },
+        {
+            ARVideoModule.External,
+            new ARVideoModuleInfo {
+                moduleSelectionString = "-module=External",
+                runtimePlatforms = new RuntimePlatform[] {
+                    RuntimePlatform.WindowsEditor,
+                    RuntimePlatform.OSXEditor,
+                    RuntimePlatform.WindowsPlayer,
+                    RuntimePlatform.OSXPlayer,
+                    RuntimePlatform.Android,
+                    RuntimePlatform.IPhonePlayer,
+                    RuntimePlatform.LinuxPlayer,
+                },
+                supportsSelectionByPosition = false,
+                positionSelectionString = null,
+                supportsSelectionByIndex = false,
+                indexSelectionString = null,
+                indexSelectionIs1Indexed = false,
+                sizeSelectionStrategy = ARVideoSizeSelectionStrategy.None,
+            }
+        },
     };
 
     //
@@ -353,6 +386,9 @@ public class ARVideoConfig : MonoBehaviour
         public ARVideoSizeSelectionStrategySizePreference sizePreference;
         public bool isUsingManualConfig;
         public string manualConfig;
+        public List<ARVideoUnityVideoSource> supportedUnityVideoSources;
+        public bool isUsingUnityVideoSource;
+        public ARVideoUnityVideoSource unityVideoSource;
     }
 
     public List<ARVideoPlatformConfig> configs = new List<ARVideoPlatformConfig>()
@@ -372,6 +408,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.OSXEditor,
@@ -386,8 +425,11 @@ public class ARVideoConfig : MonoBehaviour
             height = 0,
             AVFoundationPreset = ARVideoSizeSelectionStrategyAVFoundationPreset.medium,
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
             isUsingManualConfig = false,
             manualConfig = "",
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.WindowsPlayer,
@@ -402,8 +444,11 @@ public class ARVideoConfig : MonoBehaviour
             height = 480,
             AVFoundationPreset = ARVideoSizeSelectionStrategyAVFoundationPreset.medium,
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
             isUsingManualConfig = false,
             manualConfig = "",
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.OSXPlayer,
@@ -420,6 +465,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.Android,
@@ -436,6 +484,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.closestpixelcount,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.IPhonePlayer,
@@ -452,6 +503,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.LinuxPlayer,
@@ -468,6 +522,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         }
     };
 
@@ -488,6 +545,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.OSXEditor,
@@ -504,6 +564,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.WindowsPlayer,
@@ -520,6 +583,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.OSXPlayer,
@@ -536,6 +602,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.Android,
@@ -552,6 +621,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.closestpixelcount,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.IPhonePlayer,
@@ -568,6 +640,9 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         },
         new ARVideoPlatformConfig {
             platform = RuntimePlatform.LinuxPlayer,
@@ -584,73 +659,95 @@ public class ARVideoConfig : MonoBehaviour
             sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
             isUsingManualConfig = false,
             manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
         }
     };
 
     public List<ARController.ARVideoSourceInfoT> sourceInfoList = null;
 
-    public string GetVideoConfigStringForPlatform(RuntimePlatform platform, bool stereoSecondInput = false)
+    private ARVideoPlatformConfig? GetPlatformConfig(RuntimePlatform platform, bool stereoSecondInput = false)
     {
-        string config = "";
         List<ARVideoPlatformConfig> cs = stereoSecondInput ? configsForStereoSecondInput : configs;
         int i = cs.FindIndex(c => c.platform == platform);
         if (i >= 0)
         {
-            ARVideoPlatformConfig pc = cs[i];
-            config = modules[pc.module].moduleSelectionString;
+            return cs[i];
+        }
+        return null;
+    }
+
+    public string GetVideoConfigStringForPlatform(RuntimePlatform platform, bool stereoSecondInput = false)
+    {
+        string config = "";
+        ARVideoPlatformConfig? pcb = GetPlatformConfig(platform, stereoSecondInput);
+        if (pcb.HasValue)
+        {
+            ARVideoPlatformConfig pc = pcb.Value;
             if (pc.isUsingManualConfig)
             {
-                config += " " + pc.manualConfig;
+                config = pc.manualConfig;
             }
             else
             {
-                switch (pc.inputSelectionMethod) {
-                    case ARVideoConfigInputSelectionMethod.CameraAtPosition:
-                    case ARVideoConfigInputSelectionMethod.NthCameraAtPosition:
-                        if (modules[pc.module].supportsSelectionByPosition)
-                        {
-                            string p = null;
-                            if (pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK) p = "back";
-                            else if (pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) p = "front";
-                            else if (platform == RuntimePlatform.Android && pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER) p = "external";
-                            if (string.IsNullOrEmpty(p))
-                            {
-                                config += " " + modules[pc.module].positionSelectionString + p;
-                            }
-                        }
-                        if (pc.inputSelectionMethod == ARVideoConfigInputSelectionMethod.NthCameraAtPosition) goto case ARVideoConfigInputSelectionMethod.NthCamera;
-                        break;
-                    case ARVideoConfigInputSelectionMethod.NthCamera:
-                        if (modules[pc.module].supportsSelectionByIndex)
-                        {
-                            config += " " + modules[pc.module].indexSelectionString + (pc.index + (modules[pc.module].indexSelectionIs1Indexed ? 1 : 0)).ToString();
-                        }
-                        break;
-                    case ARVideoConfigInputSelectionMethod.VideoSourceInfoList:
-                        config += " " + pc.VideoSourceInfoListOpenToken;
-                        break;
-                    case ARVideoConfigInputSelectionMethod.AnyCamera:
-                    default:
-                        break;
-                }
-                switch (modules[pc.module].sizeSelectionStrategy)
+                if (!pc.isUsingUnityVideoSource)
                 {
-                    case ARVideoSizeSelectionStrategy.AVFoundationPreset:
-                        config += " " + AVFoundationPresets[pc.AVFoundationPreset].config;
-                        break;
-                    case ARVideoSizeSelectionStrategy.SizePreference:
-                        if (!SizePreferences[pc.sizePreference].usesWidthAndHeightFields || (pc.width != 0 && pc.height != 0))
-                        {
-                            config += " " + SizePreferences[pc.sizePreference].config;
-                            if (SizePreferences[pc.sizePreference].usesWidthAndHeightFields) goto case ARVideoSizeSelectionStrategy.WidthAndHeight;
-                        }
-                        break;
-                    case ARVideoSizeSelectionStrategy.WidthAndHeight:
-                        config += " -width=" + pc.width + " -height=" + pc.height;
-                        break;
-                    case ARVideoSizeSelectionStrategy.None:
-                    default:
-                        break;
+                    config = modules[pc.module].moduleSelectionString;
+                    switch (pc.inputSelectionMethod)
+                    {
+                        case ARVideoConfigInputSelectionMethod.CameraAtPosition:
+                        case ARVideoConfigInputSelectionMethod.NthCameraAtPosition:
+                            if (modules[pc.module].supportsSelectionByPosition)
+                            {
+                                string p = null;
+                                if (pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK) p = "back";
+                                else if (pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) p = "front";
+                                else if (platform == RuntimePlatform.Android && pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER) p = "external";
+                                if (string.IsNullOrEmpty(p))
+                                {
+                                    config += " " + modules[pc.module].positionSelectionString + p;
+                                }
+                            }
+                            if (pc.inputSelectionMethod == ARVideoConfigInputSelectionMethod.NthCameraAtPosition) goto case ARVideoConfigInputSelectionMethod.NthCamera;
+                            break;
+                        case ARVideoConfigInputSelectionMethod.NthCamera:
+                            if (modules[pc.module].supportsSelectionByIndex)
+                            {
+                                config += " " + modules[pc.module].indexSelectionString + (pc.index + (modules[pc.module].indexSelectionIs1Indexed ? 1 : 0)).ToString();
+                            }
+                            break;
+                        case ARVideoConfigInputSelectionMethod.VideoSourceInfoList:
+                            config += " " + pc.VideoSourceInfoListOpenToken;
+                            break;
+                        case ARVideoConfigInputSelectionMethod.AnyCamera:
+                        default:
+                            break;
+                    }
+                    switch (modules[pc.module].sizeSelectionStrategy)
+                    {
+                        case ARVideoSizeSelectionStrategy.AVFoundationPreset:
+                            config += " " + AVFoundationPresets[pc.AVFoundationPreset].config;
+                            break;
+                        case ARVideoSizeSelectionStrategy.SizePreference:
+                            if (!SizePreferences[pc.sizePreference].usesWidthAndHeightFields || (pc.width != 0 && pc.height != 0))
+                            {
+                                config += " " + SizePreferences[pc.sizePreference].config;
+                                if (SizePreferences[pc.sizePreference].usesWidthAndHeightFields) goto case ARVideoSizeSelectionStrategy.WidthAndHeight;
+                            }
+                            break;
+                        case ARVideoSizeSelectionStrategy.WidthAndHeight:
+                            config += " -width=" + pc.width + " -height=" + pc.height;
+                            break;
+                        case ARVideoSizeSelectionStrategy.None:
+                        default:
+                            break;
+                    }
+                }
+                else /* pc.isUsingUnityVideoSource */
+                {
+                    // All Unity video sources require external module.
+                    config = modules[ARVideoModule.External].moduleSelectionString;
                 }
             }
         }

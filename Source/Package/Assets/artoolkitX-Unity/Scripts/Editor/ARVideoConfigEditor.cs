@@ -79,6 +79,8 @@ public class ARVideoConfigEditor : Editor
 
             EditorGUI.BeginDisabledGroup(pc.isUsingManualConfig);
 
+            // This function is called against each enum, and if it returns false, that enum value isn't shown.
+            // We use it to avoid showing the "index" and "position" options for modules that don't support them.
             Func<Enum, bool> checkSelectionMethod = (e) => {
                 ARVideoConfig.ARVideoConfigInputSelectionMethod ism = (ARVideoConfig.ARVideoConfigInputSelectionMethod)e;
                 if (!ARVideoConfig.modules[pc.module].supportsSelectionByIndex
@@ -93,6 +95,7 @@ public class ARVideoConfigEditor : Editor
                 }
                 return true;
             };
+
             ARVideoConfig.ARVideoConfigInputSelectionMethod tempIsm = (ARVideoConfig.ARVideoConfigInputSelectionMethod)EditorGUILayout.EnumPopup(new GUIContent("Select input by"), pc.inputSelectionMethod, checkSelectionMethod, false);
             if (tempIsm != pc.inputSelectionMethod)
             {

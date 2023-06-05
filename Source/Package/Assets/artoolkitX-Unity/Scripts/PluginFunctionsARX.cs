@@ -42,6 +42,8 @@ using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 /// <summary>
 /// A concrete implentation of the IPluginFunctions interface that calls into a local
@@ -496,5 +498,28 @@ public class PluginFunctionsARX : IPluginFunctions
         defaultWidth = ARX_pinvoke.arwGetTrackerOptionFloat(ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES_DEFAULT_WIDTH) * 0.001f;
         tecb = trackableEventCallback;
         return true;
+    }
+
+    override public int arwVideoPushInit(int videoSourceIndex, int width, int height, string pixelFormat, int cameraIndex, int cameraPosition)
+    {
+        return ARX_pinvoke.arwVideoPushInit(videoSourceIndex, width, height, pixelFormat, cameraIndex, cameraPosition);
+    }
+
+    override public int arwVideoPush(int videoSourceIndex,
+                NativeArray<byte> buf0, int buf0PixelStride, int buf0RowStride,
+                NativeArray<byte>? buf1 = null, int buf1PixelStride = 0, int buf1RowStride = 0,
+                NativeArray<byte>? buf2 = null, int buf2PixelStride = 0, int buf2RowStride = 0,
+                NativeArray<byte>? buf3 = null, int buf3PixelStride = 0, int buf3RowStride = 0)
+    {
+        return ARX_pinvoke.arwVideoPush(videoSourceIndex,
+                                        buf0.GetIntPtr(), buf0.Length, buf0PixelStride, buf0RowStride,
+                                        buf1.HasValue ? buf1.Value.GetIntPtr() : IntPtr.Zero, buf1.HasValue ? buf1.Value.Length : 0, buf1PixelStride, buf1RowStride,
+                                        buf2.HasValue ? buf2.Value.GetIntPtr() : IntPtr.Zero, buf2.HasValue ? buf2.Value.Length : 0, buf2PixelStride, buf2RowStride,
+                                        buf3.HasValue ? buf3.Value.GetIntPtr() : IntPtr.Zero, buf3.HasValue ? buf3.Value.Length : 0, buf3PixelStride, buf3RowStride);
+    }
+
+    override public int arwVideoPushFinal(int videoSourceIndex)
+    {
+        return ARX_pinvoke.arwVideoPushFinal(videoSourceIndex);
     }
 }

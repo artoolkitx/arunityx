@@ -69,6 +69,9 @@ public class ARControllerEditor : Editor
     protected SerializedProperty FarPlane;
     protected SerializedProperty TwoDMaxMarkersToTrack;
     protected SerializedProperty TwoDThreaded;
+    protected SerializedProperty NFTMultiMode;
+    protected SerializedProperty AutoStartAR;
+    protected SerializedProperty QuitOnEscOrBack;
 
     private readonly static Dictionary<ARController.ARToolKitThresholdMode, string> thresholdModeDescriptions = new Dictionary<ARController.ARToolKitThresholdMode, string>
     {
@@ -94,8 +97,11 @@ public class ARControllerEditor : Editor
         ContentFlipH = serializedObject.FindProperty("ContentFlipH");
         NearPlane = serializedObject.FindProperty("NearPlane");
         FarPlane = serializedObject.FindProperty("FarPlane");
-        TwoDMaxMarkersToTrack = serializedObject.FindProperty("currentTwoDMaxMarkersToTrack"); ;
-        TwoDThreaded = serializedObject.FindProperty("currentTwoDThreaded"); ;
+        TwoDMaxMarkersToTrack = serializedObject.FindProperty("currentTwoDMaxMarkersToTrack");
+        TwoDThreaded = serializedObject.FindProperty("currentTwoDThreaded");
+        NFTMultiMode = serializedObject.FindProperty("currentNFTMultiMode");
+        AutoStartAR = serializedObject.FindProperty("AutoStartAR");
+        QuitOnEscOrBack = serializedObject.FindProperty("QuitOnEscOrBack");
     }
 
     public override void OnInspectorGUI()
@@ -224,7 +230,9 @@ public class ARControllerEditor : Editor
             }
 
             bool doTemplateMatching = newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR
-                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO;
+                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO
+                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX
+                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX;
             bool doMatrixMatching = newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_MATRIX_CODE_DETECTION
                 || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX
                 || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX;
@@ -312,24 +320,24 @@ public class ARControllerEditor : Editor
         showNFTTrackingOptions = EditorGUILayout.Foldout(showNFTTrackingOptions, "NFT Tracking Options");
         if (showNFTTrackingOptions)
         {
-            bool m = EditorGUILayout.Toggle("Multi-page mode", arcontroller.NFTMultiMode);
-            if (m != arcontroller.NFTMultiMode)
-            {
-                Undo.RecordObject(arcontroller, "Set multi-page mode");
-                arcontroller.NFTMultiMode = m;
-            }
+            EditorGUILayout.PropertyField(NFTMultiMode, new GUIContent("Multi - page mode"), null);
         }
 
 		EditorGUILayout.Separator();
 		showApplicationOptions = EditorGUILayout.Foldout(showApplicationOptions, "Application Options");
 		if (showApplicationOptions) {
-			arcontroller.AutoStartAR = EditorGUILayout.Toggle("Auto-start AR.", arcontroller.AutoStartAR);
-			if (arcontroller.AutoStartAR) EditorGUILayout.HelpBox("ARController.StartAR() will be called during MonoBehavior.Start().", MessageType.Info);
+            EditorGUILayout.PropertyField(AutoStartAR, new GUIContent("Auto-start AR."));
+			if (AutoStartAR.boolValue) EditorGUILayout.HelpBox("ARController.StartAR() will be called during MonoBehavior.Start().", MessageType.Info);
 			else EditorGUILayout.HelpBox("ARController.StartAR() will not be called during MonoBehavior.Start(); you must call it yourself.", MessageType.Info);
-			arcontroller.QuitOnEscOrBack = EditorGUILayout.Toggle("Quit on [Esc].", arcontroller.QuitOnEscOrBack);
-			if (arcontroller.QuitOnEscOrBack) EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will quit the app.", MessageType.Info);
-			else EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will be ignored.", MessageType.Info);
-			arcontroller.LogLevel = (ARController.AR_LOG_LEVEL)EditorGUILayout.EnumPopup("Log level:", arcontroller.LogLevel);
+            EditorGUILayout.PropertyField(QuitOnEscOrBack, new GUIContent("Quit on [Esc]."));
+            if (QuitOnEscOrBack.boolValue) EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will quit the app.", MessageType.Info);
+			else EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will be ignored by artoolkitX.", MessageType.Info);
+			ARController.AR_LOG_LEVEL newLogLevel = (ARController.AR_LOG_LEVEL)EditorGUILayout.EnumPopup("Log level:", arcontroller.LogLevel);
+            if (newLogLevel != arcontroller.LogLevel)
+            {
+                Undo.RecordObject(arcontroller, "Set log level");
+                arcontroller.LogLevel = newLogLevel;
+            }
 		}
 
         serializedObject.ApplyModifiedProperties();
