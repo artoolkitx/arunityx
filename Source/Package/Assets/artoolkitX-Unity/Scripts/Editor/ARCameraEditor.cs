@@ -63,11 +63,14 @@ public class ARCameraEditor : Editor
     {
 		ARCamera arc = (ARCamera)target;
 		if (arc == null) return;
-		
-		//
-		// Stereo parameters.
-		//
-		EditorGUILayout.Separator();
+
+        using (new EditorGUI.DisabledScope(true))
+            EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
+
+        //
+        // Stereo parameters.
+        //
+        EditorGUILayout.Separator();
 		arc.Stereo = EditorGUILayout.Toggle("Part of a stereo pair", arc.Stereo);
 		if (arc.Stereo) {
 			arc.StereoEye = (ARCamera.ViewEye)EditorGUILayout.EnumPopup("Stereo eye:", arc.StereoEye);

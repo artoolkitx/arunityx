@@ -103,7 +103,7 @@ public class ARTrackedObject : MonoBehaviour
 	{
 		if (_origin == null) {
 			// Locate the origin in parent.
-			_origin = this.gameObject.GetComponentInParent<AROrigin>(); // Unity v4.5 and later.
+			_origin = this.gameObject.GetComponentInParent<AROrigin>();
 		}
 		return _origin;
 	}
@@ -127,81 +127,80 @@ public class ARTrackedObject : MonoBehaviour
 	// Note that [DefaultExecutionOrder] is used on ARTrackable to ensure the base ARTrackable has updated before we try and use the transformation.
 	void Update()
 	{
-		// Local scale is always 1 for now
-		transform.localScale = Vector3.one;
-		
 		// Update tracking if we are running in the Player.
-		if (Application.isPlaying)
+		if (!Application.isPlaying)
+        {
+			return;
+        }
+
+		// Sanity check, make sure we have an ARTrackable assigned.
+		ARTrackable trackable = GetTrackable();
+		if (trackable == null)
 		{
-			// Sanity check, make sure we have an AROrigin in parent hierachy.
-			AROrigin origin = GetOrigin();
-			if (origin == null) {
-				//visible = visibleOrRemain = false;
+			visible = visibleOrRemain = false;
+			return;
+		}
+
+		// Sanity check, make sure we have an AROrigin in parent hierachy.
+		AROrigin origin = GetOrigin();
+		if (origin == null) {
+			visible = visibleOrRemain = false;
+			return;
+		}
+
+		// Note the current time
+		float timeNow = Time.realtimeSinceStartup;
+					
+        ARTrackable baseTrackable = origin.GetBaseTrackable();
+		if (baseTrackable != null && trackable.Visible)
+		{
+			if (!visible)
+			{
+				// Trackable was hidden but now is visible.
+				visible = visibleOrRemain = true;
+				OnTrackedObjectFound.Invoke(this);
+				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", trackable, SendMessageOptions.DontRequireReceiver);
+
+				for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
 			}
+
+            Matrix4x4 pose;
+            if (trackable == baseTrackable)
+			{
+                // If this marker is the base, no need to take base inverse etc.
+                pose = origin.transform.localToWorldMatrix;
+            }
 			else
 			{
-				// Sanity check, make sure we have an ARTrackable assigned.
-                ARTrackable trackable = GetTrackable();
-				if (trackable == null)
-				{
-					//visible = visibleOrRemain = false;
-				}
-				else
-				{
-					// Note the current time
-					float timeNow = Time.realtimeSinceStartup;
-					
-                    ARTrackable baseTrackable = origin.GetBaseTrackable();
-					if (baseTrackable != null && trackable.Visible)
-					{
-						if (!visible)
-						{
-							// Trackable was hidden but now is visible.
-							visible = visibleOrRemain = true;
-							OnTrackedObjectFound.Invoke(this);
-							if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", trackable, SendMessageOptions.DontRequireReceiver);
+				pose = (origin.transform.localToWorldMatrix * baseTrackable.TransformationMatrix.inverse * trackable.TransformationMatrix);
+			}
+			// Local scale is always 1 for now
+			transform.localScale = Vector3.one;
+			transform.position = ARUtilityFunctions.PositionFromMatrix(pose);
+			transform.rotation = ARUtilityFunctions.QuaternionFromMatrix(pose);
 
-							for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
-						}
+			OnTrackedObjectTracked.Invoke(this);
+			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", trackable, SendMessageOptions.DontRequireReceiver);
 
-                        Matrix4x4 pose;
-                        if (trackable == baseTrackable)
-						{
-                            // If this marker is the base, no need to take base inverse etc.
-                            pose = origin.transform.localToWorldMatrix;
-                        }
-						else
-						{
-						    pose = (origin.transform.localToWorldMatrix * baseTrackable.TransformationMatrix.inverse * trackable.TransformationMatrix);
-						}
-						transform.position = ARUtilityFunctions.PositionFromMatrix(pose);
-						transform.rotation = ARUtilityFunctions.QuaternionFromMatrix(pose);
+		}
+		else
+		{
+			if (visible)
+			{
+				// Trackable was visible but now is hidden.
+				visible = false;
+				timeTrackingLost = timeNow;
+			}
 
-						OnTrackedObjectTracked.Invoke(this);
-						if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", trackable, SendMessageOptions.DontRequireReceiver);
+			if (visibleOrRemain && (timeNow - timeTrackingLost >= secondsToRemainVisible))
+			{
+				visibleOrRemain = false;
+				OnTrackedObjectLost.Invoke(this);
+				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", trackable, SendMessageOptions.DontRequireReceiver);
+				for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
+			}
+		}
 
-					}
-					else
-					{
-						if (visible)
-						{
-							// Trackable was visible but now is hidden.
-							visible = false;
-							timeTrackingLost = timeNow;
-						}
-
-						if (visibleOrRemain && (timeNow - timeTrackingLost >= secondsToRemainVisible))
-						{
-							visibleOrRemain = false;
-							OnTrackedObjectLost.Invoke(this);
-							if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", trackable, SendMessageOptions.DontRequireReceiver);
-							for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
-						}
-					}
-				} // marker
-
-			} // origin
-		} // Application.isPlaying
 
 	}
 

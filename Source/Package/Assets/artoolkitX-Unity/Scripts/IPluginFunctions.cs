@@ -35,6 +35,7 @@
  */
 
 using System.Runtime.InteropServices;
+using Unity.Collections;
 using UnityEngine;
 
 // Delegate type declaration for log callback.
@@ -126,4 +127,11 @@ public abstract class IPluginFunctions
     abstract public void arwDeleteVideoSourceInfoList();
     abstract public void arwSetSquareMatrixModeAutocreateNewTrackables(bool on, float defaultWidth = 0.08f, PluginFunctionsTrackableEventCallback tecb = null);
     abstract public bool arwGetSquareMatrixModeAutocreateNewTrackables(out bool on, out float defaultWidth, out PluginFunctionsTrackableEventCallback tecb);
+    abstract public int arwVideoPushInit(int videoSourceIndex, int width, int height, string pixelFormat, int cameraIndex, int cameraPosition);
+    abstract public int arwVideoPush(int videoSourceIndex,
+                NativeArray<byte> buf0, int buf0PixelStride, int buf0RowStride,
+                NativeArray<byte>? buf1 = null, int buf1PixelStride = 0, int buf1RowStride = 0,
+                NativeArray<byte>? buf2 = null, int buf2PixelStride = 0, int buf2RowStride = 0,
+                NativeArray<byte>? buf3 = null, int buf3PixelStride = 0, int buf3RowStride = 0);
+    abstract public int arwVideoPushFinal(int videoSourceIndex);
 }

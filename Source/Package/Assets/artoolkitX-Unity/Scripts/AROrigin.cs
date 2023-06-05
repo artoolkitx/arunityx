@@ -69,10 +69,7 @@ public class AROrigin : MonoBehaviour
 
 	public FindMode findTrackableMode
 	{
-		get
-		{
-			return _findTrackableMode;
-		}
+		get => _findTrackableMode;
 		
 		set
 		{
@@ -118,7 +115,12 @@ public class AROrigin : MonoBehaviour
 		}
 	}
 
-	void Start()
+    void OnEnable()
+    {
+        
+    }
+
+    void Start()
 	{
 		FindTrackables();
 	}
