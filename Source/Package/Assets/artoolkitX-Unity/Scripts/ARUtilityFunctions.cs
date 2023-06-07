@@ -152,6 +152,48 @@ public static class ARUtilityFunctions
 		}
 	}
 
+	// Creates a GameObject in layer 'layer' which renders a mesh displaying the video stream.
+	// Places references to the Color array (as required), the texture and the material into the out parameters.
+	public static GameObject CreateVideoGameObject(int index, int w, int h, bool flipH, bool flipV, int layer, out Texture2D vt, out Material vm)
+	{
+		// Check parameters.
+		if (w <= 0 || h <= 0)
+		{
+			ARController.Log("Error: CreateVideoGameObject cannot configure video texture with invalid video size: " + w + "x" + h);
+			vt = null; vm = null;
+			return null;
+		}
+
+		// Create new GameObject to hold mesh.
+		GameObject vbmgo = new GameObject("Video source " + index);
+		if (vbmgo == null)
+		{
+			ARController.Log("Error: CreateVideoGameObject cannot create GameObject.");
+			vt = null; vm = null;
+			return null;
+		}
+		vbmgo.layer = layer; // Belongs in the background layer.
+
+		// Create an video texture, an array that can be used to update it and a material to display it.
+		vt = ARUtilityFunctions.CreateTexture(w, h, TextureFormat.ARGB32);
+		Shader shaderSource = Shader.Find("VideoPlaneNoLight");
+		vm = new Material(shaderSource); //arunityX.Properties.Resources.VideoPlaneShader;
+		vm.hideFlags = HideFlags.HideAndDontSave;
+		vm.mainTexture = vt;
+
+		// Now create a mesh appropriate for displaying the video, a mesh filter to instantiate that mesh,
+		// and a mesh renderer to render the material on the instantiated mesh.
+		MeshFilter filter = vbmgo.AddComponent<MeshFilter>();
+		filter.mesh = ARUtilityFunctions.CreateTextureMesh(1.0f, 1.0f, 2.0f, 2.0f, 0.5f, flipH, flipV);
+		MeshRenderer meshRenderer = vbmgo.AddComponent<MeshRenderer>();
+		meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+		meshRenderer.receiveShadows = false;
+		vbmgo.GetComponent<Renderer>().material = vm;
+
+		return vbmgo;
+	}
+
+
 	public static TextureFormat GetTextureFormatFromARPixelFormat(string pixelFormat)
 	{
 		switch (pixelFormat)
@@ -181,7 +223,7 @@ public static class ARUtilityFunctions
 		// Check parameters.
 		if (width <= 0 || height <= 0)
 		{
-			Debug.LogError("Error: Cannot configure video texture with invalid size: " + width + "x" + height);
+			ARController.Log("Error: CreateTexture cannot configure video texture with invalid size: " + width + "x" + height);
 			return null;
 		}
 
@@ -202,5 +244,40 @@ public static class ARUtilityFunctions
 		return vt;
 	}
 
+	public static Mesh CreateTextureMesh(float textureScaleU, float textureScaleV, float width, float height, float zPosition, bool flipX, bool flipY)
+	{
+		Mesh m = new Mesh();
+		m.Clear();
+		m.vertices = new Vector3[]
+		{
+			new Vector3(-width * 0.5f, 0.0f, zPosition),
+			new Vector3(width * 0.5f, 0.0f, zPosition),
+			new Vector3(width * 0.5f, height, zPosition),
+			new Vector3(-width * 0.5f, height, zPosition),
+		};
+		m.normals = new Vector3[]
+		{
+			new Vector3(0.0f, 0.0f, 1.0f),
+			new Vector3(0.0f, 0.0f, 1.0f),
+			new Vector3(0.0f, 0.0f, 1.0f),
+			new Vector3(0.0f, 0.0f, 1.0f),
+		};
+		float u1 = flipX ? textureScaleU : 0.0f;
+		float u2 = flipX ? 0.0f : textureScaleU;
+		float v1 = flipY ? textureScaleV : 0.0f;
+		float v2 = flipY ? 0.0f : textureScaleV;
+		m.uv = new Vector2[] {
+			new Vector2(u1, v1),
+			new Vector2(u2, v1),
+			new Vector2(u2, v2),
+			new Vector2(u1, v2)
+		};
+		m.triangles = new int[] {
+			2, 1, 0,
+			3, 2, 0
+		};
+
+		return m;
+	}
 
 }

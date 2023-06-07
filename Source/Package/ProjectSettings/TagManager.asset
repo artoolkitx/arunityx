@@ -3,7 +3,13 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Glove
+  - Character
+  - Floor
+  - Target
+  - Controller
+  - MegaHit
   layers:
   - Default
   - TransparentFX
@@ -13,7 +19,7 @@ TagManager:
   - UI
   - 
   - 
-  - AR-foreground
+  - AR-background
   - 
   - 
   - 

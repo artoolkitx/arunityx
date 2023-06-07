@@ -863,11 +863,13 @@ public class ARController : MonoBehaviour
                     if (ContentFlipV) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1.0f, -1.0f, 1.0f)) * _videoProjectionMatrix0;
                     if (ContentFlipH) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix0;
 
-                    _videoBackgroundMeshGO0 = CreateVideoBackgroundMesh(0, _videoWidth0, _videoHeight0, BackgroundLayer0, out _videoColor32Array0, out _videoTexture0, out _videoMaterial0);
+                    // Invert flipV for texture because artoolkitX video frame is top-down, Unity's is bottom-up.
+                    _videoBackgroundMeshGO0 = ARUtilityFunctions.CreateVideoGameObject(0, _videoWidth0, _videoHeight0, ContentFlipH, !ContentFlipV, BackgroundLayer0, out _videoTexture0, out _videoMaterial0);
                     if (_videoBackgroundMeshGO0 == null || _videoTexture0 == null || _videoMaterial0 == null)
                     {
                         Log(LogTag + "Error: unable to create video mesh.");
                     }
+                    _videoColor32Array0 = _useNativeGLTexturing ? new Color32[_videoWidth0 * _videoHeight0] : null;
 
                 }
                 else
@@ -892,12 +894,15 @@ public class ARController : MonoBehaviour
                     if (ContentFlipH) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix0;
                     if (ContentFlipH) _videoProjectionMatrix1 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix1;
 
-                    _videoBackgroundMeshGO0 = CreateVideoBackgroundMesh(0, _videoWidth0, _videoHeight0, BackgroundLayer0, out _videoColor32Array0, out _videoTexture0, out _videoMaterial0);
-                    _videoBackgroundMeshGO1 = CreateVideoBackgroundMesh(1, _videoWidth1, _videoHeight1, BackgroundLayer1, out _videoColor32Array1, out _videoTexture1, out _videoMaterial1);
+                    // Invert flipV flipV for texture because artoolkitX video frame is top-down, Unity's is bottom-up.
+                    _videoBackgroundMeshGO0 = ARUtilityFunctions.CreateVideoGameObject(0, _videoWidth0, _videoHeight0, ContentFlipH, !ContentFlipV, BackgroundLayer0, out _videoTexture0, out _videoMaterial0);
+                    _videoBackgroundMeshGO1 = ARUtilityFunctions.CreateVideoGameObject(1, _videoWidth1, _videoHeight1, ContentFlipH, !ContentFlipV, BackgroundLayer1, out _videoTexture1, out _videoMaterial1);
                     if (_videoBackgroundMeshGO0 == null || _videoTexture0 == null || _videoMaterial0 == null || _videoBackgroundMeshGO1 == null || _videoTexture1 == null || _videoMaterial1 == null)
                     {
                         Log(LogTag + "Error: unable to create video background mesh.");
                     }
+                    _videoColor32Array0 = _useNativeGLTexturing ? new Color32[_videoWidth0 * _videoHeight0] : null;
+                    _videoColor32Array1 = _useNativeGLTexturing ? new Color32[_videoWidth1 * _videoHeight1] : null;
                 }
 
                 // Create background camera(s) to actually view the "video background" layer(s).
@@ -1104,6 +1109,11 @@ public class ARController : MonoBehaviour
             return _version;
         }
     }
+
+    //
+    // Tracker configuration
+    // </summary>
+    #region Tracker configuration.
 
     public ARController.ARToolKitThresholdMode VideoThresholdMode
     {
@@ -1376,6 +1386,34 @@ public class ARController : MonoBehaviour
         }
     }
 
+    public bool SquareMatrixModeAutocreateNewTrackables
+    {
+        get => currentSquareMatrixModeAutocreateNewTrackables;
+        set
+        {
+            currentSquareMatrixModeAutocreateNewTrackables = value;
+            if (_running)
+            {
+                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(value, currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth, ARTrackable.OnTrackableEvent);
+            }
+        }
+    }
+
+    public float SquareMatrixModeAutocreateNewTrackablesDefaultWidth
+    {
+        get => currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth;
+        set
+        {
+            currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth = value;
+            if (_running)
+            {
+                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(currentSquareMatrixModeAutocreateNewTrackables, value, ARTrackable.OnTrackableEvent);
+            }
+        }
+    }
+
+    #endregion Tracker configuration.
+
     public ContentMode ContentMode
     {
         get
@@ -1412,41 +1450,12 @@ public class ARController : MonoBehaviour
         }
     }
 
-    public bool SquareMatrixModeAutocreateNewTrackables
-    {
-        get => currentSquareMatrixModeAutocreateNewTrackables;
-        set
-        {
-            currentSquareMatrixModeAutocreateNewTrackables = value;
-            if (_running)
-            {
-                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(value, currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth, ARTrackable.OnTrackableEvent);
-            }
-        }
-    }
-
-    public float SquareMatrixModeAutocreateNewTrackablesDefaultWidth
-    {
-        get => currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth;
-        set
-        {
-            currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth = value;
-            if (_running)
-            {
-                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(currentSquareMatrixModeAutocreateNewTrackables, value, ARTrackable.OnTrackableEvent);
-            }
-        }
-    }
-
     //
     // Internal methods.
     //
 
     private void UpdateTexture()
     {
-        // Only update the texture when running
-        if (!_running) return;
-
         if (!VideoIsStereo)
         {
             // Mono.
@@ -1519,61 +1528,6 @@ public class ARController : MonoBehaviour
         clearCamera.backgroundColor = new Color(0.0f, 0.0f, 0.0f, (currentUseVideoBackground ? 1.0f : 0.0f));
 
         return true;
-    }
-
-    // Creates a GameObject in layer 'layer' which renders a mesh displaying the video stream.
-    // Places references to the Color array (as required), the texture and the material into the out parameters.
-    private GameObject CreateVideoBackgroundMesh(int index, int w, int h, int layer, out Color32[] vbc32a, out Texture2D vbt, out Material vbm)
-    {
-        // Check parameters.
-        if (w <= 0 || h <= 0)
-        {
-            Log(LogTag + "Error: Cannot configure video texture with invalid video size: " + w + "x" + h);
-            vbc32a = null; vbt = null; vbm = null;
-            return null;
-        }
-
-        // Create new GameObject to hold mesh.
-        GameObject vbmgo = new GameObject("Video source " + index);
-        if (vbmgo == null)
-        {
-            Log(LogTag + "Error: CreateVideoBackgroundCamera cannot create GameObject.");
-            vbc32a = null; vbt = null; vbm = null;
-            return null;
-        }
-        vbmgo.layer = layer; // Belongs in the background layer.
-
-        // Work out size of required texture.
-        // OK to use NPOT textures everywhere now.
-        int textureWidth = w;
-        int textureHeight = h;
-        Log(LogTag + "Video size " + w + "x" + h + " will use texture size " + textureWidth + "x" + textureHeight + ".");
-
-        float textureScaleU = (float)w / (float)textureWidth;
-        float textureScaleV = (float)h / (float)textureHeight;
-        //Log(LogTag + "Video texture coordinate scaling: " + textureScaleU + ", " + textureScaleV);
-
-        // Create stuff for video texture.
-        vbc32a = _useNativeGLTexturing ? null : new Color32[w * h];
-        vbt = ARUtilityFunctions.CreateTexture(textureWidth, textureHeight, TextureFormat.ARGB32);
-
-        // Create a material tied to the texture.
-        Shader shaderSource = Shader.Find("VideoPlaneNoLight");
-        vbm = new Material(shaderSource); //arunityX.Properties.Resources.VideoPlaneShader;
-        vbm.hideFlags = HideFlags.HideAndDontSave;
-        vbm.mainTexture = vbt;
-        //Log(LogTag + "Created video background material");
-
-        // Now create a mesh appropriate for displaying the video, a mesh filter to instantiate that mesh,
-        // and a mesh renderer to render the material on the instantiated mesh.
-        MeshFilter filter = vbmgo.AddComponent<MeshFilter>();
-        filter.mesh = newVideoMesh(ContentFlipH, !ContentFlipV, textureScaleU, textureScaleV); // Invert flipV because artoolkitX video frame is top-down, Unity's is bottom-up.
-        MeshRenderer meshRenderer = vbmgo.AddComponent<MeshRenderer>();
-        meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        meshRenderer.receiveShadows = false;
-        vbmgo.GetComponent<Renderer>().material = vbm;
-
-        return vbmgo;
     }
 
     // Creates a GameObject holding a camera with name 'name', which will render layer 'layer'.
@@ -1883,47 +1837,6 @@ public class ARController : MonoBehaviour
         //}        
 #endif
         return true;
-    }
-
-    private static Mesh newVideoMesh(bool flipX, bool flipY, float textureScaleU, float textureScaleV)
-    {
-        Mesh m = new Mesh();
-        m.Clear();
-
-        float r = 1.0f;
-
-        m.vertices = new Vector3[] {
-                new Vector3(-r, -r, 0.5f),
-                new Vector3( r, -r, 0.5f),
-                new Vector3( r,  r, 0.5f),
-                new Vector3(-r,  r, 0.5f),
-            };
-
-        m.normals = new Vector3[] {
-                new Vector3(0.0f, 0.0f, 1.0f),
-                new Vector3(0.0f, 0.0f, 1.0f),
-                new Vector3(0.0f, 0.0f, 1.0f),
-                new Vector3(0.0f, 0.0f, 1.0f),
-            };
-
-        float u1 = flipX ? textureScaleU : 0.0f;
-        float u2 = flipX ? 0.0f : textureScaleU;
-
-        float v1 = flipY ? textureScaleV : 0.0f;
-        float v2 = flipY ? 0.0f : textureScaleV;
-
-        m.uv = new Vector2[] {
-                new Vector2(u1, v1),
-                new Vector2(u2, v1),
-                new Vector2(u2, v2),
-                new Vector2(u1, v2)
-            };
-
-        m.triangles = new int[] {
-                2, 1, 0,
-                3, 2, 0
-            };
-        return m;
     }
 
     public static void Log(String msg)
