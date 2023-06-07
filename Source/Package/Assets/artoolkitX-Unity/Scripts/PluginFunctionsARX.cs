@@ -191,6 +191,16 @@ public class PluginFunctionsARX : IPluginFunctions
         return ARX_pinvoke.arwGetProjectionMatrixStereo(nearPlane, farPlane, matrixL, matrixR);
     }
 
+    override public bool arwGetProjectionMatrixForViewportSizeAndFittingMode(int width, int height, int scaleMode, int hAlign, int vAlign, float nearPlane, float farPlane, float[] matrix)
+    {
+        return ARX_pinvoke.arwGetProjectionMatrixForViewportSizeAndFittingMode(width, height, scaleMode, hAlign, vAlign, nearPlane, farPlane, matrix);
+    }
+
+    override public bool arwGetProjectionMatrixForViewportSizeAndFittingModeStereo(int width, int height, int scaleMode, int hAlign, int vAlign, float nearPlane, float farPlane, float[] matrixL, float[] matrixR)
+    {
+        return ARX_pinvoke.arwGetProjectionMatrixForViewportSizeAndFittingModeStereo(width, height, scaleMode, hAlign, vAlign, nearPlane, farPlane, matrixL, matrixR);
+    }
+
     override public bool arwGetVideoParams(out int width, out int height, out int pixelSize, out String pixelFormatString)
     {
         StringBuilder sb = new StringBuilder(128);

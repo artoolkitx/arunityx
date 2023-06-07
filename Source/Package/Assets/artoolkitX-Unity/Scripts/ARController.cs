@@ -136,7 +136,6 @@ public class ARController : MonoBehaviour
 
     // Unity objects.
     private GameObject _videoBackgroundMeshGO0 = null; // The GameObject which holds the MeshFilter and MeshRenderer for the background video, and also the Camera object(s) used to render them. 
-    private Color[] _videoColorArray0 = null; // An array used to fetch pixels from the native side, only if not using native GL texturing.
     private Color32[] _videoColor32Array0 = null; // An array used to fetch pixels from the native side, only if not using native GL texturing.
     private Texture2D _videoTexture0 = null;  // Texture object with the video image.
     private Material _videoMaterial0 = null;  // Material which uses our "VideoPlaneNoLight" shader, and paints itself with _videoTexture0.
@@ -162,7 +161,6 @@ public class ARController : MonoBehaviour
 
     // Unity objects.
     private GameObject _videoBackgroundMeshGO1 = null; // The GameObject which holds the MeshFilter and MeshRenderer for the background video, and also the Camera object(s) used to render them. 
-    private Color[] _videoColorArray1 = null; // An array used to fetch pixels from the native side, only if not using native GL texturing.
     private Color32[] _videoColor32Array1 = null; // An array used to fetch pixels from the native side, only if not using native GL texturing.
     private Texture2D _videoTexture1 = null;  // Texture object with the video image.
     private Material _videoMaterial1 = null;  // Material which uses our "VideoPlaneNoLight" shader, and paints itself with _videoTexture0.
@@ -865,7 +863,7 @@ public class ARController : MonoBehaviour
                     if (ContentFlipV) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1.0f, -1.0f, 1.0f)) * _videoProjectionMatrix0;
                     if (ContentFlipH) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix0;
 
-                    _videoBackgroundMeshGO0 = CreateVideoBackgroundMesh(0, _videoWidth0, _videoHeight0, BackgroundLayer0, out _videoColorArray0, out _videoColor32Array0, out _videoTexture0, out _videoMaterial0);
+                    _videoBackgroundMeshGO0 = CreateVideoBackgroundMesh(0, _videoWidth0, _videoHeight0, BackgroundLayer0, out _videoColor32Array0, out _videoTexture0, out _videoMaterial0);
                     if (_videoBackgroundMeshGO0 == null || _videoTexture0 == null || _videoMaterial0 == null)
                     {
                         Log(LogTag + "Error: unable to create video mesh.");
@@ -894,8 +892,8 @@ public class ARController : MonoBehaviour
                     if (ContentFlipH) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix0;
                     if (ContentFlipH) _videoProjectionMatrix1 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix1;
 
-                    _videoBackgroundMeshGO0 = CreateVideoBackgroundMesh(0, _videoWidth0, _videoHeight0, BackgroundLayer0, out _videoColorArray0, out _videoColor32Array0, out _videoTexture0, out _videoMaterial0);
-                    _videoBackgroundMeshGO1 = CreateVideoBackgroundMesh(1, _videoWidth1, _videoHeight1, BackgroundLayer1, out _videoColorArray1, out _videoColor32Array1, out _videoTexture1, out _videoMaterial1);
+                    _videoBackgroundMeshGO0 = CreateVideoBackgroundMesh(0, _videoWidth0, _videoHeight0, BackgroundLayer0, out _videoColor32Array0, out _videoTexture0, out _videoMaterial0);
+                    _videoBackgroundMeshGO1 = CreateVideoBackgroundMesh(1, _videoWidth1, _videoHeight1, BackgroundLayer1, out _videoColor32Array1, out _videoTexture1, out _videoMaterial1);
                     if (_videoBackgroundMeshGO0 == null || _videoTexture0 == null || _videoMaterial0 == null || _videoBackgroundMeshGO1 == null || _videoTexture1 == null || _videoMaterial1 == null)
                     {
                         Log(LogTag + "Error: unable to create video background mesh.");
@@ -1525,13 +1523,13 @@ public class ARController : MonoBehaviour
 
     // Creates a GameObject in layer 'layer' which renders a mesh displaying the video stream.
     // Places references to the Color array (as required), the texture and the material into the out parameters.
-    private GameObject CreateVideoBackgroundMesh(int index, int w, int h, int layer, out Color[] vbca, out Color32[] vbc32a, out Texture2D vbt, out Material vbm)
+    private GameObject CreateVideoBackgroundMesh(int index, int w, int h, int layer, out Color32[] vbc32a, out Texture2D vbt, out Material vbm)
     {
         // Check parameters.
         if (w <= 0 || h <= 0)
         {
             Log(LogTag + "Error: Cannot configure video texture with invalid video size: " + w + "x" + h);
-            vbca = null; vbc32a = null; vbt = null; vbm = null;
+            vbc32a = null; vbt = null; vbm = null;
             return null;
         }
 
@@ -1540,7 +1538,7 @@ public class ARController : MonoBehaviour
         if (vbmgo == null)
         {
             Log(LogTag + "Error: CreateVideoBackgroundCamera cannot create GameObject.");
-            vbca = null; vbc32a = null; vbt = null; vbm = null;
+            vbc32a = null; vbt = null; vbm = null;
             return null;
         }
         vbmgo.layer = layer; // Belongs in the background layer.
@@ -1556,30 +1554,8 @@ public class ARController : MonoBehaviour
         //Log(LogTag + "Video texture coordinate scaling: " + textureScaleU + ", " + textureScaleV);
 
         // Create stuff for video texture.
-        if (!_useNativeGLTexturing)
-        {
-             vbca = null;
-             vbc32a = new Color32[w * h];
-        }
-        else
-        {
-            vbca = null;
-            vbc32a = null;
-        }
-        vbt = new Texture2D(textureWidth, textureHeight, TextureFormat.ARGB32, false);
-        //vbt = new Texture2D(textureWidth, textureHeight, TextureFormat.RGBA32, false);
-        vbt.hideFlags = HideFlags.HideAndDontSave;
-        vbt.filterMode = FilterMode.Bilinear;
-        vbt.wrapMode = TextureWrapMode.Clamp;
-        vbt.anisoLevel = 0;
-
-        // Initialise the video texture to black.
-        Color32[] arr = new Color32[textureWidth * textureHeight];
-        Color32 blackOpaque = new Color32(0, 0, 0, 255);
-        for (int i = 0; i < arr.Length; i++) arr[i] = blackOpaque;
-        vbt.SetPixels32(arr);
-        vbt.Apply(); // Pushes all SetPixels*() ops to texture.
-        arr = null;
+        vbc32a = _useNativeGLTexturing ? null : new Color32[w * h];
+        vbt = ARUtilityFunctions.CreateTexture(textureWidth, textureHeight, TextureFormat.ARGB32);
 
         // Create a material tied to the texture.
         Shader shaderSource = Shader.Find("VideoPlaneNoLight");
@@ -1617,6 +1593,7 @@ public class ARController : MonoBehaviour
         if (vbc == null)
         {
             Log(LogTag + "Error: CreateVideoBackgroundCamera cannot add Camera to GameObject.");
+            Destroy(vbcgo);
             return null;
         }
 
@@ -1694,8 +1671,6 @@ public class ARController : MonoBehaviour
             else Destroy(_videoTexture1);
             _videoTexture1 = null;
         }
-        if (_videoColorArray0 != null) _videoColorArray0 = null;
-        if (_videoColorArray1 != null) _videoColorArray1 = null;
         if (_videoColor32Array0 != null) _videoColor32Array0 = null;
         if (_videoColor32Array1 != null) _videoColor32Array1 = null;
         if (_videoBackgroundMeshGO0 != null)
@@ -1910,7 +1885,7 @@ public class ARController : MonoBehaviour
         return true;
     }
 
-    private Mesh newVideoMesh(bool flipX, bool flipY, float textureScaleU, float textureScaleV)
+    private static Mesh newVideoMesh(bool flipX, bool flipY, float textureScaleU, float textureScaleV)
     {
         Mesh m = new Mesh();
         m.Clear();

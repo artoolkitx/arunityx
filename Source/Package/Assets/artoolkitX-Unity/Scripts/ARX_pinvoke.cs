@@ -99,7 +99,15 @@ public static class ARX_pinvoke
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
     public static extern bool arwGetProjectionMatrixStereo(float nearPlane, float farPlane, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrixL, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst=16)] float[] matrixR);
-	
+
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+	[return: MarshalAsAttribute(UnmanagedType.I1)]
+	public static extern bool arwGetProjectionMatrixForViewportSizeAndFittingMode(int width, int height, int scaleMode, int hAlign, int vAlign, float nearPlane, float farPlane, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst = 16)] float[] matrix);
+
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+	[return: MarshalAsAttribute(UnmanagedType.I1)]
+	public static extern bool arwGetProjectionMatrixForViewportSizeAndFittingModeStereo(int width, int height, int scaleMode, int hAlign, int vAlign, float nearPlane, float farPlane, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst = 16)] float[] matrixL, [Out][MarshalAs(UnmanagedType.LPArray, SizeConst = 16)] float[] matrixR);
+
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	[return: MarshalAsAttribute(UnmanagedType.I1)]
 	public static extern bool arwGetVideoParams(out int width, out int height, out int pixelSize, [MarshalAs(UnmanagedType.LPStr)]StringBuilder pixelFormatBuffer, int pixelFormatBufferLen);

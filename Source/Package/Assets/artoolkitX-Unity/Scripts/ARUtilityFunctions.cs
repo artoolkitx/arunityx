@@ -152,4 +152,55 @@ public static class ARUtilityFunctions
 		}
 	}
 
+	public static TextureFormat GetTextureFormatFromARPixelFormat(string pixelFormat)
+	{
+		switch (pixelFormat)
+		{
+			case "AR_PIXEL_FORMAT_RGB": return TextureFormat.RGB24;
+			case "AR_PIXEL_FORMAT_BGR": /* return TextureFormat.BGR24; */ break;
+			case "AR_PIXEL_FORMAT_RGBA": return TextureFormat.RGBA32;
+			case "AR_PIXEL_FORMAT_BGRA": return TextureFormat.BGRA32;
+			case "AR_PIXEL_FORMAT_ABGR": /* return TextureFormat.ABGR32; */ break;
+			case "AR_PIXEL_FORMAT_MONO": return TextureFormat.R8;
+			case "AR_PIXEL_FORMAT_ARGB": return TextureFormat.ARGB32;
+			case "AR_PIXEL_FORMAT_2vuy": break;
+			case "AR_PIXEL_FORMAT_yuvs": return TextureFormat.YUY2;
+			case "AR_PIXEL_FORMAT_RGB_565": return TextureFormat.RGB565;
+			case "AR_PIXEL_FORMAT_RGBA_5551": /* return TextureFormat.RGBA5551; */ break;
+			case "AR_PIXEL_FORMAT_RGBA_4444": return TextureFormat.RGBA4444;
+			case "AR_PIXEL_FORMAT_420v": break;
+			case "AR_PIXEL_FORMAT_420f": break;
+			case "AR_PIXEL_FORMAT_NV21": break;
+			default: break; // AR_PIXEL_FORMAT_INVALID
+		}
+		return (TextureFormat)0;
+	}
+
+	public static Texture2D CreateTexture(int width, int height, TextureFormat format)
+	{
+		// Check parameters.
+		if (width <= 0 || height <= 0)
+		{
+			Debug.LogError("Error: Cannot configure video texture with invalid size: " + width + "x" + height);
+			return null;
+		}
+
+		Texture2D vt = new Texture2D(width, height, format, false);
+		vt.hideFlags = HideFlags.HideAndDontSave;
+		vt.filterMode = FilterMode.Bilinear;
+		vt.wrapMode = TextureWrapMode.Clamp;
+		vt.anisoLevel = 0;
+
+		// Initialise the video texture to black.
+		Color32[] arr = new Color32[width * height];
+		Color32 blackOpaque = new Color32(0, 0, 0, 255);
+		for (int i = 0; i < arr.Length; i++) arr[i] = blackOpaque;
+		vt.SetPixels32(arr);
+		vt.Apply(); // Pushes all SetPixels*() ops to texture.
+		arr = null;
+
+		return vt;
+	}
+
+
 }
