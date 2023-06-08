@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/artoolkitX-Unity/Example Scenes/TwoMarkerScene.unity
+    path: Assets/artoolkitX-Unity/Example Scenes/SquarePictorialMarkerScene.unity
     guid: 2de9db8029065464ab5202cac04a1878
   - enabled: 0
     path: Assets/artoolkitX-Unity/Example Scenes/SimpleScene.unity

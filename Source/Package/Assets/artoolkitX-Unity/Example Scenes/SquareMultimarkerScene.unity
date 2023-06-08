@@ -716,6 +716,7 @@ GameObject:
   - component: {fileID: 614231948}
   - component: {fileID: 614231946}
   - component: {fileID: 614231950}
+  - component: {fileID: 614231951}
   m_Layer: 9
   m_Name: Camera
   m_TagString: Untagged
@@ -763,7 +764,7 @@ Camera:
   m_GameObject: {fileID: 614231944}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 3
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0.019607844}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -809,7 +810,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ac62947536a3704295fb870f025f1e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eventReceiver: {fileID: 0}
+  currentCameraContentMode: 2
+  CameraContentHAlign: 1
+  CameraContentVAlign: 1
+  ContentRotate90: 0
+  ContentFlipH: 0
+  ContentFlipV: 0
   Stereo: 0
   StereoEye: 1
   Optical: 0
@@ -818,6 +824,20 @@ MonoBehaviour:
   OpticalParamsFilename: 
   OpticalParamsFileContents: 
   OpticalEyeLateralOffsetRight: 0
+--- !u!114 &614231951
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 614231944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 171aa47cb08164ae893800564739e0dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BackgroundLayer: 8
+  currentUseVideoBackground: 1
 --- !u!1 &748136092
 GameObject:
   m_ObjectHideFlags: 0
@@ -1158,6 +1178,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   findTrackableTags: []
   _findTrackableMode: 0
+  _cameraIsBeingDrivenExternally: 0
 --- !u!1 &1438993914
 GameObject:
   m_ObjectHideFlags: 0
@@ -1501,19 +1522,10 @@ MonoBehaviour:
   AutoStartAR: 1
   videoCParamName0: 
   videoConfigurationLinux0: 
-  BackgroundLayer0: 8
   PluginConfigurationRequiredFlag: 0
   VideoIsStereo: 0
   transL2RName: transL2R
   videoCParamName1: 
-  BackgroundLayer1: 9
-  NearPlane: 0.01
-  FarPlane: 5
-  ContentRotate90: 0
-  ContentFlipH: 0
-  ContentFlipV: 0
-  ContentAlign: 4
-  currentContentMode: 1
   currentThresholdMode: 0
   currentThreshold: 100
   currentLabelingMode: 1
@@ -1523,10 +1535,21 @@ MonoBehaviour:
   currentPatternDetectionMode: 2
   currentMatrixCodeType: 3
   currentImageProcMode: 0
-  currentUseVideoBackground: 1
   currentNFTMultiMode: 0
   currentTwoDMaxMarkersToTrack: 1
+  currentTwoDThreaded: 1
   currentLogLevel: 1
+  currentSquareMatrixModeAutocreateNewTrackables: 0
+  currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth: 0.08
+  onVideoStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  onVideoStopped:
+    m_PersistentCalls:
+      m_Calls: []
+  onVideoFrame:
+    m_PersistentCalls:
+      m_Calls: []
   scrollPosition: {x: 0, y: 0}
 --- !u!114 &1965431133
 MonoBehaviour:
@@ -1583,6 +1606,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 0
     name: mac OS (Editor)
     defaultModule: 5
@@ -1597,6 +1623,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 2
     name: Windows (Player)
     defaultModule: 7
@@ -1611,6 +1640,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 1
     name: mac OS (Player)
     defaultModule: 5
@@ -1625,6 +1657,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 11
     name: Android
     defaultModule: 6
@@ -1639,6 +1674,9 @@ MonoBehaviour:
     sizePreference: 3
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 8
     name: iOS
     defaultModule: 5
@@ -1653,6 +1691,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 13
     name: Linux (Player)
     defaultModule: 2
@@ -1667,6 +1708,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   configsForStereoSecondInput:
   - platform: 7
     name: Windows (Editor)
@@ -1682,6 +1726,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 0
     name: mac OS (Editor)
     defaultModule: 5
@@ -1696,6 +1743,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 2
     name: Windows (Player)
     defaultModule: 7
@@ -1710,6 +1760,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 1
     name: mac OS (Player)
     defaultModule: 5
@@ -1724,6 +1777,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 11
     name: Android
     defaultModule: 6
@@ -1738,6 +1794,9 @@ MonoBehaviour:
     sizePreference: 3
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 8
     name: iOS
     defaultModule: 5
@@ -1752,6 +1811,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
   - platform: 13
     name: Linux (Player)
     defaultModule: 2
@@ -1766,6 +1828,9 @@ MonoBehaviour:
     sizePreference: 0
     isUsingManualConfig: 0
     manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
 --- !u!1 &2026903972
 GameObject:
   m_ObjectHideFlags: 0
@@ -1919,6 +1984,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e02d1ce5da0c446acaea956b6ae07690, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  secondsToRemainVisible: 0
-  eventReceiver: {fileID: 0}
   _trackableTag: trackable1
+  secondsToRemainVisible: 0
+  OnTrackedObjectFound:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTrackedObjectTracked:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTrackedObjectLost:
+    m_PersistentCalls:
+      m_Calls: []
+  eventReceiver: {fileID: 0}

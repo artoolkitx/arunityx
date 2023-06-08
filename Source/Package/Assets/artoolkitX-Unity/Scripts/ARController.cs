@@ -43,28 +43,8 @@ using System.Linq;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Android;
+using UnityEngine.Events;
 using UnityEngine.Rendering;
-
-public enum ContentMode
-{
-    Stretch,
-    Fit,
-    Fill,
-    OneToOne
-}
-
-public enum ContentAlign
-{
-    TopLeft,
-    Top,
-    TopRight,
-    Left,
-    Center,
-    Right,
-    BottomLeft,
-    Bottom,
-    BottomRight
-}
 
 /// <summary>
 /// Manages core ARToolKit behaviour.
@@ -83,13 +63,33 @@ public class ARController : MonoBehaviour
     //
     // Logging.
     //
-    public static Action<String> logCallback { get; set; }
     private static List<String> logMessages = new List<String>();
     private const int MaximumLogMessages = 1000;
     private const string LogTag = "ARController: ";
 
-    [HideInInspector]
-    public static ARController Instance { get; private set; }
+    private static ARController _instance = null;
+    public static ARController Instance
+    {
+        get {
+            if (_instance == null)
+            {
+                ARController[] c = FindObjectsOfType<ARController>();
+                if (c.Length == 0)
+                {
+                    Debug.LogError("There are no instances of " + typeof(ARController) + " in the scene.");
+                }
+                else if (c.Length > 1)
+                {
+                    Debug.LogError("There is more than one instance of " + typeof(ARController) + " in the scene.");
+                }
+                else
+                {
+                    _instance = c[0];
+                }
+            }
+            return _instance;
+        }
+    }
 
     // Main reference to the plugin functions. Created in OnEnable, destroyed in OnDisable().
     public IPluginFunctions PluginFunctions { get; private set; }
@@ -99,6 +99,13 @@ public class ARController : MonoBehaviour
     public bool AllowNonRGBVideo = true;
     public bool QuitOnEscOrBack = true;
     public bool AutoStartAR = true;
+
+    // Video source config.
+    public string videoCParamName0 = "";
+    public string videoConfigurationLinux0 = "";
+    public bool VideoIsStereo = false;
+    public string transL2RName = "transL2R";
+    public string videoCParamName1 = "";
 
     //API Addition - Users can check this value to see if the camera is initialised running.
     //Usage: Used to show 'Please Wait' UIs while the camera is still initialising or markers are being loaded.
@@ -116,77 +123,6 @@ public class ARController : MonoBehaviour
     private bool _sceneConfiguredForVideoWaitingMessageLogged = false;
     private bool _useNativeGLTexturing = false;
 
-    //
-    // Video source 0.
-    //
-
-    // Config. in.
-    public string videoCParamName0 = "";
-    public string videoConfigurationLinux0 = "";
-    public int BackgroundLayer0 = 8;
-
-    public bool PluginConfigurationRequiredFlag = false;
-
-    // Config. out.
-    private int _videoWidth0 = 0;
-    private int _videoHeight0 = 0;
-    private int _videoPixelSize0 = 0;
-    private string _videoPixelFormatString0 = "";
-    private Matrix4x4 _videoProjectionMatrix0;
-
-    // Unity objects.
-    private GameObject _videoBackgroundMeshGO0 = null; // The GameObject which holds the MeshFilter and MeshRenderer for the background video, and also the Camera object(s) used to render them. 
-    private Color32[] _videoColor32Array0 = null; // An array used to fetch pixels from the native side, only if not using native GL texturing.
-    private Texture2D _videoTexture0 = null;  // Texture object with the video image.
-    private Material _videoMaterial0 = null;  // Material which uses our "VideoPlaneNoLight" shader, and paints itself with _videoTexture0.
-
-    // Stereo config.
-    public bool VideoIsStereo = false;
-    public string transL2RName = "transL2R";
-
-    //
-    // Video source 1.
-    //
-
-    // Config. in.
-    public string videoCParamName1 = "";
-    public int BackgroundLayer1 = 9;
-
-    // Config. out.
-    private int _videoWidth1 = 0;
-    private int _videoHeight1 = 0;
-    private int _videoPixelSize1 = 0;
-    private string _videoPixelFormatString1 = "";
-    private Matrix4x4 _videoProjectionMatrix1;
-
-    // Unity objects.
-    private GameObject _videoBackgroundMeshGO1 = null; // The GameObject which holds the MeshFilter and MeshRenderer for the background video, and also the Camera object(s) used to render them. 
-    private Color32[] _videoColor32Array1 = null; // An array used to fetch pixels from the native side, only if not using native GL texturing.
-    private Texture2D _videoTexture1 = null;  // Texture object with the video image.
-    private Material _videoMaterial1 = null;  // Material which uses our "VideoPlaneNoLight" shader, and paints itself with _videoTexture0.
-
-    //
-    // Background camera(s).
-    //
-
-    private Camera clearCamera = null;
-    private GameObject _videoBackgroundCameraGO0 = null; // The GameObject which holds the Camera object for the mono / stereo left-eye video background.
-    private Camera _videoBackgroundCamera0 = null; // The Camera component attached to _videoBackgroundCameraGO0. Easier to keep this reference than calling _videoBackgroundCameraGO0.GetComponent<Camera>() each time.
-    private GameObject _videoBackgroundCameraGO1 = null; // The GameObject which holds the Camera object(s) for the stereo right-eye video background.
-    private Camera _videoBackgroundCamera1 = null; // The Camera component attached to _videoBackgroundCameraGO1. Easier to keep this reference than calling _videoBackgroundCameraGO1.GetComponent<Camera>() eaach time.
-
-    //
-    // Other
-    //
-
-    public float NearPlane = 0.01f;
-    public float FarPlane = 5.0f;
-
-    public bool ContentRotate90 = false; // Used in CreateVideoBackgroundCamera().
-    public bool ContentFlipH = false;
-    public bool ContentFlipV = false;
-    public ContentAlign ContentAlign = ContentAlign.Center;
-
 #if UNITY_ANDROID
     //
     //Android Plugin
@@ -198,14 +134,6 @@ public class ARController : MonoBehaviour
     //private float _frameStatsTimeUpdateTexture = 0.0f;
     //private float _frameStatsTimeSetPixels = 0.0f;
     //private float _frameStatsTimeApply = 0.0f;
-
-    public readonly static Dictionary<ContentMode, string> ContentModeNames = new Dictionary<ContentMode, string>
-    {
-        {ContentMode.Stretch, "Stretch"},
-        {ContentMode.Fit, "Fit"},
-        {ContentMode.Fill, "Fill"},
-        {ContentMode.OneToOne, "1:1"},
-    };
 
     // Frames per second calculations
     private int frameCounter = 0;
@@ -293,6 +221,26 @@ public class ARController : MonoBehaviour
         AR_LOG_LEVEL_REL_INFO
     }
 
+    /// <summary>
+    /// Specifies desired horizontal alignment of video frames in drawing graphics context.
+    /// </summary>
+    public enum ARW_H_ALIGN
+    {
+        ARW_H_ALIGN_LEFT,       ///< Align the left edge of the video frame with the left edge of the context.
+        ARW_H_ALIGN_CENTRE,     ///< Align the centre of the video frame with the centre of the context.
+        ARW_H_ALIGN_RIGHT       ///< Align the right edge of the video frame with the right edge of the context.
+    }
+
+    /// <summary>
+    /// Specifies desired vertical alignment of video frames in drawing graphics context.
+    /// </summary>
+    public enum ARW_V_ALIGN
+    {
+        ARW_V_ALIGN_TOP,        ///< Align the top edge of the video frame with the top edge of the context.
+        ARW_V_ALIGN_CENTRE,     ///< Align the centre of the video frame with the centre of the context.
+        ARW_V_ALIGN_BOTTOM      ///< Align the bottom edge of the video frame with the bottom edge of the context.
+    }
+
     ///
     /// @brief Values for device position, as encoded in ARVideoSourceInfoT.flags & AR_VIDEO_SOURCE_INFO_POSITION_MASK.
     ///
@@ -357,8 +305,6 @@ public class ARController : MonoBehaviour
 
     // Private fields with accessors.
     [SerializeField]
-    private ContentMode currentContentMode = ContentMode.Fit;
-    [SerializeField]
     private ARToolKitThresholdMode currentThresholdMode = ARToolKitThresholdMode.Manual;
     [SerializeField]
     private int currentThreshold = 100;
@@ -377,8 +323,6 @@ public class ARController : MonoBehaviour
     [SerializeField]
     private ARToolKitImageProcMode currentImageProcMode = ARToolKitImageProcMode.AR_IMAGE_PROC_FRAME_IMAGE;
     [SerializeField]
-    private bool currentUseVideoBackground = true;
-    [SerializeField]
     private bool currentNFTMultiMode = false;
     [Tooltip("The max. number of markers to track simultaneously. If fewer than this number are found, then detection will run each frame, as well as tracking for any detected markers.")]
     [SerializeField]
@@ -396,13 +340,17 @@ public class ARController : MonoBehaviour
     // Links to other components.
     private ARVideoConfig arvideoconfig = null;
 
+    // Notifications.
+    public UnityEvent onVideoStarted = new UnityEvent();
+    public UnityEvent onVideoStopped = new UnityEvent();
+    public UnityEvent onVideoFrame = new UnityEvent();
+
     //
     // MonoBehavior methods.
     //
     void Awake()
     {
-        Log(LogTag + "ARController.Awake())");
-        Instance = this;
+        //Log(LogTag + "ARController.Awake())");
     }
 
     void OnEnable()
@@ -615,9 +563,12 @@ public class ARController : MonoBehaviour
     {
         //Log(LogTag + "ARController.OnDestroy()");
 
-
         // Classes inheriting from MonoBehavior should set all static member variables to null on unload.
-        //none.
+        logMessages.Clear();
+        if (_instance == this)
+        {
+            _instance = null;
+        }
     }
 
     //
@@ -671,8 +622,6 @@ public class ARController : MonoBehaviour
             //_useNativeGLTexturing = usingOpenGL && UseNativeGLTexturingIfAvailable;
             _useNativeGLTexturing = false; // TODO: reinstate native texturing support.
             Log(LogTag + "Render device: " + renderDeviceVersion + (_useNativeGLTexturing ? ", using native GL texturing." : ", using Unity texturing."));
-
-            CreateClearCamera();
 
             // Retrieve video configuration, and append any required per-platform overrides.
             // For native GL texturing we need monoplanar video; iOS and Android default to biplanar format. 
@@ -842,104 +791,7 @@ public class ARController : MonoBehaviour
             {
                 Log(LogTag + "UpdateAR: artoolkitX video is running. Configuring Unity scene for video.");
 
-                // Retrieve artoolkitX video source(s) frame size and format, and projection matrix, and store globally.
-                // Then create the required object(s) to instantiate a mesh/meshes with the frame texture(s).
-                // Each mesh lives in a separate "video background" layer.
-                if (!VideoIsStereo)
-                {
-
-                    // artoolkitX video size and format.
-
-                    bool ok1 = PluginFunctions.arwGetVideoParams(out _videoWidth0, out _videoHeight0, out _videoPixelSize0, out _videoPixelFormatString0);
-                    if (!ok1) return false;
-                    Log(LogTag + "Video " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + ")");
-
-                    // artoolkitX projection matrix adjusted for Unity
-                    float[] projRaw = new float[16];
-                    PluginFunctions.arwGetProjectionMatrix(NearPlane, FarPlane, projRaw);
-                    _videoProjectionMatrix0 = ARUtilityFunctions.MatrixFromFloatArray(projRaw);
-                    Log(LogTag + "Projection matrix: [" + Environment.NewLine + _videoProjectionMatrix0.ToString().Trim() + "]");
-                    if (ContentRotate90) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * _videoProjectionMatrix0;
-                    if (ContentFlipV) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1.0f, -1.0f, 1.0f)) * _videoProjectionMatrix0;
-                    if (ContentFlipH) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix0;
-
-                    // Invert flipV for texture because artoolkitX video frame is top-down, Unity's is bottom-up.
-                    _videoBackgroundMeshGO0 = ARUtilityFunctions.CreateVideoGameObject(0, _videoWidth0, _videoHeight0, ContentFlipH, !ContentFlipV, BackgroundLayer0, out _videoTexture0, out _videoMaterial0);
-                    if (_videoBackgroundMeshGO0 == null || _videoTexture0 == null || _videoMaterial0 == null)
-                    {
-                        Log(LogTag + "Error: unable to create video mesh.");
-                    }
-                    _videoColor32Array0 = _useNativeGLTexturing ? new Color32[_videoWidth0 * _videoHeight0] : null;
-
-                }
-                else
-                {
-
-                    // artoolkitX stereo video size and format.
-                    bool ok1 = PluginFunctions.arwGetVideoParamsStereo(out _videoWidth0, out _videoHeight0, out _videoPixelSize0, out _videoPixelFormatString0, out _videoWidth1, out _videoHeight1, out _videoPixelSize1, out _videoPixelFormatString1);
-                    if (!ok1) return false;
-                    Log(LogTag + "Video left " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + "), right " + _videoWidth1 + "x" + _videoHeight1 + "@" + _videoPixelSize1 + "Bpp (" + _videoPixelFormatString1 + ")");
-
-                    // artoolkitX projection matrices, adjusted for Unity
-                    float[] projRaw0 = new float[16];
-                    float[] projRaw1 = new float[16];
-                    PluginFunctions.arwGetProjectionMatrixStereo(NearPlane, FarPlane, projRaw0, projRaw1);
-                    _videoProjectionMatrix0 = ARUtilityFunctions.MatrixFromFloatArray(projRaw0);
-                    _videoProjectionMatrix1 = ARUtilityFunctions.MatrixFromFloatArray(projRaw1);
-                    Log(LogTag + "Projection matrix left: [" + Environment.NewLine + _videoProjectionMatrix0.ToString().Trim() + "], right: [" + Environment.NewLine + _videoProjectionMatrix1.ToString().Trim() + "]");
-                    if (ContentRotate90) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * _videoProjectionMatrix0;
-                    if (ContentRotate90) _videoProjectionMatrix1 = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * _videoProjectionMatrix1;
-                    if (ContentFlipV) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1.0f, -1.0f, 1.0f)) * _videoProjectionMatrix0;
-                    if (ContentFlipV) _videoProjectionMatrix1 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1.0f, -1.0f, 1.0f)) * _videoProjectionMatrix1;
-                    if (ContentFlipH) _videoProjectionMatrix0 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix0;
-                    if (ContentFlipH) _videoProjectionMatrix1 = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * _videoProjectionMatrix1;
-
-                    // Invert flipV flipV for texture because artoolkitX video frame is top-down, Unity's is bottom-up.
-                    _videoBackgroundMeshGO0 = ARUtilityFunctions.CreateVideoGameObject(0, _videoWidth0, _videoHeight0, ContentFlipH, !ContentFlipV, BackgroundLayer0, out _videoTexture0, out _videoMaterial0);
-                    _videoBackgroundMeshGO1 = ARUtilityFunctions.CreateVideoGameObject(1, _videoWidth1, _videoHeight1, ContentFlipH, !ContentFlipV, BackgroundLayer1, out _videoTexture1, out _videoMaterial1);
-                    if (_videoBackgroundMeshGO0 == null || _videoTexture0 == null || _videoMaterial0 == null || _videoBackgroundMeshGO1 == null || _videoTexture1 == null || _videoMaterial1 == null)
-                    {
-                        Log(LogTag + "Error: unable to create video background mesh.");
-                    }
-                    _videoColor32Array0 = _useNativeGLTexturing ? new Color32[_videoWidth0 * _videoHeight0] : null;
-                    _videoColor32Array1 = _useNativeGLTexturing ? new Color32[_videoWidth1 * _videoHeight1] : null;
-                }
-
-                // Create background camera(s) to actually view the "video background" layer(s).
-                bool haveStereoARCameras = false;
-                ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
-                foreach (ARCamera arc in arCameras)
-                {
-                    if (arc.Stereo) haveStereoARCameras = true;
-                }
-                if (!haveStereoARCameras)
-                {
-                    // Mono display.
-                    // Use only first video source, regardless of whether VideoIsStereo.
-                    // (The case where stereo video source is used with a mono display is not likely to be common.)
-                    _videoBackgroundCameraGO0 = CreateVideoBackgroundCamera("Video background", BackgroundLayer0, out _videoBackgroundCamera0);
-                    if (_videoBackgroundCameraGO0 == null || _videoBackgroundCamera0 == null)
-                    {
-                        Log(LogTag + "Error: unable to create video background camera.");
-                    }
-                }
-                else
-                {
-                    // Stereo display.
-                    // If not VideoIsStereo, right eye will display copy of video frame.
-                    _videoBackgroundCameraGO0 = CreateVideoBackgroundCamera("Video background (L)", BackgroundLayer0, out _videoBackgroundCamera0);
-                    _videoBackgroundCameraGO1 = CreateVideoBackgroundCamera("Video background (R)", (VideoIsStereo ? BackgroundLayer1 : BackgroundLayer0), out _videoBackgroundCamera1);
-                    if (_videoBackgroundCameraGO0 == null || _videoBackgroundCamera0 == null || _videoBackgroundCameraGO1 == null || _videoBackgroundCamera1 == null)
-                    {
-                        Log(LogTag + "Error: unable to create video background camera.");
-                    }
-                }
-
-                // Setup foreground cameras for the video configuration.
-                ConfigureForegroundCameras();
-
-                // Adjust viewports of both background and foreground cameras.
-                ConfigureViewports();
+                onVideoStarted.Invoke();
 
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
                 UpdateVideoTexture();
@@ -967,10 +819,7 @@ public class ARController : MonoBehaviour
         if (gotFrame)
         {
             if (!PluginFunctions.arwUpdateAR()) return false;
-            if (_sceneConfiguredForVideo && UseVideoBackground)
-            {
-                UpdateTexture();
-            }
+            onVideoFrame.Invoke();
         }
 
         return true;
@@ -991,12 +840,7 @@ public class ARController : MonoBehaviour
             Log(LogTag + "Error stopping AR.");
         }
 
-        // Clean up.
-        if (_sceneConfiguredForVideo)
-        {
-            DestroyVideoBackground();
-            DestroyClearCamera();
-        }
+        onVideoStopped.Invoke();
 
         // Reset display sleep.
         Screen.sleepTimeout = SleepTimeout.SystemSetting;
@@ -1075,19 +919,6 @@ public class ARController : MonoBehaviour
         }
     }
 #endif
-
-    public void SetVideoAlpha(float a)
-    {
-        if (_videoMaterial0 != null)
-        {
-            _videoMaterial0.color = new Color(1.0f, 1.0f, 1.0f, a);
-        }
-        if (_videoMaterial1 != null)
-        {
-            _videoMaterial1.color = new Color(1.0f, 1.0f, 1.0f, a);
-        }
-    }
-
 
     public bool DebugVideo
     {
@@ -1414,441 +1245,22 @@ public class ARController : MonoBehaviour
 
     #endregion Tracker configuration.
 
-    public ContentMode ContentMode
-    {
-        get
-        {
-            return currentContentMode;
-        }
-
-        set
-        {
-            if (currentContentMode != value)
-            {
-                currentContentMode = value;
-                if (_running)
-                {
-                    ConfigureViewports();
-                }
-            }
-        }
-    }
-
-    public bool UseVideoBackground
-    {
-        get
-        {
-            return currentUseVideoBackground;
-        }
-
-        set
-        {
-            currentUseVideoBackground = value;
-            if (clearCamera != null) clearCamera.backgroundColor = new Color(0.0f, 0.0f, 0.0f, (currentUseVideoBackground ? 1.0f : 0.0f));
-            if (_videoBackgroundCamera0 != null) _videoBackgroundCamera0.enabled = currentUseVideoBackground;
-            if (_videoBackgroundCamera1 != null) _videoBackgroundCamera1.enabled = currentUseVideoBackground;
-        }
-    }
-
     //
     // Internal methods.
     //
-
-    private void UpdateTexture()
-    {
-        if (!VideoIsStereo)
-        {
-            // Mono.
-            if (_videoTexture0 == null)
-            {
-                Log(LogTag + "Error: No video texture to update.");
-            }
-            else
-            {
-                if (_videoColor32Array0 != null)
-                {
-                    bool updatedTexture = PluginFunctions.arwUpdateTexture32(_videoColor32Array0);
-                    if (updatedTexture)
-                    {
-                        _videoTexture0.SetPixels32(_videoColor32Array0);
-                        _videoTexture0.Apply(false);
-                    }
-                }
-                else
-                {
-                    Log(LogTag + "Error: No video color array to update.");
-                }
-            }
-        }
-        else
-        {
-            // Stereo.
-            if (_videoTexture0 == null || _videoTexture1 == null)
-            {
-                Log(LogTag + "Error: No video textures to update.");
-            }
-            else
-            {
-                if (_videoColor32Array0 != null && _videoColor32Array1 != null)
-                {
-
-                    bool updatedTexture = PluginFunctions.arwUpdateTexture32Stereo(_videoColor32Array0, _videoColor32Array1);
-                    if (updatedTexture)
-                    {
-                        _videoTexture0.SetPixels32(_videoColor32Array0);
-                        _videoTexture1.SetPixels32(_videoColor32Array1);
-                        _videoTexture0.Apply(false);
-                        _videoTexture1.Apply(false);
-                    }
-                }
-                else
-                {
-                    Log(LogTag + "Error: No video color array to update.");
-                }
-            }
-        }
-    }
-
-    private bool CreateClearCamera()
-    {
-        // Attach the clear camera to this GameObject, so that we can respond to 
-        // camera events in addition to clearing the display.
-        clearCamera = this.gameObject.GetComponent<Camera>();
-        if (clearCamera == null)
-        {
-            clearCamera = this.gameObject.AddComponent<Camera>();
-        }
-
-        // First camera to render, don't render any layers.
-        clearCamera.depth = 0;
-        clearCamera.cullingMask = 0;
-
-        // Clear color to black.
-        clearCamera.clearFlags = CameraClearFlags.SolidColor;
-        clearCamera.backgroundColor = new Color(0.0f, 0.0f, 0.0f, (currentUseVideoBackground ? 1.0f : 0.0f));
-
-        return true;
-    }
-
-    // Creates a GameObject holding a camera with name 'name', which will render layer 'layer'.
-    private GameObject CreateVideoBackgroundCamera(String name, int layer, out Camera vbc)
-    {
-        // Create new GameObject to hold camera.
-        GameObject vbcgo = new GameObject(name);
-        if (vbcgo == null)
-        {
-            Log(LogTag + "Error: CreateVideoBackgroundCamera cannot create GameObject.");
-            vbc = null;
-            return null;
-        }
-        //vbgo.layer = layer; // Belongs in the background layer.
-
-        vbc = vbcgo.AddComponent<Camera>();
-        if (vbc == null)
-        {
-            Log(LogTag + "Error: CreateVideoBackgroundCamera cannot add Camera to GameObject.");
-            Destroy(vbcgo);
-            return null;
-        }
-
-        // Camera at origin, orthographic projection.
-        vbc.orthographic = true;
-        vbc.projectionMatrix = Matrix4x4.identity;
-        if (ContentRotate90) vbc.projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * vbc.projectionMatrix;
-        vbc.projectionMatrix = Matrix4x4.Ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f) * vbc.projectionMatrix;
-        vbc.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
-        vbc.transform.rotation = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-        vbc.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-
-        // Unity 5.6 regression: Unity 5.6 combines cameras, which seems to result in the ClearCamera
-        // we create being merged with this video background camera, resulting in the ClearCamera having
-        // no effect. So a workaround (but not a viable fix) is to make this camera also clear the background.
-#if UNITY_5_6_OR_NEWER
-        vbc.clearFlags = CameraClearFlags.SolidColor;
-        vbc.backgroundColor = Color.black;
-#else
-        vbc.clearFlags = CameraClearFlags.Nothing;
-#endif
-
-        // The background camera displays only the background layer
-        vbc.cullingMask = 1 << layer;
-
-        // Renders after the clear camera but before foreground cameras
-        vbc.depth = 1;
-
-        // Finally: having done all this setup, if video background isn't actually wanted, disable the camera.
-        vbc.enabled = UseVideoBackground;
-
-        return vbcgo;
-    }
-
-    private void DestroyVideoBackground()
-    {
-        bool ed = Application.isEditor;
-
-        _videoBackgroundCamera0 = null;
-        _videoBackgroundCamera1 = null;
-        if (_videoBackgroundCameraGO0 != null)
-        {
-            if (ed) DestroyImmediate(_videoBackgroundCameraGO0);
-            else Destroy(_videoBackgroundCameraGO0);
-            _videoBackgroundCameraGO0 = null;
-        }
-        if (_videoBackgroundCameraGO1 != null)
-        {
-            if (ed) DestroyImmediate(_videoBackgroundCameraGO1);
-            else Destroy(_videoBackgroundCameraGO1);
-            _videoBackgroundCameraGO1 = null;
-        }
-
-        if (_videoMaterial0 != null)
-        {
-            if (ed) DestroyImmediate(_videoMaterial0);
-            else Destroy(_videoMaterial0);
-            _videoMaterial0 = null;
-        }
-        if (_videoMaterial1 != null)
-        {
-            if (ed) DestroyImmediate(_videoMaterial1);
-            else Destroy(_videoMaterial1);
-            _videoMaterial1 = null;
-        }
-        if (_videoTexture0 != null)
-        {
-            if (ed) DestroyImmediate(_videoTexture0);
-            else Destroy(_videoTexture0);
-            _videoTexture0 = null;
-        }
-        if (_videoTexture1 != null)
-        {
-            if (ed) DestroyImmediate(_videoTexture1);
-            else Destroy(_videoTexture1);
-            _videoTexture1 = null;
-        }
-        if (_videoColor32Array0 != null) _videoColor32Array0 = null;
-        if (_videoColor32Array1 != null) _videoColor32Array1 = null;
-        if (_videoBackgroundMeshGO0 != null)
-        {
-            if (ed) DestroyImmediate(_videoBackgroundMeshGO0);
-            else Destroy(_videoBackgroundMeshGO0);
-            _videoBackgroundMeshGO0 = null;
-        }
-        if (_videoBackgroundMeshGO1 != null)
-        {
-            if (ed) DestroyImmediate(_videoBackgroundMeshGO1);
-            else Destroy(_videoBackgroundMeshGO1);
-            _videoBackgroundMeshGO1 = null;
-        }
-        Resources.UnloadUnusedAssets();
-    }
-
-    private bool DestroyClearCamera()
-    {
-        //bool ed = Application.isEditor;
-        if (clearCamera != null)
-        {
-            //Log(LogTag + "Destroying Camera on ARController object");
-            //Log(LogTag + "BEFORE: ARController Camera component is '" + this.gameObject.GetComponent<Camera>() + "'");
-            //if (ed) DestroyImmediate(this.gameObject.GetComponent<Camera>());
-            //else Destroy(this.gameObject.GetComponent<Camera>());
-            clearCamera = null;
-            //Log(LogTag + "AFTER: ARController Camera component is '" + this.gameObject.GetComponent<Camera>() + "'");
-        }
-
-        return true;
-    }
-
-    // References globals ContentMode, ContentAlign, ContentRotate90, Screen.width, Screen.height.
-    private Rect getViewport(int contentWidth, int contentHeight, bool stereo, ARCamera.ViewEye viewEye)
-    {
-        int backingWidth = Screen.width;
-        int backingHeight = Screen.height;
-        int left, bottom, w, h;
-
-        if (stereo)
-        {
-            // Assume side-by-side or half side-by-side mode.
-            w = backingWidth / 2;
-            h = backingHeight;
-            if (viewEye == ARCamera.ViewEye.Left) left = 0;
-            else left = backingWidth / 2;
-            bottom = 0;
-        }
-        else
-        {
-            if (ContentMode == ContentMode.Stretch)
-            {
-                w = backingWidth;
-                h = backingHeight;
-            }
-            else
-            {
-                int contentWidthFinalOrientation = (ContentRotate90 ? contentHeight : contentWidth);
-                int contentHeightFinalOrientation = (ContentRotate90 ? contentWidth : contentHeight);
-
-                if (ContentMode == ContentMode.Fit || ContentMode == ContentMode.Fill)
-                {
-                    float scaleRatioWidth, scaleRatioHeight, scaleRatio;
-                    scaleRatioWidth = (float)backingWidth / (float)contentWidthFinalOrientation;
-                    scaleRatioHeight = (float)backingHeight / (float)contentHeightFinalOrientation;
-                    if (ContentMode == ContentMode.Fill) scaleRatio = Math.Max(scaleRatioHeight, scaleRatioWidth);
-                    else scaleRatio = Math.Min(scaleRatioHeight, scaleRatioWidth);
-                    w = (int)((float)contentWidthFinalOrientation * scaleRatio);
-                    h = (int)((float)contentHeightFinalOrientation * scaleRatio);
-                }
-                else
-                { // 1:1
-                    w = contentWidthFinalOrientation;
-                    h = contentHeightFinalOrientation;
-                }
-            }
-
-            if (ContentAlign == ContentAlign.TopLeft
-                || ContentAlign == ContentAlign.Left
-                || ContentAlign == ContentAlign.BottomLeft) left = 0;
-            else if (ContentAlign == ContentAlign.TopRight
-                     || ContentAlign == ContentAlign.Right
-                     || ContentAlign == ContentAlign.BottomRight) left = backingWidth - w;
-            else left = (backingWidth - w) / 2;
-
-            if (ContentAlign == ContentAlign.BottomLeft
-                || ContentAlign == ContentAlign.Bottom
-                || ContentAlign == ContentAlign.BottomRight) bottom = 0;
-            else if (ContentAlign == ContentAlign.TopLeft
-                     || ContentAlign == ContentAlign.Top
-                     || ContentAlign == ContentAlign.TopRight) bottom = backingHeight - h;
-            else bottom = (backingHeight - h) / 2;
-        }
-
-        Log(LogTag + "For " + backingWidth + "x" + backingHeight + " screen, calculated viewport " + w + "x" + h + " at (" + left + ", " + bottom + ").");
-#if !UNITY_EDITOR && UNITY_ANDROID
-        if (androidPlugin != null)
-            androidPlugin.Call("logUnityMessage", LogTag + "For " + backingWidth + "x" + backingHeight + " screen, calculated viewport " + w + "x" + h + " at (" + left + ", " + bottom + ").");
-#endif
-
-        return new Rect(left, bottom, w, h);
-    }
-
-    private void CycleContentMode()
-    {
-        switch (ContentMode)
-        {
-            case ContentMode.Fit:
-                ContentMode = ContentMode.Fill; // Fill and OneToOne mode can potentially result in negative values for viewport x and y. Unity can't handle that.
-                break;
-            case ContentMode.Fill:
-                ContentMode = ContentMode.Stretch;
-                break;
-            case ContentMode.Stretch:
-                ContentMode = ContentMode.OneToOne;
-                break;
-            case ContentMode.OneToOne:
-            default:
-                ContentMode = ContentMode.Fit;
-                break;
-        }
-    }
-
-    // Iterate through all ARCamera objects, asking each to set its viewing frustum and any viewing pose.
-    private bool ConfigureForegroundCameras()
-    {
-        // Note if  any of the ARCamera objects are in optical mode so we can adjust UseVideoBackground.
-        bool optical = false;
-
-        ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
-        foreach (ARCamera arc in arCameras)
-        {
-            bool ok;
-            if (!arc.Stereo)
-            {
-                // A mono display.
-                ok = arc.SetupCamera(PluginFunctions, NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
-            }
-            else
-            {
-                // One eye of a stereo display.
-                if (arc.StereoEye == ARCamera.ViewEye.Left)
-                {
-                    ok = arc.SetupCamera(PluginFunctions, NearPlane, FarPlane, _videoProjectionMatrix0, out optical);
-                }
-                else
-                {
-                    ok = arc.SetupCamera(PluginFunctions, NearPlane, FarPlane, (VideoIsStereo ? _videoProjectionMatrix1 : _videoProjectionMatrix0), out optical);
-                }
-            }
-            if (!ok)
-            {
-                Log(LogTag + "Error setting up ARCamera.");
-            }
-        }
-
-        // If any of the ARCameras are in optical mode, turn off the video background, otherwise turn it on.
-        UseVideoBackground = !optical;
-
-        return true;
-    }
-
-    private bool ConfigureViewports()
-    {
-        bool haveStereoARCamera = false;
-
-        // Set viewports on foreground camera(s).
-        ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
-        foreach (ARCamera arc in arCameras)
-        {
-            if (!arc.Stereo)
-            {
-                // A mono display.
-                arc.gameObject.GetComponent<Camera>().pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
-            }
-            else
-            {
-                // One eye of a stereo display.
-                haveStereoARCamera = true;
-                if (arc.StereoEye == ARCamera.ViewEye.Left)
-                {
-                    arc.gameObject.GetComponent<Camera>().pixelRect = getViewport(_videoWidth0, _videoHeight0, true, ARCamera.ViewEye.Left);
-                }
-                else
-                {
-                    arc.gameObject.GetComponent<Camera>().pixelRect = getViewport((VideoIsStereo ? _videoWidth1 : _videoWidth0), (VideoIsStereo ? _videoHeight1 : _videoHeight0), true, ARCamera.ViewEye.Right);
-                }
-            }
-        }
-
-        // Set viewports on background camera(s).
-        if (!haveStereoARCamera)
-        {
-            // Mono display.
-            _videoBackgroundCamera0.pixelRect = getViewport(_videoWidth0, _videoHeight0, false, ARCamera.ViewEye.Left);
-        }
-        else
-        {
-            // Stereo display.
-            _videoBackgroundCamera0.pixelRect = getViewport(_videoWidth0, _videoHeight0, true, ARCamera.ViewEye.Left);
-            _videoBackgroundCamera1.pixelRect = getViewport((VideoIsStereo ? _videoWidth1 : _videoWidth0), (VideoIsStereo ? _videoHeight1 : _videoHeight0), true, ARCamera.ViewEye.Right);
-        }
-
-#if UNITY_ANDROID
-        // Special feature: on Android, call the UnityARPlayer.setStereo(haveStereoARCamera) Java method.
-        // This allows Android-based devices (e.g. the Epson Moverio BT-200) to support hardware switching between mono/stereo display modes.
-        //if (Application.platform == RuntimePlatform.Android && androidPlugin != null) {
-        //    androidPlugin.Call("setStereo",new object[]{haveStereoARCamera});
-        //}        
-#endif
-        return true;
-    }
 
     public static void Log(String msg)
     {
         // Add the new log message to the collection. If the collection has grown too large
         // then remove the oldest messages.
-        logMessages.Add(msg);
-        while (logMessages.Count > MaximumLogMessages) logMessages.RemoveAt(0);
+        if (Debug.isDebugBuild)
+        {
+            logMessages.Add(msg);
+            while (logMessages.Count > MaximumLogMessages) logMessages.RemoveAt(0);
+        }
 
-        // If there is a logCallback then use that to handle the log message. Otherwise simply
-        // print out on the debug console.
-        if (logCallback != null) logCallback(msg);
+        if (msg.StartsWith("[error]")) Debug.LogError(msg);
+        else if (msg.StartsWith("[warning]")) Debug.LogWarning(msg);
         else Debug.Log(msg);
     }
 
@@ -1867,7 +1279,7 @@ public class ARController : MonoBehaviour
         }
     }
 
-
+    #region Debug GUI
     // ------------------------------------------------------------------------------------
     // GUI Methods
     // ------------------------------------------------------------------------------------
@@ -1915,10 +1327,12 @@ public class ARController : MonoBehaviour
             if (GUI.Button(new Rect(570, 250, 150, 50), "Info")) showGUIDebugInfo = !showGUIDebugInfo;
             if (showGUIDebugInfo) DrawInfoGUI();
 
-            if (GUI.Button(new Rect(570, 320, 150, 50), "Log")) showGUIDebugLogConsole = !showGUIDebugLogConsole;
-            if (showGUIDebugLogConsole) DrawLogConsole();
+            if (Debug.isDebugBuild) {
+                if (GUI.Button(new Rect(570, 320, 150, 50), "Log")) showGUIDebugLogConsole = !showGUIDebugLogConsole;
+                if (showGUIDebugLogConsole) DrawLogConsole();
+            }
 
-            if (GUI.Button(new Rect(570, 390, 150, 50), "Content mode: " + ContentModeNames[ContentMode])) CycleContentMode();
+            //if (GUI.Button(new Rect(570, 390, 150, 50), "Content mode: " + ARCamera.ContentModeNames[ARCamera.CameraContentMode])) ARCamera.CycleContentMode();
 #if UNITY_ANDROID
         if (Application.platform == RuntimePlatform.Android) {
             if (GUI.Button(new Rect(400, 250, 150, 50), "Camera preferences")) {
@@ -1927,7 +1341,7 @@ public class ARController : MonoBehaviour
             }
         }
 #endif
-            if (GUI.Button(new Rect(400, 320, 150, 50), "Video background: " + UseVideoBackground)) UseVideoBackground = !UseVideoBackground;
+            //if (GUI.Button(new Rect(400, 320, 150, 50), "Video background: " + UseVideoBackground)) UseVideoBackground = !UseVideoBackground;
             if (GUI.Button(new Rect(400, 390, 150, 50), "Debug mode: " + DebugVideo)) DebugVideo = !DebugVideo;
 
             ARToolKitThresholdMode currentThresholdMode = VideoThresholdMode;
@@ -1966,7 +1380,7 @@ public class ARController : MonoBehaviour
     {
         // Basic ARToolKit information
         GUI.Label(new Rect(10, 10, 500, 25), "artoolkitX " + Version);
-        GUI.Label(new Rect(10, 30, 500, 25), "Video " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + ")");
+        //GUI.Label(new Rect(10, 30, 500, 25), "Video " + _videoWidth0 + "x" + _videoHeight0 + "@" + _videoPixelSize0 + "Bpp (" + _videoPixelFormatString0 + ")");
 
         // Some system information
         GUI.Label(new Rect(10, 90, 500, 25), "Graphics device: " + SystemInfo.graphicsDeviceName);
@@ -1976,7 +1390,7 @@ public class ARController : MonoBehaviour
 
         GUI.Label(new Rect(10, 170, 500, 25), "Resolution : " + Screen.currentResolution.width + "x" + Screen.currentResolution.height + "@" + Screen.currentResolution.refreshRate + "Hz");
         GUI.Label(new Rect(10, 190, 500, 25), "Screen : " + Screen.width + "x" + Screen.height);
-        GUI.Label(new Rect(10, 210, 500, 25), "Viewport : " + _videoBackgroundCamera0.pixelRect.xMin + "," + _videoBackgroundCamera0.pixelRect.yMin + ", " + _videoBackgroundCamera0.pixelRect.xMax + ", " + _videoBackgroundCamera0.pixelRect.yMax);
+        //GUI.Label(new Rect(10, 210, 500, 25), "Viewport : " + _videoBackgroundCamera0.pixelRect.xMin + "," + _videoBackgroundCamera0.pixelRect.yMin + ", " + _videoBackgroundCamera0.pixelRect.xMax + ", " + _videoBackgroundCamera0.pixelRect.yMax);
         //GUI.Label(new Rect(10, 250, 800, 100), "Base Data Path : " + BaseDataPath);
 
 
@@ -1997,22 +1411,16 @@ public class ARController : MonoBehaviour
     {
         Rect consoleRect = new Rect(0, 0, Screen.width, 200);
 
-        GUIStyle s = new GUIStyle(GUI.skin.box);
-        s.normal.background = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        s.normal.background.SetPixel(0, 0, new Color(1, 1, 1, 1));
-        s.normal.background.Apply();
+        GUIStyle bs = new GUIStyle(GUI.skin.box);
+        bs.normal.background = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        bs.normal.background.SetPixel(0, 0, new Color(1, 1, 1, 1));
+        bs.normal.background.Apply();
 
-        GUI.Box(consoleRect, "", s);
+        GUI.Box(consoleRect, "", bs);
 
-        DrawLogEntries(consoleRect, false);
-    }
-
-
-    private void DrawLogEntries(Rect container, bool reverse)
-    {
         //int numItems = logMessages.Count;
 
-        Rect scrollViewRect = new Rect(5, 5, container.width - 10, container.height - 10);
+        Rect scrollViewRect = new Rect(5, 5, consoleRect.width - 10, consoleRect.height - 10);
 
         float height = 0;
         float width = scrollViewRect.width - 30;
@@ -2030,7 +1438,6 @@ public class ARController : MonoBehaviour
         float y = 0;
 
         IEnumerable<string> lm = logMessages;
-        if (reverse) lm = lm.Reverse<string>();
 
         int i = 0;
 
@@ -2038,7 +1445,7 @@ public class ARController : MonoBehaviour
         {
             i = 0;
             if (s.StartsWith(LogTag)) i = 1;
-            else if (s.StartsWith("ARController C++:")) i = 2;
+            else if (s.StartsWith("[")) i = 2;
 
             float h = GUI.skin.label.CalcHeight(new GUIContent(s), width);
             GUI.Label(new Rect(0, y, width, h), s, style[i]);
@@ -2050,4 +1457,4 @@ public class ARController : MonoBehaviour
     }
 
 }
-
+#endregion Debug GUI

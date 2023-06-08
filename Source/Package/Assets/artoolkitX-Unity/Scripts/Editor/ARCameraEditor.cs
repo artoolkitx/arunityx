@@ -48,6 +48,16 @@ public class ARCameraEditor : Editor
 	private static TextAsset[] OpticalParamsAssets;
 	private static int OpticalParamsAssetCount;
     private static string[] OpticalParamsFilenames;
+    protected SerializedProperty ContentRotate90;
+    protected SerializedProperty ContentFlipV;
+    protected SerializedProperty ContentFlipH;
+
+    protected virtual void OnEnable()
+    {
+        ContentRotate90 = serializedObject.FindProperty("ContentRotate90");
+        ContentFlipV = serializedObject.FindProperty("ContentFlipV");
+        ContentFlipH = serializedObject.FindProperty("ContentFlipH");
+    }
 
     public static void RefreshOpticalParamsFilenames() 
 	{
@@ -65,7 +75,17 @@ public class ARCameraEditor : Editor
 		if (arc == null) return;
 
         using (new EditorGUI.DisabledScope(true))
+        {
             EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
+            Camera c = arc.gameObject.GetComponent<Camera>();
+            if (c != null)
+            {
+                EditorGUILayout.LabelField(new GUIContent("Near plane",
+        "For maximum depth-buffer precision, set this value on the attached camera to the largest acceptable value that is less than \"Far plane\", while taking into account that content closer than this to the camera will not be rendered."), new GUIContent(c.nearClipPlane.ToString()));
+                EditorGUILayout.LabelField(new GUIContent("Far plane",
+                    "For maximum depth-buffer precision, set this value on the attached camera to the smallest acceptable value that is greater than \"Near plane\", while taking into account that content farther than this from the camera will not be rendered."), new GUIContent(c.farClipPlane.ToString()));
+            }
+        }
 
         //
         // Stereo parameters.
@@ -83,8 +103,22 @@ public class ARCameraEditor : Editor
 
 		arc.Optical = EditorGUILayout.Toggle("Optical see-through mode.", arc.Optical);
 
-		if (arc.Optical) {
+        if (!arc.Optical)
+        {
+            ARCamera.ContentMode currentContentMode = arc.CameraContentMode;
+            ARCamera.ContentMode newContentMode = (ARCamera.ContentMode)EditorGUILayout.EnumPopup("Content mode", currentContentMode);
+            if (newContentMode != currentContentMode)
+            {
+                Undo.RecordObject(arc, "Set content mode");
+                arc.CameraContentMode = newContentMode;
+            }
 
+            EditorGUILayout.PropertyField(ContentRotate90, new GUIContent("Rotate 90 deg."));
+            EditorGUILayout.PropertyField(ContentFlipV, new GUIContent("Flip vertically"));
+            EditorGUILayout.PropertyField(ContentFlipH, new GUIContent("Flip horizontally."));
+        }
+        else
+        {
             arc.OpticalCalibrationMode0 = (ARCamera.OpticalCalibrationMode)EditorGUILayout.EnumPopup("Optical calibration type", arc.OpticalCalibrationMode0);
             if (arc.OpticalCalibrationMode0 == ARCamera.OpticalCalibrationMode.ARXOpticalParametersFile)
             {

@@ -154,7 +154,7 @@ public static class ARUtilityFunctions
 
 	// Creates a GameObject in layer 'layer' which renders a mesh displaying the video stream.
 	// Places references to the Color array (as required), the texture and the material into the out parameters.
-	public static GameObject CreateVideoGameObject(int index, int w, int h, bool flipH, bool flipV, int layer, out Texture2D vt, out Material vm)
+	public static GameObject CreateVideoObject(string name, int w, int h, float zPos, bool flipH, bool flipV, int layer, out Texture2D vt, out Material vm)
 	{
 		// Check parameters.
 		if (w <= 0 || h <= 0)
@@ -165,7 +165,7 @@ public static class ARUtilityFunctions
 		}
 
 		// Create new GameObject to hold mesh.
-		GameObject vbmgo = new GameObject("Video source " + index);
+		GameObject vbmgo = new GameObject(name);
 		if (vbmgo == null)
 		{
 			ARController.Log("Error: CreateVideoGameObject cannot create GameObject.");
@@ -184,7 +184,7 @@ public static class ARUtilityFunctions
 		// Now create a mesh appropriate for displaying the video, a mesh filter to instantiate that mesh,
 		// and a mesh renderer to render the material on the instantiated mesh.
 		MeshFilter filter = vbmgo.AddComponent<MeshFilter>();
-		filter.mesh = ARUtilityFunctions.CreateTextureMesh(1.0f, 1.0f, 2.0f, 2.0f, 0.5f, flipH, flipV);
+		filter.mesh = ARUtilityFunctions.CreateTextureMesh(1.0f, 1.0f, w, h, zPos, flipH, flipV);
 		MeshRenderer meshRenderer = vbmgo.AddComponent<MeshRenderer>();
 		meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 		meshRenderer.receiveShadows = false;
@@ -250,10 +250,10 @@ public static class ARUtilityFunctions
 		m.Clear();
 		m.vertices = new Vector3[]
 		{
-			new Vector3(-width * 0.5f, 0.0f, zPosition),
-			new Vector3(width * 0.5f, 0.0f, zPosition),
-			new Vector3(width * 0.5f, height, zPosition),
-			new Vector3(-width * 0.5f, height, zPosition),
+			new Vector3(-width * 0.5f, -height * 0.5f, zPosition),
+			new Vector3(width * 0.5f, -height * 0.5f, zPosition),
+			new Vector3(width * 0.5f, height * 0.5f, zPosition),
+			new Vector3(-width * 0.5f, height * 0.5f, zPosition),
 		};
 		m.normals = new Vector3[]
 		{

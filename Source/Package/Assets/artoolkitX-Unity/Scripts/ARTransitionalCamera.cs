@@ -63,7 +63,7 @@ public class ARTransitionalCamera : ARTrackedCamera
 
     IEnumerator DoTransition(bool flyIn)
     {
-		ARController arcontroller = Component.FindObjectOfType(typeof(ARController)) as ARController;
+        ARXVideoBackground arvbg = gameObject.GetComponent<ARXVideoBackground>();
 
         float transitionSpeed = flyIn ? 1.0f : -1.0f;
         bool transitioning = true;
@@ -81,7 +81,7 @@ public class ARTransitionalCamera : ARTrackedCamera
                 transitioning = false;
             }
        
-            if (arcontroller != null) arcontroller.SetVideoAlpha(1.0f - transitionAmount);
+            if (arvbg != null) arvbg.VideoAlpha = 1.0f - transitionAmount;
 
             yield return null;
         }

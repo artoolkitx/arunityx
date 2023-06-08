@@ -36,6 +36,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -56,7 +57,47 @@ using UnityEngine;
 public class ARCamera : MonoBehaviour
 {
 	private const string LogTag = "ARCamera: ";
-	
+
+	public enum ContentMode
+	{
+		Stretch,
+		Fit,
+		Fill,
+		OneToOne
+	}
+
+	public readonly static Dictionary<ContentMode, string> ContentModeNames = new Dictionary<ContentMode, string>
+	{
+		{ContentMode.Stretch, "Stretch"},
+		{ContentMode.Fit, "Fit"},
+		{ContentMode.Fill, "Fill"},
+		{ContentMode.OneToOne, "1:1"},
+	};
+
+	[SerializeField]
+	private ContentMode currentCameraContentMode = ContentMode.Fill;
+	public ContentMode CameraContentMode
+	{
+		get => currentCameraContentMode;
+		set
+		{
+			if (currentCameraContentMode != value)
+			{
+				currentCameraContentMode = value;
+				//if (_running)
+				{
+					//ConfigureViewports();
+				}
+			}
+		}
+	}
+	public ARController.ARW_H_ALIGN CameraContentHAlign = ARController.ARW_H_ALIGN.ARW_H_ALIGN_CENTRE;
+	public ARController.ARW_V_ALIGN CameraContentVAlign = ARController.ARW_V_ALIGN.ARW_V_ALIGN_CENTRE;
+	public bool ContentRotate90 = false;
+	public bool ContentFlipH = false;
+	public bool ContentFlipV = false;
+
+
 	public enum ViewEye
 	{
 		Left = 1,
@@ -86,8 +127,12 @@ public class ARCamera : MonoBehaviour
 	}*/
 	
 	private AROrigin _origin = null;
-	protected ARTrackable _trackable = null;				// Instance of trackable that will be used as the origin for the camera pose.
-	
+	protected ARTrackable _trackable = null;                // Instance of trackable that will be used as the origin for the camera pose.
+
+	[NonSerialized]
+	protected ARController arController;
+	[NonSerialized]
+	protected Camera cam;
 	[NonSerialized]
 	protected Vector3 arPosition = Vector3.zero;	// Current 3D position from tracking
 	[NonSerialized]
@@ -113,21 +158,47 @@ public class ARCamera : MonoBehaviour
 	public float OpticalEyeLateralOffsetRight = 0.0f;
 	private Matrix4x4 opticalViewMatrix; // This transform expresses the position and orientation of the physical camera in eye coordinates.
 
-    public bool SetupCamera(IPluginFunctions pluginFunctions, float nearClipPlane, float farClipPlane, Matrix4x4 projectionMatrix, out bool opticalOut)
-	{
-		Camera c = this.gameObject.GetComponent<Camera>();
-        opticalOut = false;
-		
-		// A perspective projection matrix from the tracker
-		c.orthographic = false;
-		
-		// Shouldn't really need to set these, because they are part of the custom 
-		// projection matrix, but it seems that in the editor, the preview camera view 
-		// isn't using the custom projection matrix.
-		c.nearClipPlane = nearClipPlane;
-		c.farClipPlane = farClipPlane;
 
-        if (Optical)
+	void OnEnable()
+	{
+		cam = gameObject.GetComponent<Camera>();
+		arController = ARController.Instance;
+		if (!arController)
+        {
+			Debug.LogError("ARController.Instance is NULL.");
+        }
+		else
+        {
+			arController.onVideoStarted.AddListener(OnVideoStarted);
+		}
+	}
+
+	void OnDisable()
+	{
+		if (!arController)
+		{
+			Debug.LogError("ARController.Instance is NULL.");
+		}
+		else
+        {
+			arController.onVideoStarted.RemoveListener(OnVideoStarted);
+			arController = null;
+		}
+		cam = null;
+	}
+
+	public void OnVideoStarted()
+    {
+		// A perspective projection matrix from the tracker
+		cam.orthographic = false;
+
+		// Even though we set a custom projection matrix (which implicitly includes near and far clipping plane values)
+		// it seems that in the editor, the preview camera view still reads its values from the Camera.nearClipPlane
+		// and Camera.farClipPlane values.
+		float camNearClipPlane = cam.nearClipPlane;
+		float camFarClipPlane = cam.farClipPlane;
+
+		if (Optical)
         {
             float fovy;
             float aspect;
@@ -136,18 +207,18 @@ public class ARCamera : MonoBehaviour
 
             if (OpticalCalibrationMode0 == OpticalCalibrationMode.ARXOpticalParametersFile)
             {
-                opticalSetupOK = pluginFunctions.arwLoadOpticalParams(null, OpticalParamsFileContents, OpticalParamsFileContents.Length, nearClipPlane, farClipPlane, out fovy, out aspect, m, p);
+                opticalSetupOK = arController.PluginFunctions.arwLoadOpticalParams(null, OpticalParamsFileContents, OpticalParamsFileContents.Length, camNearClipPlane, camFarClipPlane, out fovy, out aspect, m, p);
                 if (!opticalSetupOK)
                 {
                     ARController.Log(LogTag + "Error loading ARX optical parameters.");
-                    return false;
+                    return;
                 }
 
                 // Convert millimetres to metres.
                 m[12] *= 0.001f;
                 m[13] *= 0.001f;
                 m[14] *= 0.001f;
-                c.projectionMatrix = ARUtilityFunctions.MatrixFromFloatArray(p);
+                cam.projectionMatrix = ARUtilityFunctions.MatrixFromFloatArray(p);
                 ARController.Log(LogTag + "Optical parameters: fovy=" + fovy + ", aspect=" + aspect + ", camera position (m)={" + m[12].ToString("F3") + ", " + m[13].ToString("F3") + ", " + m[14].ToString("F3") + "}");
             } else {
                 m[0] = m[5] = m[10] = m[15] = 1.0f;
@@ -158,23 +229,38 @@ public class ARCamera : MonoBehaviour
 			if (OpticalEyeLateralOffsetRight != 0.0f) opticalViewMatrix = Matrix4x4.TRS(new Vector3(-OpticalEyeLateralOffsetRight, 0.0f, 0.0f), Quaternion.identity, Vector3.one) * opticalViewMatrix; 
 			// Convert to left-hand matrix.
 			opticalViewMatrix = ARUtilityFunctions.LHMatrixFromRHMatrix(opticalViewMatrix);
-			
-			opticalOut = true;
 		} else {
-			c.projectionMatrix = projectionMatrix;
+
+			// Fetch the projection from the video source.
+			float[] projRaw = new float[16];
+			bool _cameraStereoRightEye = Stereo && StereoEye == ARCamera.ViewEye.Right;
+			if (!_cameraStereoRightEye || !arController.VideoIsStereo)
+			{
+				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingMode(cam.pixelWidth, cam.pixelHeight, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, projRaw)) return;
+			}
+			else
+			{
+				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingModeStereo(cam.pixelWidth, cam.pixelHeight, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, null, projRaw)) return;
+			}
+			Matrix4x4 projectionMatrix = ARUtilityFunctions.MatrixFromFloatArray(projRaw);
+			ARController.Log(LogTag + "Projection matrix: [" + Environment.NewLine + projectionMatrix.ToString().Trim() + "]");
+			if (ContentRotate90) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * projectionMatrix;
+			if (ContentFlipV) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1.0f, -1.0f, 1.0f)) * projectionMatrix;
+			if (ContentFlipH) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * projectionMatrix;
+
+			cam.projectionMatrix = projectionMatrix;
 		}
 		
 		// Don't clear anything or else we interfere with other foreground cameras
-		c.clearFlags = CameraClearFlags.Nothing;
+		//cam.clearFlags = CameraClearFlags.Nothing;
 		
 		// Renders after the clear and background cameras
-		c.depth = 2;
-		
-		c.transform.position = Vector3.zero;
-		c.transform.rotation = Quaternion.identity;
-		c.transform.localScale = Vector3.one;
-		
-		return true;
+		//c.depth = 0;
+
+		// Start at origin.
+		cam.transform.position = Vector3.zero;
+		cam.transform.rotation = Quaternion.identity;
+		cam.transform.localScale = Vector3.one;
 	}
 	
 	// Return the origin associated with this component.
@@ -263,6 +349,26 @@ public class ARCamera : MonoBehaviour
 			ApplyTracking();
 		}
 	}
-	
+
+	private void CycleContentMode()
+	{
+		switch (CameraContentMode)
+		{
+			case ContentMode.Fit:
+				CameraContentMode = ContentMode.Fill; // Fill and OneToOne mode can potentially result in negative values for viewport x and y. Unity can't handle that.
+				break;
+			case ContentMode.Fill:
+				CameraContentMode = ContentMode.Stretch;
+				break;
+			case ContentMode.Stretch:
+				CameraContentMode = ContentMode.OneToOne;
+				break;
+			case ContentMode.OneToOne:
+			default:
+				CameraContentMode = ContentMode.Fit;
+				break;
+		}
+	}
+
 }
 
