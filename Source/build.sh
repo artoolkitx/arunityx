@@ -58,6 +58,8 @@ do
             ;;
         --debug) DEBUG=
             ;;
+        --no-config) NO_CONFIG=1
+            ;;
         --dev) DEV=1
             ;;
         --*) echo "bad option $1"
@@ -175,17 +177,17 @@ if [ $DEV ] ; then
 
         if [ $BUILD_ANDROID ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh ${DEBUG+--debug} android
+            ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} android
             refresh_plugin_for_platform_from_source Android  "${ARTOOLKITX_HOME}"
         fi
         if [ $BUILD_IOS ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh ${DEBUG+--debug} ios
+            ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} ios
             refresh_plugin_for_platform_from_source iOS "${ARTOOLKITX_HOME}"
         fi
         if [ $BUILD_MACOS ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh ${DEBUG+--debug} macos
+            ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} macos
             refresh_plugin_for_platform_from_source macOS "${ARTOOLKITX_HOME}"
         fi
     fi
@@ -199,12 +201,12 @@ if [ $DEV ] ; then
 
         if [ $BUILD_ANDROID ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh ${DEBUG+--debug} android
+            ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} android
             refresh_plugin_for_platform_from_source Android "${ARTOOLKITX_HOME}"
         fi
         if [ $BUILD_WINDOWS ] ; then
             cd "${ARTOOLKITX_HOME}/Source"
-            ./build.sh ${DEBUG+--debug} windows
+            ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} windows
             refresh_plugin_for_platform_from_source Windows "${ARTOOLKITX_HOME}"
         fi
     fi

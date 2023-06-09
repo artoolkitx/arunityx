@@ -175,12 +175,8 @@ public class ARCamera : MonoBehaviour
 
 	void OnDisable()
 	{
-		if (!arController)
+		if (arController)
 		{
-			Debug.LogError("ARController.Instance is NULL.");
-		}
-		else
-        {
 			arController.onVideoStarted.RemoveListener(OnVideoStarted);
 			arController = null;
 		}

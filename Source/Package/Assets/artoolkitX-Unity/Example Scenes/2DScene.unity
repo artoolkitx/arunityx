@@ -325,7 +325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ac62947536a3704295fb870f025f1e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentCameraContentMode: 1
+  currentCameraContentMode: 2
   CameraContentHAlign: 1
   CameraContentVAlign: 1
   ContentRotate90: 0
@@ -598,7 +598,6 @@ MonoBehaviour:
   AutoStartAR: 1
   videoCParamName0: 
   videoConfigurationLinux0: 
-  PluginConfigurationRequiredFlag: 0
   VideoIsStereo: 0
   transL2RName: transL2R
   videoCParamName1: 
