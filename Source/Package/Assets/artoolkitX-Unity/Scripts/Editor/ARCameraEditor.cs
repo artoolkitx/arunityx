@@ -74,6 +74,7 @@ public class ARCameraEditor : Editor
 		ARCamera arc = (ARCamera)target;
 		if (arc == null) return;
 
+        serializedObject.Update();
         using (new EditorGUI.DisabledScope(true))
         {
             EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
@@ -151,5 +152,6 @@ public class ARCameraEditor : Editor
                 EditorGUILayout.HelpBox("Enter an amount by which this eye is to the right of the video camera lens. E.g. if the camera is centred between the eyes, and your IPD is 0.065 (65mm), enter 0.0325 for the right eye and -0.0325 for the left eye.", MessageType.Info);
             }
 		}
+        serializedObject.ApplyModifiedProperties();
     }
 }

@@ -170,6 +170,7 @@ public class ARCamera : MonoBehaviour
 		else
         {
 			arController.onVideoStarted.AddListener(OnVideoStarted);
+			arController.onScreenGeometryChanged.AddListener(OnVideoStarted);
 		}
 	}
 
@@ -178,6 +179,7 @@ public class ARCamera : MonoBehaviour
 		if (arController)
 		{
 			arController.onVideoStarted.RemoveListener(OnVideoStarted);
+			arController.onScreenGeometryChanged.RemoveListener(OnVideoStarted);
 			arController = null;
 		}
 		cam = null;
@@ -226,25 +228,54 @@ public class ARCamera : MonoBehaviour
 			// Convert to left-hand matrix.
 			opticalViewMatrix = ARUtilityFunctions.LHMatrixFromRHMatrix(opticalViewMatrix);
 		} else {
+			// Get screen size. If in a portrait mode, swap w/h.
+			int w = cam.pixelWidth;
+			int h = cam.pixelHeight;
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+			if (Screen.orientation == ScreenOrientation.Portrait || Screen.orientation == ScreenOrientation.PortraitUpsideDown)
+            {
+				w = cam.pixelHeight;
+				h = cam.pixelWidth;
+            }
+#endif
 
 			// Fetch the projection from the video source.
 			float[] projRaw = new float[16];
 			bool _cameraStereoRightEye = Stereo && StereoEye == ARCamera.ViewEye.Right;
 			if (!_cameraStereoRightEye || !arController.VideoIsStereo)
 			{
-				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingMode(cam.pixelWidth, cam.pixelHeight, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, projRaw)) return;
+				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingMode(w, h, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, projRaw)) return;
 			}
 			else
 			{
-				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingModeStereo(cam.pixelWidth, cam.pixelHeight, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, null, projRaw)) return;
+				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingModeStereo(w, h, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, null, projRaw)) return;
 			}
 			Matrix4x4 projectionMatrix = ARUtilityFunctions.MatrixFromFloatArray(projRaw);
-			ARController.Log(LogTag + "Projection matrix: [" + Environment.NewLine + projectionMatrix.ToString().Trim() + "]");
+			//ARController.Log(LogTag + "Projection matrix: [" + Environment.NewLine + projectionMatrix.ToString().Trim() + "]");
 			if (ContentRotate90) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * projectionMatrix;
 			if (ContentFlipV) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1.0f, -1.0f, 1.0f)) * projectionMatrix;
 			if (ContentFlipH) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * projectionMatrix;
 
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+			switch (Screen.orientation)
+			{
+				case ScreenOrientation.Portrait:
+					cam.projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * projectionMatrix;
+					break;
+				case ScreenOrientation.PortraitUpsideDown:
+					cam.projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(-90.0f, Vector3.back), Vector3.one) * projectionMatrix;
+					break;
+				case ScreenOrientation.LandscapeRight:
+					cam.projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(180.0f, Vector3.back), Vector3.one) * projectionMatrix;
+					break;
+				case ScreenOrientation.LandscapeLeft:
+				default:
+					cam.projectionMatrix = projectionMatrix;
+					break;
+			}
+#else
 			cam.projectionMatrix = projectionMatrix;
+#endif
 		}
 		
 		// Don't clear anything or else we interfere with other foreground cameras
@@ -365,6 +396,5 @@ public class ARCamera : MonoBehaviour
 				break;
 		}
 	}
-
 }
 

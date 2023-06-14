@@ -63,6 +63,7 @@ public class ARXVideoBackground : MonoBehaviour
         arController.onVideoStarted.AddListener(OnVideoStarted);
         arController.onVideoStopped.AddListener(OnVideoStopped);
         arController.onVideoFrame.AddListener(OnVideoFrame);
+        arController.onScreenGeometryChanged.AddListener(OnScreenGeometryChanged);
     }
 
     void OnDisable()
@@ -70,6 +71,7 @@ public class ARXVideoBackground : MonoBehaviour
         arController.onVideoStarted.RemoveListener(OnVideoStarted);
         arController.onVideoStopped.RemoveListener(OnVideoStopped);
         arController.onVideoFrame.RemoveListener(OnVideoFrame);
+        arController.onScreenGeometryChanged.RemoveListener(OnScreenGeometryChanged);
         arController = null;
         arCamera = null;
         cam = null;
@@ -79,7 +81,7 @@ public class ARXVideoBackground : MonoBehaviour
     {
         // Get information on the video stream.
         string nameSuffix = arCamera.Stereo ? (arCamera.StereoEye == ARCamera.ViewEye.Left ? " (L)" : " (R)") : "";
-        _cameraStereoRightEye = arCamera.Stereo && arCamera.StereoEye == ARCamera.ViewEye.Right; 
+        _cameraStereoRightEye = arCamera.Stereo && arCamera.StereoEye == ARCamera.ViewEye.Right;
         if (!_cameraStereoRightEye || !arController.VideoIsStereo)
         {
             if (!arController.PluginFunctions.arwGetVideoParams(out _videoWidth, out _videoHeight, out _videoPixelSize, out _videoPixelFormatString)) return;
@@ -130,28 +132,49 @@ public class ARXVideoBackground : MonoBehaviour
             Destroy(_videoBackgroundCameraGO);
             return;
         }
+        // Camera at origin.
+        _videoBackgroundCamera.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
+        _videoBackgroundCamera.transform.rotation = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
+        _videoBackgroundCamera.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        // Rendering settings.
+        _videoBackgroundCamera.cullingMask = 1 << BackgroundLayer; // The background camera displays only the chosen background layer.
+        _videoBackgroundCamera.depth = cam.depth - 1; // Render before foreground cameras.
+        _videoBackgroundCamera.clearFlags = CameraClearFlags.SolidColor;
+        _videoBackgroundCamera.backgroundColor = Color.black;
 
-        // Camera at origin, orthographic projection.
+        // If video background isn't actually wanted, disable the camera.
+        // This step also decides whether to clear the main camera background or not.
+        UseVideoBackground = currentUseVideoBackground;
+
+        UpdateVideoBackgroundProjection();
+    }
+
+    private void UpdateVideoBackgroundProjection()
+    {
+        // Get screen size. If in a portrait mode, swap w/h.
+        float w = cam.pixelWidth;
+        float h = cam.pixelHeight;
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+        bool swapWH = Screen.orientation == ScreenOrientation.Portrait || Screen.orientation == ScreenOrientation.PortraitUpsideDown;
+        if (swapWH)
+        {
+            w = cam.pixelHeight;
+            h = cam.pixelWidth;
+        }
+#endif
 
         // Work out cropping for content mode.
-        float w;
-        float h;
-        if (arCamera.CameraContentMode == ARCamera.ContentMode.OneToOne)
-        {
-            w = cam.pixelWidth;
-            h = cam.pixelHeight;
-        }
-        else
+        if (arCamera.CameraContentMode != ARCamera.ContentMode.OneToOne)
         {
             int videoWidthFinalOrientation = (arCamera.ContentRotate90 ? _videoHeight : _videoWidth);
             int videoHeightFinalOrientation = (arCamera.ContentRotate90 ? _videoWidth : _videoHeight);
             if (arCamera.CameraContentMode == ARCamera.ContentMode.Fit || arCamera.CameraContentMode == ARCamera.ContentMode.Fill)
             {
-                float scaleRatioWidth = (float)cam.pixelWidth / (float)videoWidthFinalOrientation;
-                float scaleRatioHeight = (float)cam.pixelHeight / (float)videoHeightFinalOrientation;
+                float scaleRatioWidth = w / (float)videoWidthFinalOrientation;
+                float scaleRatioHeight = h / (float)videoHeightFinalOrientation;
                 float scaleRatio = arCamera.CameraContentMode == ARCamera.ContentMode.Fill ? Math.Max(scaleRatioHeight, scaleRatioWidth) : Math.Min(scaleRatioHeight, scaleRatioWidth);
-                w = (float)cam.pixelWidth / scaleRatio;
-                h = (float)cam.pixelHeight / scaleRatio;
+                w /= scaleRatio;
+                h /= scaleRatio;
             }
             else
             { // Stretch
@@ -161,24 +184,37 @@ public class ARXVideoBackground : MonoBehaviour
         }
         // TODO: also work out content alignment offsets.
 
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+        if (swapWH)
+        {
+            float temp = w;
+            w = h;
+            h = temp;
+        }
+#endif
         _videoBackgroundCamera.pixelRect = cam.pixelRect;
         _videoBackgroundCamera.orthographic = true;
         _videoBackgroundCamera.projectionMatrix = Matrix4x4.identity;
         if (arCamera.ContentRotate90) _videoBackgroundCamera.projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * _videoBackgroundCamera.projectionMatrix;
         _videoBackgroundCamera.projectionMatrix = Matrix4x4.Ortho(-w*0.5f, w*0.5f, -h*0.5f, h*0.5f, 0.0f, 2000.0f) * _videoBackgroundCamera.projectionMatrix;
-        _videoBackgroundCamera.transform.position = new Vector3(0.0f, 0.0f, 0.0f);
-        _videoBackgroundCamera.transform.rotation = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);
-        _videoBackgroundCamera.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-
-        // Rendering settings.
-        _videoBackgroundCamera.cullingMask = 1 << BackgroundLayer; // The background camera displays only the chosen background layer.
-        _videoBackgroundCamera.depth = cam.depth - 1; // Render before foreground cameras.
-        _videoBackgroundCamera.clearFlags = CameraClearFlags.SolidColor;
-        _videoBackgroundCamera.backgroundColor = Color.black;
-
-        // Finally: having done all this setup, if video background isn't actually wanted, disable the camera.
-        // This step also decides whether to clear the main camera background or not.
-        UseVideoBackground = currentUseVideoBackground;
+#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
+        switch (Screen.orientation)
+        {
+            case ScreenOrientation.Portrait:
+                _videoBackgroundCameraGO.transform.localRotation = Quaternion.AngleAxis(-90.0f, Vector3.back);
+                break;
+            case ScreenOrientation.PortraitUpsideDown:
+                _videoBackgroundCameraGO.transform.localRotation = Quaternion.AngleAxis(90.0f, Vector3.back);
+                break;
+            case ScreenOrientation.LandscapeRight:
+                _videoBackgroundCameraGO.transform.localRotation = Quaternion.AngleAxis(180.0f, Vector3.back);
+                break;
+            case ScreenOrientation.LandscapeLeft:
+            default:
+                _videoBackgroundCameraGO.transform.localRotation = Quaternion.identity;
+                break;
+        }
+#endif
     }
 
     public void OnVideoStopped()
@@ -231,6 +267,12 @@ public class ARXVideoBackground : MonoBehaviour
             }
         }
     }
+
+    public void OnScreenGeometryChanged()
+    {
+        UpdateVideoBackgroundProjection();
+    }
+
 
     public float VideoAlpha 
     {

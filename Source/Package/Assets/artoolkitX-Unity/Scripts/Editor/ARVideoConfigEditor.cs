@@ -60,10 +60,23 @@ public class ARVideoConfigEditor : Editor
         // Init the per-platform turndown arrows.
         if (showPlatformConfig == null)
         {
+            // Translate build target to a runtime platform, if possible.
+            RuntimePlatform p;
+            switch (EditorUserBuildSettings.activeBuildTarget)
+            {
+                case BuildTarget.StandaloneOSX: p = RuntimePlatform.OSXPlayer; break;
+                case BuildTarget.StandaloneWindows:
+                case BuildTarget.StandaloneWindows64: p = RuntimePlatform.WindowsPlayer; break;
+                case BuildTarget.StandaloneLinux64: p = RuntimePlatform.LinuxPlayer; break;
+                case BuildTarget.iOS: p = RuntimePlatform.IPhonePlayer; break;
+                case BuildTarget.Android: p = RuntimePlatform.Android; break;
+                default: p = (RuntimePlatform)(-1); break;
+            }
+
             showPlatformConfig = new bool[arvideoconfig.configs.Count];
             for (int i = 0; i < arvideoconfig.configs.Count; i++)
             {
-                if (arvideoconfig.configs[i].platform == Application.platform) {
+                if (arvideoconfig.configs[i].platform == Application.platform || arvideoconfig.configs[i].platform == p) {
                     showPlatformConfig[i] = true;
                 }
             }

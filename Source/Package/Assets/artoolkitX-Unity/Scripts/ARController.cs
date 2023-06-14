@@ -122,6 +122,14 @@ public class ARController : MonoBehaviour
     private bool _sceneConfiguredForVideo = false;
     private bool _sceneConfiguredForVideoWaitingMessageLogged = false;
     private bool _useNativeGLTexturing = false;
+    // As Unity doesn't provide its own notification of screen geometry changes, we need to keep track of screen
+    // parameters so we can detect size changes (and orientation changes, on mobile devices).
+#if UNITY_IOS || UNITY_ANDROID
+    private ScreenOrientation _screenOrientation = ScreenOrientation.LandscapeLeft;
+#endif
+    private int _screenWidth = 0;
+    private int _screenHeight = 0;
+
 
 #if UNITY_ANDROID
     //
@@ -344,6 +352,7 @@ public class ARController : MonoBehaviour
     public UnityEvent onVideoStarted = new UnityEvent();
     public UnityEvent onVideoStopped = new UnityEvent();
     public UnityEvent onVideoFrame = new UnityEvent();
+    public UnityEvent onScreenGeometryChanged = new UnityEvent();
 
     //
     // MonoBehavior methods.
@@ -623,6 +632,13 @@ public class ARController : MonoBehaviour
             _useNativeGLTexturing = false; // TODO: reinstate native texturing support.
             Log(LogTag + "Render device: " + renderDeviceVersion + (_useNativeGLTexturing ? ", using native GL texturing." : ", using Unity texturing."));
 
+            // Init screen geometry.
+            _screenWidth = Screen.width;
+            _screenHeight = Screen.height;
+#if UNITY_IOS || UNITY_ANDROID
+            _screenOrientation = Screen.orientation;
+#endif
+
             // Retrieve video configuration, and append any required per-platform overrides.
             // For native GL texturing we need monoplanar video; iOS and Android default to biplanar format. 
             string videoConfiguration0 = arvideoconfig.GetVideoConfigString();
@@ -750,16 +766,6 @@ public class ARController : MonoBehaviour
         // Remaining Unity setup happens in UpdateAR().
     }
 
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-    // Keep track of screen parameters so we can detect device oritentation changes.
-    private ScreenOrientation screenOrientation = ScreenOrientation.LandscapeLeft;
-#if UNITY_ANDROID
-    private int screenWidth = 0;
-    private int screenHeight = 0;
-#endif
-#endif
-
-
     bool UpdateAR()
     {
         if (!_running)
@@ -769,15 +775,6 @@ public class ARController : MonoBehaviour
 
         if (!_sceneConfiguredForVideo)
         {
-
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-            screenOrientation = Screen.orientation;
-#if UNITY_ANDROID
-            screenWidth = Screen.width;
-            screenHeight = Screen.height;
-#endif
-#endif
-
             // Wait for the wrapper to confirm video frames have arrived before configuring our video-dependent stuff.
             if (!PluginFunctions.arwIsRunning())
             {
@@ -793,28 +790,26 @@ public class ARController : MonoBehaviour
 
                 onVideoStarted.Invoke();
 
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-                UpdateVideoTexture();
-#endif
-
                 Log(LogTag + "Scene configured for video.");
                 _sceneConfiguredForVideo = true;
             } // !running
         } // !sceneConfiguredForVideo
 
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-#if UNITY_IOS
-        if (Screen.orientation != screenOrientation) {
-            UpdateVideoTexture();
-        }
-#elif UNITY_ANDROID
-        if ((Screen.width != screenWidth) || (Screen.height != screenHeight)) {
-            UpdateVideoTexture();
-        } else if (Screen.orientation != screenOrientation) {
-            screenWidth = screenHeight = 0;  // Force video texture update on next pass.
-        }
+        // Check for screen geometry changes.
+        if (Screen.width != _screenWidth || Screen.height != _screenHeight
+#if UNITY_IOS || UNITY_ANDROID
+            || Screen.orientation != _screenOrientation
 #endif
+            )
+        {
+#if UNITY_IOS || UNITY_ANDROID
+            _screenOrientation = Screen.orientation;
 #endif
+            _screenWidth = Screen.width;
+            _screenHeight = Screen.height;
+            onScreenGeometryChanged.Invoke();
+        }
+
         bool gotFrame = PluginFunctions.arwCapture();
         if (gotFrame)
         {
@@ -852,73 +847,6 @@ public class ARController : MonoBehaviour
     //
     // User-callable configuration methods.
     //
-
-#if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-    public void UpdateVideoTexture()
-    {
-        ScreenOrientation screenOrientation = Screen.orientation;
-
-#if UNITY_ANDROID
-        screenWidth = Screen.width;
-        screenHeight = Screen.height;
-#endif
-        Matrix4x4 deviceRotation;
-        int height = _videoHeight0;
-        int width = _videoWidth0;
-
-        switch (screenOrientation) {
-        case ScreenOrientation.Portrait:
-            Log(LogTag + "ScreenOrientation.Portrait");
-            deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one);
-            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(-90.0f, Vector3.back);
-            break;
-
-        case ScreenOrientation.PortraitUpsideDown:
-            Log(LogTag + "ScreenOrientation.PortraitUpsideDown");
-            deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(-90.0f, Vector3.back), Vector3.one);
-            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(90.0f, Vector3.back);
-            break;
-
-        case ScreenOrientation.LandscapeRight:
-            Log(LogTag + "ScreenOrientation.LandscapeRight");
-            deviceRotation = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(180.0f, Vector3.back), Vector3.one);
-            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.AngleAxis(180.0f, Vector3.back);
-            height = _videoWidth0;
-            width = _videoHeight0;
-            break;
-
-        case ScreenOrientation.LandscapeLeft:
-            Log(LogTag + "ScreenOrientation.LandscapeLeft");
-            deviceRotation = Matrix4x4.identity;
-            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.identity;
-            height = _videoWidth0;
-            width = _videoHeight0;
-            break;
-
-        default:
-            Log(LogTag + "ScreenOrientation.Unknown");
-            deviceRotation = Matrix4x4.identity;
-            _videoBackgroundCameraGO0.transform.localRotation = Quaternion.identity;
-            break;
-        }
-
-        _videoBackgroundCamera0.pixelRect = getViewport(height, width, false, ARCamera.ViewEye.Left);
-
-        bool optical;
-        ARCamera[] arCameras = FindObjectsOfType(typeof(ARCamera)) as ARCamera[];
-        foreach (ARCamera arCamera in arCameras) {
-            bool success = arCamera.SetupCamera(PluginFunctions, NearPlane, FarPlane, deviceRotation * _videoProjectionMatrix0, out optical);
-            if(!success){
-                Log(LogTag + "Error setting up ARCamera.");
-            }
-
-            Camera camera = arCamera.GetComponent<Camera>();
-            if ( camera == null )
-                break;
-            camera.pixelRect = getViewport(height, width, false, ARCamera.ViewEye.Left);
-        }
-    }
-#endif
 
     public bool DebugVideo
     {

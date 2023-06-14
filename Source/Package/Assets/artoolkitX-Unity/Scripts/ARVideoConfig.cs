@@ -704,7 +704,7 @@ public class ARVideoConfig : MonoBehaviour
                                 if (pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK) p = "back";
                                 else if (pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) p = "front";
                                 else if (platform == RuntimePlatform.Android && pc.position == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER) p = "external";
-                                if (string.IsNullOrEmpty(p))
+                                if (!string.IsNullOrEmpty(p))
                                 {
                                     config += " " + modules[pc.module].positionSelectionString + p;
                                 }
