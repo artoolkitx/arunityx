@@ -68,3 +68,4 @@ Source/Package/Assets/artoolkitX-Unity/Plugins/x86/*.dll
 Source/Package/Assets/artoolkitX-Unity/Plugins/x86_64/*.dll
 
 #### Other
+build-ios

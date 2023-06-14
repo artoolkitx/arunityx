@@ -87,6 +87,8 @@ public abstract class IPluginFunctions
     abstract public int arwGetPatternDetectionMode();
     abstract public bool arwGetProjectionMatrix(float nearPlane, float farPlane, float[] matrix);
     abstract public bool arwGetProjectionMatrixStereo(float nearPlane, float farPlane, float[] matrixL, float[] matrixR);
+    abstract public bool arwGetProjectionMatrixForViewportSizeAndFittingMode(int width, int height, int scaleMode, int hAlign, int vAlign, float nearPlane, float farPlane, float[] matrix);
+    abstract public bool arwGetProjectionMatrixForViewportSizeAndFittingModeStereo(int width, int height, int scaleMode, int hAlign, int vAlign, float nearPlane, float farPlane, float[] matrixL, float[] matrixR);
     abstract public bool arwGetVideoDebugMode();
     abstract public bool arwGetVideoParams(out int width, out int height, out int pixelSize, out string pixelFormatString);
     abstract public bool arwGetVideoParamsStereo(out int widthL, out int heightL, out int pixelSizeL, out string pixelFormatL, out int widthR, out int heightR, out int pixelSizeR, out string pixelFormatR);
