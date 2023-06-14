@@ -1,5 +1,5 @@
 ﻿/*
- *  ARCamera.cs
+ *  ARXCamera.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -40,23 +40,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// A class which links an ARCamera to any available ARMarker via an AROrigin object.
-/// 
+/// A class which links an ARXCamera to any available ARMarker via an ARXOrigin object.
+///
 /// To get a list of foreground Camera objects, do:
 ///
 ///     List<Camera> foregroundCameras = new List<Camera>();
-///     ARCamera[] arCameras = FindObjectsOfType<ARCamera>(); // (or FindObjectsOfType(typeof(ARCamera)) as ARCamera[])
-///     foreach (ARCamera arc in arCameras) {
+///     ARXCamera[] arCameras = FindObjectsOfType<ARXCamera>(); // (or FindObjectsOfType(typeof(ARXCamera)) as ARXCamera[])
+///     foreach (ARXCamera arc in arCameras) {
 ///         foregroundCameras.Add(arc.gameObject.camera);
 ///     }
 /// </summary>
-/// 
+///
 [RequireComponent(typeof(Transform))]   // A Transform is required to update the position and orientation from tracking
 [RequireComponent(typeof(Camera))]      // A Camera is required.
 [ExecuteInEditMode]                     // Run in the editor so we can keep the scale at 1
-public class ARCamera : MonoBehaviour
+public class ARXCamera : MonoBehaviour
 {
-	private const string LogTag = "ARCamera: ";
+	private const string LogTag = "ARXCamera: ";
 
 	public enum ContentMode
 	{
@@ -91,8 +91,8 @@ public class ARCamera : MonoBehaviour
 			}
 		}
 	}
-	public ARController.ARW_H_ALIGN CameraContentHAlign = ARController.ARW_H_ALIGN.ARW_H_ALIGN_CENTRE;
-	public ARController.ARW_V_ALIGN CameraContentVAlign = ARController.ARW_V_ALIGN.ARW_V_ALIGN_CENTRE;
+	public ARXController.ARW_H_ALIGN CameraContentHAlign = ARXController.ARW_H_ALIGN.ARW_H_ALIGN_CENTRE;
+	public ARXController.ARW_V_ALIGN CameraContentVAlign = ARXController.ARW_V_ALIGN.ARW_V_ALIGN_CENTRE;
 	public bool ContentRotate90 = false;
 	public bool ContentFlipH = false;
 	public bool ContentFlipV = false;
@@ -103,7 +103,7 @@ public class ARCamera : MonoBehaviour
 		Left = 1,
 		Right = 2,
 	}
-	
+
     public enum OpticalCalibrationMode
     {
         ManuallySpecified = 0,
@@ -125,12 +125,12 @@ public class ARCamera : MonoBehaviour
 		STEREO_DISPLAY_MODE_ANAGLYPH_RED_BLUE,      // One output. Both views are rendered into the same buffer, the left view drawn only in the red channel and the right view only in the blue channel.
 		STEREO_DISPLAY_MODE_ANAGLYPH_RED_GREEN,     // One output. Both views are rendered into the same buffer, the left view drawn only in the red channel and the right view only in the green channel.
 	}*/
-	
-	private AROrigin _origin = null;
-	protected ARTrackable _trackable = null;                // Instance of trackable that will be used as the origin for the camera pose.
+
+	private ARXOrigin _origin = null;
+	protected ARXTrackable _trackable = null;                // Instance of trackable that will be used as the origin for the camera pose.
 
 	[NonSerialized]
-	protected ARController arController;
+	protected ARXController arController;
 	[NonSerialized]
 	protected Camera cam;
 	[NonSerialized]
@@ -143,11 +143,11 @@ public class ARCamera : MonoBehaviour
 	protected float timeLastUpdate = 0;				// Time when tracking was last updated.
 	[NonSerialized]
 	protected float timeTrackingLost = 0;			// Time when tracking was last lost.
-	
+
 	// Stereo settings.
 	public bool Stereo = false;
 	public ViewEye StereoEye = ViewEye.Left;
-	
+
 	// Optical settings.
 	public bool Optical = false;
     public OpticalCalibrationMode OpticalCalibrationMode0 = OpticalCalibrationMode.ManuallySpecified;
@@ -162,10 +162,10 @@ public class ARCamera : MonoBehaviour
 	void OnEnable()
 	{
 		cam = gameObject.GetComponent<Camera>();
-		arController = ARController.Instance;
+		arController = ARXController.Instance;
 		if (!arController)
         {
-			Debug.LogError("ARController.Instance is NULL.");
+			Debug.LogError("ARXController.Instance is NULL.");
         }
 		else
         {
@@ -208,7 +208,7 @@ public class ARCamera : MonoBehaviour
                 opticalSetupOK = arController.PluginFunctions.arwLoadOpticalParams(null, OpticalParamsFileContents, OpticalParamsFileContents.Length, camNearClipPlane, camFarClipPlane, out fovy, out aspect, m, p);
                 if (!opticalSetupOK)
                 {
-                    ARController.Log(LogTag + "Error loading ARX optical parameters.");
+                    ARXController.Log(LogTag + "Error loading ARX optical parameters.");
                     return;
                 }
 
@@ -216,17 +216,17 @@ public class ARCamera : MonoBehaviour
                 m[12] *= 0.001f;
                 m[13] *= 0.001f;
                 m[14] *= 0.001f;
-                cam.projectionMatrix = ARUtilityFunctions.MatrixFromFloatArray(p);
-                ARController.Log(LogTag + "Optical parameters: fovy=" + fovy + ", aspect=" + aspect + ", camera position (m)={" + m[12].ToString("F3") + ", " + m[13].ToString("F3") + ", " + m[14].ToString("F3") + "}");
+                cam.projectionMatrix = ARXUtilityFunctions.MatrixFromFloatArray(p);
+                ARXController.Log(LogTag + "Optical parameters: fovy=" + fovy + ", aspect=" + aspect + ", camera position (m)={" + m[12].ToString("F3") + ", " + m[13].ToString("F3") + ", " + m[14].ToString("F3") + "}");
             } else {
                 m[0] = m[5] = m[10] = m[15] = 1.0f;
                 m[1] = m[2] = m[3] = m[4] = m[6] = m[7] = m[8] = m[9] = m[11] = m[12] = m[13] = m[14] = 0.0f;
             }
-			
-			opticalViewMatrix = ARUtilityFunctions.MatrixFromFloatArray(m);
-			if (OpticalEyeLateralOffsetRight != 0.0f) opticalViewMatrix = Matrix4x4.TRS(new Vector3(-OpticalEyeLateralOffsetRight, 0.0f, 0.0f), Quaternion.identity, Vector3.one) * opticalViewMatrix; 
+
+			opticalViewMatrix = ARXUtilityFunctions.MatrixFromFloatArray(m);
+			if (OpticalEyeLateralOffsetRight != 0.0f) opticalViewMatrix = Matrix4x4.TRS(new Vector3(-OpticalEyeLateralOffsetRight, 0.0f, 0.0f), Quaternion.identity, Vector3.one) * opticalViewMatrix;
 			// Convert to left-hand matrix.
-			opticalViewMatrix = ARUtilityFunctions.LHMatrixFromRHMatrix(opticalViewMatrix);
+			opticalViewMatrix = ARXUtilityFunctions.LHMatrixFromRHMatrix(opticalViewMatrix);
 		} else {
 			// Get screen size. If in a portrait mode, swap w/h.
 			int w = cam.pixelWidth;
@@ -241,7 +241,7 @@ public class ARCamera : MonoBehaviour
 
 			// Fetch the projection from the video source.
 			float[] projRaw = new float[16];
-			bool _cameraStereoRightEye = Stereo && StereoEye == ARCamera.ViewEye.Right;
+			bool _cameraStereoRightEye = Stereo && StereoEye == ARXCamera.ViewEye.Right;
 			if (!_cameraStereoRightEye || !arController.VideoIsStereo)
 			{
 				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingMode(w, h, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, projRaw)) return;
@@ -250,8 +250,8 @@ public class ARCamera : MonoBehaviour
 			{
 				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingModeStereo(w, h, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, null, projRaw)) return;
 			}
-			Matrix4x4 projectionMatrix = ARUtilityFunctions.MatrixFromFloatArray(projRaw);
-			//ARController.Log(LogTag + "Projection matrix: [" + Environment.NewLine + projectionMatrix.ToString().Trim() + "]");
+			Matrix4x4 projectionMatrix = ARXUtilityFunctions.MatrixFromFloatArray(projRaw);
+			//ARXController.Log(LogTag + "Projection matrix: [" + Environment.NewLine + projectionMatrix.ToString().Trim() + "]");
 			if (ContentRotate90) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * projectionMatrix;
 			if (ContentFlipV) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(1.0f, -1.0f, 1.0f)) * projectionMatrix;
 			if (ContentFlipH) projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(-1.0f, 1.0f, 1.0f)) * projectionMatrix;
@@ -277,10 +277,10 @@ public class ARCamera : MonoBehaviour
 			cam.projectionMatrix = projectionMatrix;
 #endif
 		}
-		
+
 		// Don't clear anything or else we interfere with other foreground cameras
 		//cam.clearFlags = CameraClearFlags.Nothing;
-		
+
 		// Renders after the clear and background cameras
 		//c.depth = 0;
 
@@ -289,34 +289,34 @@ public class ARCamera : MonoBehaviour
 		cam.transform.rotation = Quaternion.identity;
 		cam.transform.localScale = Vector3.one;
 	}
-	
+
 	// Return the origin associated with this component.
 	// Uses cached value if available, otherwise performs a find operation.
-	public virtual AROrigin GetOrigin()
+	public virtual ARXOrigin GetOrigin()
 	{
 		if (_origin == null) {
 			// Locate the origin in parent.
-			_origin = this.gameObject.GetComponentInParent<AROrigin>();
+			_origin = this.gameObject.GetComponentInParent<ARXOrigin>();
 		}
 		return _origin;
 	}
-	
+
 	// Get the marker, if any, currently acting as the base.
-	public virtual ARTrackable GetTrackable()
+	public virtual ARXTrackable GetTrackable()
 	{
-		AROrigin origin = GetOrigin();
+		ARXOrigin origin = GetOrigin();
 		if (origin == null) return null;
 		return (origin.GetBaseTrackable());
 	}
-	
+
 	// Updates arVisible, arPosition, arRotation based on linked marker state.
 	protected virtual void UpdateTracking()
 	{
 		// Note the current time
 		timeLastUpdate = Time.realtimeSinceStartup;
-			
+
 		// First, ensure we have a base marker. If none, then no markers are currently in view.
-        ARTrackable trackable = GetTrackable();
+        ARXTrackable trackable = GetTrackable();
 		if (trackable == null) {
 			if (arVisible) {
 				// Marker was visible but now is hidden.
@@ -324,24 +324,24 @@ public class ARCamera : MonoBehaviour
 				arVisible = false;
 			}
 		} else {
-			
+
 			if (trackable.Visible) {
-				
+
 				Matrix4x4 pose;
 				if (Optical && opticalSetupOK) {
 					pose = (opticalViewMatrix * trackable.TransformationMatrix).inverse;
 				} else {
 					pose = trackable.TransformationMatrix.inverse;
 				}
-				
-				arPosition = ARUtilityFunctions.PositionFromMatrix(pose);
+
+				arPosition = ARXUtilityFunctions.PositionFromMatrix(pose);
 				// Camera orientation: In ARToolKit, zero rotation of the camera corresponds to looking vertically down on a marker
 				// lying flat on the ground. In Unity however, if we still treat markers as being flat on the ground, we clash with Unity's
 				// camera "rotation", because an unrotated Unity camera is looking horizontally.
 				// So we choose to treat an unrotated marker as standing vertically, and apply a transform to the scene to
 				// to get it to lie flat on the ground.
-				arRotation = ARUtilityFunctions.QuaternionFromMatrix(pose);
-				
+				arRotation = ARXUtilityFunctions.QuaternionFromMatrix(pose);
+
 				if (!arVisible) {
 					// Marker was hidden but now is visible.
 					arVisible = true;
@@ -355,7 +355,7 @@ public class ARCamera : MonoBehaviour
 			}
 		}
 	}
-	
+
 	protected virtual void ApplyTracking()
 	{
 		if (arVisible) {
@@ -363,13 +363,13 @@ public class ARCamera : MonoBehaviour
 			transform.localRotation = arRotation;
 		}
 	}
-	
-	// Note that [DefaultExecutionOrder] is used on ARTrackable to ensure the base ARTrackable has updated before we try and use the transformation.
+
+	// Note that [DefaultExecutionOrder] is used on ARXTrackable to ensure the base ARXTrackable has updated before we try and use the transformation.
 	protected virtual void Update()
 	{
 		// Local scale is always 1 for now
 		transform.localScale = Vector3.one;
-		
+
 		// Update tracking if we are running in Player.
 		if (Application.isPlaying) {
 			UpdateTracking();

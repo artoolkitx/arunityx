@@ -1,5 +1,5 @@
 ﻿/*
- *  ARUtilityFunctions.cs
+ *  ARXUtilityFunctions.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -43,7 +43,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
-public static class ARUtilityFunctions
+public static class ARXUtilityFunctions
 {
 
 	/// <summary>
@@ -96,7 +96,7 @@ public static class ARUtilityFunctions
 	{
 		// Trap the case where the matrix passed in has an invalid rotation submatrix.
 		if (m.GetColumn(2) == Vector4.zero) {
-			ARController.Log("QuaternionFromMatrix got zero matrix.");
+			ARXController.Log("QuaternionFromMatrix got zero matrix.");
 			return Quaternion.identity;
 		}
 		return Quaternion.LookRotation(m.GetColumn(2), m.GetColumn(1));
@@ -122,19 +122,19 @@ public static class ARUtilityFunctions
 		lhm[1, 0] =  rhm[1, 0];
 		lhm[2, 0] = -rhm[2, 0];
 		lhm[3, 0] =  rhm[3, 0];
-		
+
 		// Column 1.
 		lhm[0, 1] =  rhm[0, 1];
 		lhm[1, 1] =  rhm[1, 1];
 		lhm[2, 1] = -rhm[2, 1];
 		lhm[3, 1] =  rhm[3, 1];
-		
+
 		// Column 2.
 		lhm[0, 2] = -rhm[0, 2];
 		lhm[1, 2] = -rhm[1, 2];
 		lhm[2, 2] =  rhm[2, 2];
 		lhm[3, 2] = -rhm[3, 2];
-		
+
 		// Column 3.
 		lhm[0, 3] =  rhm[0, 3];
 		lhm[1, 3] =  rhm[1, 3];
@@ -159,7 +159,7 @@ public static class ARUtilityFunctions
 		// Check parameters.
 		if (w <= 0 || h <= 0)
 		{
-			ARController.Log("Error: CreateVideoGameObject cannot configure video texture with invalid video size: " + w + "x" + h);
+			ARXController.Log("Error: CreateVideoGameObject cannot configure video texture with invalid video size: " + w + "x" + h);
 			vt = null; vm = null;
 			return null;
 		}
@@ -168,14 +168,14 @@ public static class ARUtilityFunctions
 		GameObject vbmgo = new GameObject(name);
 		if (vbmgo == null)
 		{
-			ARController.Log("Error: CreateVideoGameObject cannot create GameObject.");
+			ARXController.Log("Error: CreateVideoGameObject cannot create GameObject.");
 			vt = null; vm = null;
 			return null;
 		}
 		vbmgo.layer = layer; // Belongs in the background layer.
 
 		// Create an video texture, an array that can be used to update it and a material to display it.
-		vt = ARUtilityFunctions.CreateTexture(w, h, TextureFormat.ARGB32);
+		vt = ARXUtilityFunctions.CreateTexture(w, h, TextureFormat.ARGB32);
 		Shader shaderSource = Shader.Find("VideoPlaneNoLight");
 		vm = new Material(shaderSource); //arunityX.Properties.Resources.VideoPlaneShader;
 		vm.hideFlags = HideFlags.HideAndDontSave;
@@ -184,7 +184,7 @@ public static class ARUtilityFunctions
 		// Now create a mesh appropriate for displaying the video, a mesh filter to instantiate that mesh,
 		// and a mesh renderer to render the material on the instantiated mesh.
 		MeshFilter filter = vbmgo.AddComponent<MeshFilter>();
-		filter.mesh = ARUtilityFunctions.CreateTextureMesh(1.0f, 1.0f, w, h, zPos, flipH, flipV);
+		filter.mesh = ARXUtilityFunctions.CreateTextureMesh(1.0f, 1.0f, w, h, zPos, flipH, flipV);
 		MeshRenderer meshRenderer = vbmgo.AddComponent<MeshRenderer>();
 		meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 		meshRenderer.receiveShadows = false;
@@ -223,7 +223,7 @@ public static class ARUtilityFunctions
 		// Check parameters.
 		if (width <= 0 || height <= 0)
 		{
-			ARController.Log("Error: CreateTexture cannot configure video texture with invalid size: " + width + "x" + height);
+			ARXController.Log("Error: CreateTexture cannot configure video texture with invalid size: " + width + "x" + height);
 			return null;
 		}
 

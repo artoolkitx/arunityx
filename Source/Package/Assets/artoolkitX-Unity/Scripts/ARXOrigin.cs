@@ -1,5 +1,5 @@
 ﻿/*
- *  AROrigin.cs
+ *  ARXOrigin.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -42,17 +42,17 @@ using System.Text;
 using UnityEngine;
 
 /// <summary>
-/// AROrigin, when instantiated in a scene, provides a means to keep a list of all
+/// ARXOrigin, when instantiated in a scene, provides a means to keep a list of all
 /// ARTrackables in the scene, as well as keep a record of a "base" trackable which
-/// acts as the origin of the coordinate system for an ARCamera.
+/// acts as the origin of the coordinate system for an ARXCamera.
 /// The base trackable can be set manually, or if none is set, and the base
 /// trackable is requested, the first visible trackable will be returned.
 /// </summary>
 [RequireComponent(typeof(Transform))]
 [ExecuteInEditMode]
-public class AROrigin : MonoBehaviour
+public class ARXOrigin : MonoBehaviour
 {
-	private const string LogTag = "AROrigin: ";
+	private const string LogTag = "ARXOrigin: ";
 
 	public enum FindMode {
 		AutoAll,
@@ -61,8 +61,8 @@ public class AROrigin : MonoBehaviour
 	}
     public List<String> findTrackableTags = new List<string>();
 
-	private ARTrackable baseTrackable = null;
-    private List<ARTrackable> trackablesEligibleForBaseTrackable = new List<ARTrackable>();
+	private ARXTrackable baseTrackable = null;
+    private List<ARXTrackable> trackablesEligibleForBaseTrackable = new List<ARXTrackable>();
 
 	[SerializeField]
     private FindMode _findTrackableMode = FindMode.AutoAll;
@@ -70,7 +70,7 @@ public class AROrigin : MonoBehaviour
 	public FindMode findTrackableMode
 	{
 		get => _findTrackableMode;
-		
+
 		set
 		{
 			if (_findTrackableMode != value) {
@@ -80,7 +80,7 @@ public class AROrigin : MonoBehaviour
 		}
 	}
 
-    public void AddTrackable(ARTrackable trackable, bool atHeadOfList = false)
+    public void AddTrackable(ARXTrackable trackable, bool atHeadOfList = false)
 	{
 		if (!atHeadOfList) {
 			trackablesEligibleForBaseTrackable.Add(trackable);
@@ -89,12 +89,12 @@ public class AROrigin : MonoBehaviour
 		}
 	}
 
-    public bool RemoveTrackable(ARTrackable trackable)
+    public bool RemoveTrackable(ARXTrackable trackable)
 	{
 		if (baseTrackable == trackable) baseTrackable = null;
         return trackablesEligibleForBaseTrackable.Remove(trackable);
 	}
-	
+
     public void RemoveAllTrackables()
 	{
 		baseTrackable = null;
@@ -105,19 +105,19 @@ public class AROrigin : MonoBehaviour
 	{
 		RemoveAllTrackables();
 		if (findTrackableMode != FindMode.Manual) {
-			ARTrackable[] ms = FindObjectsOfType<ARTrackable>(); // Does not find inactive objects.
-			foreach (ARTrackable m in ms) {
+			ARXTrackable[] ms = FindObjectsOfType<ARXTrackable>(); // Does not find inactive objects.
+			foreach (ARXTrackable m in ms) {
 				if (findTrackableMode == FindMode.AutoAll || (findTrackableMode == FindMode.AutoByTags && findTrackableTags.Contains(m.Tag))) {
                     trackablesEligibleForBaseTrackable.Add(m);
 				}
 			}
-            ARController.Log(LogTag + "Found " + trackablesEligibleForBaseTrackable.Count + " trackables eligible to become base trackable.");
+            ARXController.Log(LogTag + "Found " + trackablesEligibleForBaseTrackable.Count + " trackables eligible to become base trackable.");
 		}
 	}
 
     void OnEnable()
     {
-        
+
     }
 
     void Start()
@@ -126,23 +126,23 @@ public class AROrigin : MonoBehaviour
 	}
 
     // Get the trackable, if any, currently acting as the base.
-	public ARTrackable GetBaseTrackable()
+	public ARXTrackable GetBaseTrackable()
 	{
         if (baseTrackable != null) {
 			if (baseTrackable.Visible) return baseTrackable;
 			else baseTrackable = null;
 		}
-        foreach (ARTrackable m in trackablesEligibleForBaseTrackable) {
+        foreach (ARXTrackable m in trackablesEligibleForBaseTrackable) {
 			if (m.Visible) {
 				baseTrackable = m;
-				ARController.Log("Trackable " + m.UID + " became base trackable.");
+				ARXController.Log("Trackable " + m.UID + " became base trackable.");
 				break;
 			}
 		}
-		
+
 		return baseTrackable;
 	}
-	
+
 	void OnApplicationQuit()
 	{
 		RemoveAllTrackables();

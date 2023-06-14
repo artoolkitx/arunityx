@@ -1,5 +1,5 @@
 ﻿/*
- *  ARTransitionalCameraEditor.cs
+ *  ARXTransitionalCameraEditor.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -42,18 +42,18 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(ARTransitionalCamera))] 
-public class ARTransitionalCameraEditor : ARTrackedCameraEditor 
+[CustomEditor(typeof(ARXTransitionalCamera))]
+public class ARXTransitionalCameraEditor : ARXTrackedCameraEditor
 {
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
 
-		ARTransitionalCamera artc = (ARTransitionalCamera)target;
+		ARXTransitionalCamera artc = (ARXTransitionalCamera)target;
 
 
         EditorGUILayout.Separator();
-		
+
 		bool allowSceneObjects = !EditorUtility.IsPersistent(artc);
 		artc.targetObject = (GameObject)EditorGUILayout.ObjectField(artc.targetObject, artc.targetObject.GetType(), allowSceneObjects);
 

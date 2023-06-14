@@ -1,5 +1,5 @@
 /*
- *  AROriginEditor.cs
+ *  ARXOriginEditor.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -43,23 +43,23 @@ using UnityEditor;
 using UnityEngine;
 using System.IO;
 
-[CustomEditor(typeof(AROrigin))]
-public class AROriginEditor : Editor
+[CustomEditor(typeof(ARXOrigin))]
+public class ARXOriginEditor : Editor
 {
-	
+
     public override void OnInspectorGUI()
     {
-		// Get the AROrigin that this panel will edit.
-        AROrigin o = (AROrigin)target;
+		// Get the ARXOrigin that this panel will edit.
+        ARXOrigin o = (ARXOrigin)target;
         if (o == null) return;
 
 		using (new EditorGUI.DisabledScope(true))
 			EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
 
-		// Find mode		
-		o.findTrackableMode = (AROrigin.FindMode)EditorGUILayout.EnumPopup("ARTrackable find mode", o.findTrackableMode);
-		
-		if (o.findTrackableMode == AROrigin.FindMode.AutoByTags) {
+		// Find mode
+		o.findTrackableMode = (ARXOrigin.FindMode)EditorGUILayout.EnumPopup("ARXTrackable find mode", o.findTrackableMode);
+
+		if (o.findTrackableMode == ARXOrigin.FindMode.AutoByTags) {
 			serializedObject.Update();
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("findTrackableTags"), true);
 			serializedObject.ApplyModifiedProperties();

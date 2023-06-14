@@ -1,5 +1,5 @@
 ﻿/*
- *  ARTransitionalCamera.cs
+ *  ARXTransitionalCamera.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -43,7 +43,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Transform))]   // A Transform is required to update the position and orientation from tracking
 [ExecuteInEditMode]                     // Run in the editor so we can keep the scale at 1
-public class ARTransitionalCamera : ARTrackedCamera
+public class ARXTransitionalCamera : ARXTrackedCamera
 {
 
     public Vector3 vrTargetPosition;    // In camera parent frame.
@@ -80,7 +80,7 @@ public class ARTransitionalCamera : ARTrackedCamera
                 transitionAmount = 0.0f;
                 transitioning = false;
             }
-       
+
             if (arvbg != null) arvbg.VideoAlpha = 1.0f - transitionAmount;
 
             yield return null;
@@ -111,8 +111,8 @@ public class ARTransitionalCamera : ARTrackedCamera
         if(targetObject == null) return ;
 		Matrix4x4 targetInWorldFrame = targetObject.transform.localToWorldMatrix;
 		Matrix4x4 targetInCameraFrame = this.gameObject.GetComponent<Camera>().transform.parent.worldToLocalMatrix * targetInWorldFrame;
-		vrTargetPosition = ARUtilityFunctions.PositionFromMatrix(targetInCameraFrame);
-		vrTargetRotation = ARUtilityFunctions.QuaternionFromMatrix(targetInCameraFrame);
+		vrTargetPosition = ARXUtilityFunctions.PositionFromMatrix(targetInCameraFrame);
+		vrTargetRotation = ARXUtilityFunctions.QuaternionFromMatrix(targetInCameraFrame);
 
 		vrObserverAzimuth = vrObserverElevation = 0.0f; // VR mode starts pointing in direction specified by the axes of the target.
 		vrObserverOffset = Vector3.zero;
@@ -158,7 +158,7 @@ public class ARTransitionalCamera : ARTrackedCamera
 		if (SystemInfo.deviceType == DeviceType.Handheld) {
 			if (Input.touchCount == 1) {
 	            Touch touch = Input.GetTouch(0);
-				look = touch.deltaPosition;           
+				look = touch.deltaPosition;
 	        } else if (Input.touchCount == 2) {
 	            if (transitionAmount <= 0) transitionIn();
 	            if (transitionAmount >= 1) transitionOut();
@@ -187,8 +187,8 @@ public class ARTransitionalCamera : ARTrackedCamera
 		vrObserverOffset += vrObserverDirection * move;
 
 		Vector3 vrPosition = vrTargetPosition + vrTargetRotation * vrObserverOffset;
-		Quaternion vrRotation = vrTargetRotation * vrObserverDirection; 
- 
+		Quaternion vrRotation = vrTargetRotation * vrObserverDirection;
+
         if (transitionAmount < 1) {
             if (arVisible) {
 				transform.localPosition = Vector3.Lerp(arPosition, vrPosition, transitionAmount);
@@ -217,7 +217,7 @@ public class ARTransitionalCamera : ARTrackedCamera
             }*/
         }
     }
-       
+
 
 }
 

@@ -1,5 +1,5 @@
 /*
- *  ARTrackable.cs
+ *  ARXTrackable.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -43,18 +43,18 @@ using System.IO;
 using UnityEngine;
 
 /// <summary>
-/// ARTrackable objects represent a native ARTrackable, even when the native artoolkitX is not
+/// ARXTrackable objects represent a native ARXTrackable, even when the native artoolkitX is not
 /// initialised.
 /// To find markers from elsewhere in the Unity environment:
-///   ARTrackable[] markers = FindObjectsOfType<ARTrackable>(); // (or FindObjectsOfType(typeof(ARTrackable)) as ARTrackable[]);
+///   ARXTrackable[] markers = FindObjectsOfType<ARXTrackable>(); // (or FindObjectsOfType(typeof(ARXTrackable)) as ARXTrackable[]);
 ///
 /// Script execution order is set to -100 on this component, to ensure that the updated pose information is available
-/// to scene game objects during their Update(), particularly game objects with ARCamera or ARTrackedOject components attached.
+/// to scene game objects during their Update(), particularly game objects with ARXCamera or ARTrackedOject components attached.
 /// </summary>
-/// 
+///
 [ExecuteInEditMode]
 [DefaultExecutionOrder(-100)]
-public class ARTrackable : MonoBehaviour
+public class ARXTrackable : MonoBehaviour
 {
     public enum TrackableType
     {
@@ -101,12 +101,12 @@ public class ARTrackable : MonoBehaviour
         ARW_TRACKABLE_EVENT_TYPE_AUTOREMOVED = 2,
     };
 
-    private const string LogTag = "ARTrackable: ";
+    private const string LogTag = "ARXTrackable: ";
 
     // Quaternion to rotate from ART to Unity
     //public static Quaternion RotationCorrection = Quaternion.AngleAxis(90.0f, new Vector3(1.0f, 0.0f, 0.0f));
 
-    // Value used when no underlying native ARTrackable is assigned
+    // Value used when no underlying native ARXTrackable is assigned
     public const int NO_ID = -1;
 
     [NonSerialized] private int uid = NO_ID;
@@ -127,7 +127,7 @@ public class ARTrackable : MonoBehaviour
     [field: SerializeField]
     public TrackableType Type { get; private set; } = TrackableType.TwoD;
 
-    public string Tag = ""; // This links this trackable with an ARTrackedObject or ARTrackedCamera in the scene.
+    public string Tag = ""; // This links this trackable with an ARXTrackedObject or ARXTrackedCamera in the scene.
 
     // 2D image trackables have an image filename and image width.
     [field: SerializeField]
@@ -208,7 +208,7 @@ public class ARTrackable : MonoBehaviour
     }
 
     // Single markers and 2D planar surfaces have a single pattern, multi markers and NFT markers have one or more..
-    private ARPattern[] patterns;
+    private ARXPattern[] patterns;
 
     // Private fields with accessors.
     // Trackable configuration options.
@@ -228,63 +228,63 @@ public class ARTrackable : MonoBehaviour
     private Matrix4x4 transformationMatrix;                                 // Full transformation matrix as a Unity matrix
 //    private Quaternion rotation = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);   // Rotation corrected for Unity
 //    private Vector3 position = new Vector3(0.0f, 0.0f, 0.0f);               // Position corrected for Unity
-    
+
     private object loadLock = new object();
 
     /// <summary>
-    /// Factory method to add a 2D image trackable to same GameObject as ARController.
+    /// Factory method to add a 2D image trackable to same GameObject as ARXController.
     /// </summary>
     /// <param name="imageFilePath">Filesystem path, relative to StreamingAssets folder, of image file.</param>
     /// <param name="imageWidth">Width of the image in Unity units, default 1.0 = 1 metre.</param>
     /// <returns></returns>
-    static ARTrackable Add2D(string imageFilePath, float imageWidth)
+    static ARXTrackable Add2D(string imageFilePath, float imageWidth)
     {
-        if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return null;
-        ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
+        if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return null;
+        ARXTrackable t = ARXController.Instance.gameObject.AddComponent<ARXTrackable>();
         t.ConfigureAsTwoD(imageFilePath, imageWidth);
         return t;
     }
 
     /// <summary>
-    /// actory method to add a square pattern marker trackable to same GameObject as ARController.
+    /// actory method to add a square pattern marker trackable to same GameObject as ARXController.
     /// </summary>
     /// <param name="patternFilePath">Filesystem path of pattern file.</param>
     /// <param name="patternWidth">Width of marker (measured on one side of border) in Unity units, default 0.08 = 80mm.</param>
     /// <returns></returns>
-    static ARTrackable AddSquarePattern(string patternFilePath, float patternWidth)
+    static ARXTrackable AddSquarePattern(string patternFilePath, float patternWidth)
     {
-        if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return null;
-        ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
+        if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return null;
+        ARXTrackable t = ARXController.Instance.gameObject.AddComponent<ARXTrackable>();
         t.ConfigureAsSquarePattern(patternFilePath, patternWidth);
         return t;
     }
 
-    static ARTrackable AddSquareBarcode(ulong barcodeID, float patternWidth)
+    static ARXTrackable AddSquareBarcode(ulong barcodeID, float patternWidth)
     {
-        if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return null;
-        ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
+        if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return null;
+        ARXTrackable t = ARXController.Instance.gameObject.AddComponent<ARXTrackable>();
         t.ConfigureAsSquareBarcode(barcodeID, patternWidth);
         return t;
     }
 
-    static ARTrackable AddMultiSquare(string configFilePath)
+    static ARXTrackable AddMultiSquare(string configFilePath)
     {
-        if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return null;
-        ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
+        if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return null;
+        ARXTrackable t = ARXController.Instance.gameObject.AddComponent<ARXTrackable>();
         t.ConfigureAsMultiSquare(configFilePath);
         return t;
     }
 
-    static ARTrackable AddNFT(string dataFilename)
+    static ARXTrackable AddNFT(string dataFilename)
     {
-        if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return null;
-        ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
+        if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return null;
+        ARXTrackable t = ARXController.Instance.gameObject.AddComponent<ARXTrackable>();
         t.ConfigureAsNFT(dataFilename);
         return t;
     }
 
     /// <summary>
-    /// Adds an ARTrackable for an auto-created trackable.
+    /// Adds an ARXTrackable for an auto-created trackable.
     /// </summary>
     /// <param name="UID"></param>
     /// <returns></returns>
@@ -293,16 +293,16 @@ public class ARTrackable : MonoBehaviour
         switch ((ARW_TRACKABLE_EVENT_TYPE)eventType)
         {
             case ARW_TRACKABLE_EVENT_TYPE.ARW_TRACKABLE_EVENT_TYPE_AUTOCREATED:
-                if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return;
-                ARTrackable t = ARController.Instance.gameObject.AddComponent<ARTrackable>();
+                if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return;
+                ARXTrackable t = ARXController.Instance.gameObject.AddComponent<ARXTrackable>();
                 t.uid = UID;
-                t.Type = (TrackableType)ARController.Instance.PluginFunctions.arwGetTrackableOptionInt(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_TYPE);
+                t.Type = (TrackableType)ARXController.Instance.PluginFunctions.arwGetTrackableOptionInt(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_TYPE);
                 t.hideFlags = HideFlags.NotEditable | HideFlags.DontSaveInEditor;
                 break;
             case ARW_TRACKABLE_EVENT_TYPE.ARW_TRACKABLE_EVENT_TYPE_AUTOREMOVED:
-                if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) return;
-                ARTrackable[] ts = FindObjectsOfType<ARTrackable>();
-                foreach (ARTrackable t1 in ts)
+                if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return;
+                ARXTrackable[] ts = FindObjectsOfType<ARXTrackable>();
+                foreach (ARXTrackable t1 in ts)
                 {
                     if (t1.UID == UID)
                     {
@@ -318,7 +318,7 @@ public class ARTrackable : MonoBehaviour
 
     public void OnDisable()
     {
-        //ARController.Log(LogTag + "ARTrackable.OnDisable()");
+        //ARXController.Log(LogTag + "ARXTrackable.OnDisable()");
         Unload();
     }
 
@@ -337,7 +337,7 @@ public class ARTrackable : MonoBehaviour
                 while (!unpackerWWW.isDone) { } // This will block in the webplayer. TODO: switch to co-routine.
                 if (!string.IsNullOrEmpty(unpackerWWW.error))
                 {
-                    ARController.Log(LogTag + "Error unpacking '" + file + "'");
+                    ARXController.Log(LogTag + "Error unpacking '" + file + "'");
                     return (false);
                 }
                 File.WriteAllBytes(System.IO.Path.Combine(Application.temporaryCachePath, basename), unpackerWWW.bytes); // 64MB limit on File.WriteAllBytes.
@@ -352,41 +352,41 @@ public class ARTrackable : MonoBehaviour
     }
     #endif
 
-    // Load the native ARTrackable structure(s) and set the UID.
-    public void Load() 
+    // Load the native ARXTrackable structure(s) and set the UID.
+    public void Load()
     {
         lock (loadLock) {
             if (this.enabled == false) {
                 return;
             }
 
-            //ARController.Log(LogTag + "ARTrackable.Load()");
+            //ARXController.Log(LogTag + "ARXTrackable.Load()");
             if (UID != NO_ID) {
                 return;
             }
 
-            if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited()) {
+            if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) {
                 // If arwInitialiseAR() has not yet been called, we can't load the native trackable yet.
-                // ARController.InitialiseAR() will trigger this again when arwInitialiseAR() has been called.
+                // ARXController.InitialiseAR() will trigger this again when arwInitialiseAR() has been called.
                 return;
             }
 
             // Work out the configuration string to pass to the native side.
             string dir = Application.streamingAssetsPath;
             string cfg = "";
-            
+
             switch (Type) {
 
                 case TrackableType.Square:
                     // Multiply width by 1000 to convert from metres to artoolkitX's millimetres.
                     cfg = "single_buffer;" + PatternWidth*1000.0f + ";buffer=" + PatternContents;
                     break;
-                
+
                 case TrackableType.SquareBarcode:
                     // Multiply width by 1000 to convert from metres to artoolkitX's millimetres.
                     cfg = "single_barcode;" + BarcodeID + ";" + PatternWidth*1000.0f;
                     break;
-                
+
                 case TrackableType.Multimarker:
                     #if !UNITY_METRO
                     if (dir.Contains("://")) {
@@ -396,7 +396,7 @@ public class ARTrackable : MonoBehaviour
                         if (!unpackStreamingAssetToCacheDir(MultiConfigFile)) {
                             dir = "";
                         } else {
-                        
+
                             //string[] unpackFiles = getPatternFiles;
                             //foreach (string patternFile in patternFiles) {
                             //if (!unpackStreamingAssetToCacheDir(patternFile)) {
@@ -406,13 +406,13 @@ public class ARTrackable : MonoBehaviour
                         }
                     }
                     #endif
-                    
+
                     if (!string.IsNullOrEmpty(dir) && !string.IsNullOrEmpty(MultiConfigFile)) {
                         cfg = "multi;" + System.IO.Path.Combine(dir, MultiConfigFile);
                     }
                     break;
 
-                
+
                 case TrackableType.NFT:
                     #if !UNITY_METRO
                     if (dir.Contains("://")) {
@@ -428,7 +428,7 @@ public class ARTrackable : MonoBehaviour
                         }
                     }
                     #endif
-                
+
                     if (!string.IsNullOrEmpty(dir) && !string.IsNullOrEmpty(NFTDataName)) {
                         cfg = "nft;" + System.IO.Path.Combine(dir, NFTDataName);
                     }
@@ -456,17 +456,17 @@ public class ARTrackable : MonoBehaviour
                     break;
 
             }
-            
-            // If a valid config. could be assembled, get the native side to process it, and assign the resulting ARTrackable UID.
+
+            // If a valid config. could be assembled, get the native side to process it, and assign the resulting ARXTrackable UID.
             if (!string.IsNullOrEmpty(cfg)) {
-                uid = ARController.Instance.PluginFunctions.arwAddTrackable(cfg);
+                uid = ARXController.Instance.PluginFunctions.arwAddTrackable(cfg);
                 if (UID == NO_ID) {
-                    ARController.Log(LogTag + "Error loading marker.");
+                    ARXController.Log(LogTag + "Error loading marker.");
                     loadError = true;
                 } else {
                     loadError = false;
                     // Trackable loaded. Do any additional configuration.
-                    //ARController.Log("Added marker with cfg='" + cfg + "'");
+                    //ARXController.Log("Added marker with cfg='" + cfg + "'");
 
                     // Any additional trackable-type-specific config not included in the trackable config string used at load time.
                     if (Type == TrackableType.Square || Type == TrackableType.SquareBarcode) UseContPoseEstimation = currentUseContPoseEstimation;
@@ -478,12 +478,12 @@ public class ARTrackable : MonoBehaviour
                     FilterCutoffFreq = currentFilterCutoffFreq;
 
                     // Create array of patterns. A single marker will have array length 1.
-                    int numPatterns = ARController.Instance.PluginFunctions.arwGetTrackablePatternCount(UID);
-                    //ARController.Log("Trackable with UID=" + UID + " has " + numPatterns + " patterns.");
+                    int numPatterns = ARXController.Instance.PluginFunctions.arwGetTrackablePatternCount(UID);
+                    //ARXController.Log("Trackable with UID=" + UID + " has " + numPatterns + " patterns.");
                     if (numPatterns > 0) {
-                        patterns = new ARPattern[numPatterns];
+                        patterns = new ARXPattern[numPatterns];
                         for (int i = 0; i < numPatterns; i++) {
-                            patterns[i] = new ARPattern(UID, i);
+                            patterns[i] = new ARXPattern(UID, i);
                         }
                     }
 
@@ -492,7 +492,7 @@ public class ARTrackable : MonoBehaviour
         }
     }
 
-    // Note that [DefaultExecutionOrder] is used on ARController to ensure that a tracking update has completed before we try
+    // Note that [DefaultExecutionOrder] is used on ARXController to ensure that a tracking update has completed before we try
     // to fetch our transformation here.
     void Update()
     {
@@ -505,9 +505,9 @@ public class ARTrackable : MonoBehaviour
         lock (loadLock)
         {
             bool v = false;
-            //ARController.Log(LogTag + "ARTrackable.Update()");
+            //ARXController.Log(LogTag + "ARXTrackable.Update()");
 
-            if (ARController.Instance && ARController.Instance.PluginFunctions != null && ARController.Instance.PluginFunctions.IsInited()) {
+            if (ARXController.Instance && ARXController.Instance.PluginFunctions != null && ARXController.Instance.PluginFunctions.IsInited()) {
 
                 // Lazy loading, provided we didn't already try to load and get an error.
                 if (UID == NO_ID && !loadError)
@@ -517,8 +517,8 @@ public class ARTrackable : MonoBehaviour
                 if (UID != NO_ID)
                 {
                     float[] matrixRawArray = new float[16];
-                    v = ARController.Instance.PluginFunctions.arwQueryTrackableVisibilityAndTransformation(UID, matrixRawArray);
-                    //ARController.Log(LogTag + "ARTrackable.Update() UID=" + UID + ", visible=" + v);
+                    v = ARXController.Instance.PluginFunctions.arwQueryTrackableVisibilityAndTransformation(UID, matrixRawArray);
+                    //ARXController.Log(LogTag + "ARXTrackable.Update() UID=" + UID + ", visible=" + v);
 
                     if (v)
                     {
@@ -526,14 +526,14 @@ public class ARTrackable : MonoBehaviour
                         matrixRawArray[13] *= 0.001f;
                         matrixRawArray[14] *= 0.001f;
 
-                        Matrix4x4 matrixRaw = ARUtilityFunctions.MatrixFromFloatArray(matrixRawArray);
+                        Matrix4x4 matrixRaw = ARXUtilityFunctions.MatrixFromFloatArray(matrixRawArray);
                         //.Log("arwQueryTrackableTransformation(" + UID + ") got matrix: [" + Environment.NewLine + matrixRaw.ToString("F3").Trim() + "]");
 
                         // artoolkitX uses right-hand coordinate system where the marker lies in x-y plane with right in direction of +x,
                         // up in direction of +y, and forward (towards viewer) in direction of +z.
                         // Need to convert to Unity's left-hand coordinate system where marker lies in x-y plane with right in direction of +x,
                         // up in direction of +y, and forward (towards viewer) in direction of -z.
-                        transformationMatrix = ARUtilityFunctions.LHMatrixFromRHMatrix(matrixRaw);
+                        transformationMatrix = ARXUtilityFunctions.LHMatrixFromRHMatrix(matrixRaw);
                     }
                 }
             }
@@ -541,20 +541,20 @@ public class ARTrackable : MonoBehaviour
             return;
         }
     }
-    
-    // Unload any native ARTrackable structures, and clear the UID.
+
+    // Unload any native ARXTrackable structures, and clear the UID.
     public void Unload()
     {
         lock (loadLock) {
-            //ARController.Log(LogTag + "ARTrackable.Unload()");
-            
+            //ARXController.Log(LogTag + "ARXTrackable.Unload()");
+
             if (UID == NO_ID) {
                 return;
             }
-            
+
             // Remove the native trackable, unless arwShutdownAR() has already been called (as it will already have been removed.)
-            if (ARController.Instance && ARController.Instance.PluginFunctions != null && ARController.Instance.PluginFunctions.IsInited()) {
-                ARController.Instance.PluginFunctions.arwRemoveTrackable(UID);
+            if (ARXController.Instance && ARXController.Instance.PluginFunctions != null && ARXController.Instance.PluginFunctions.IsInited()) {
+                ARXController.Instance.PluginFunctions.arwRemoveTrackable(UID);
             }
 
             uid = NO_ID;
@@ -562,11 +562,11 @@ public class ARTrackable : MonoBehaviour
             patterns = null; // Delete the patterns too.
         }
     }
-    
+
     public Matrix4x4 TransformationMatrix
     {
         get
-        {                
+        {
             return transformationMatrix;
         }
     }
@@ -596,7 +596,7 @@ public class ARTrackable : MonoBehaviour
     }
 
 
-    public ARPattern[] Patterns
+    public ARXPattern[] Patterns
     {
         get
         {
@@ -616,7 +616,7 @@ public class ARTrackable : MonoBehaviour
             currentFiltered = value;
             lock (loadLock) {
                 if (UID != NO_ID) {
-                    ARController.Instance.PluginFunctions.arwSetTrackableOptionBool(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTERED, value);
+                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionBool(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTERED, value);
                 }
             }
         }
@@ -634,7 +634,7 @@ public class ARTrackable : MonoBehaviour
             currentFilterSampleRate = value;
             lock (loadLock) {
                 if (UID != NO_ID) {
-                    ARController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTER_SAMPLE_RATE, value);
+                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTER_SAMPLE_RATE, value);
                 }
             }
         }
@@ -652,7 +652,7 @@ public class ARTrackable : MonoBehaviour
             currentFilterCutoffFreq = value;
             lock (loadLock) {
                 if (UID != NO_ID) {
-                    ARController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTER_CUTOFF_FREQ, value);
+                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTER_CUTOFF_FREQ, value);
                 }
             }
         }
@@ -670,7 +670,7 @@ public class ARTrackable : MonoBehaviour
             currentUseContPoseEstimation = value;
             lock (loadLock) {
                 if (UID != NO_ID && (Type == TrackableType.Square || Type == TrackableType.SquareBarcode)) {
-                    ARController.Instance.PluginFunctions.arwSetTrackableOptionBool(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_SQUARE_USE_CONT_POSE_ESTIMATION, value);
+                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionBool(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_SQUARE_USE_CONT_POSE_ESTIMATION, value);
                 }
             }
         }
@@ -682,17 +682,17 @@ public class ARTrackable : MonoBehaviour
         {
             return currentNFTScale; // Serialised.
         }
-        
+
         set
         {
             currentNFTScale = value;
             lock (loadLock) {
                 if (UID != NO_ID && (Type == TrackableType.NFT)) {
-                    ARController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_NFT_SCALE, value);
+                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_NFT_SCALE, value);
                 }
             }
         }
     }
-    
+
 
 }

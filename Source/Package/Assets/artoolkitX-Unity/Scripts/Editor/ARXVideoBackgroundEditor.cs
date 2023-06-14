@@ -67,10 +67,10 @@ public class ARXVideoBackgroundEditor : Editor
             Undo.RecordObject(arvb, (u ? "En" : "Dis") + "able video background");
             arvb.UseVideoBackground = u;
         }
-        ARCamera arc = arvb.gameObject.GetComponent<ARCamera>();
+        ARXCamera arc = arvb.gameObject.GetComponent<ARXCamera>();
         if (arc && u & arc.Optical)
         {
-            EditorGUILayout.HelpBox("This video background is enabled, even though the ARCamera is in optical see-through mode.", MessageType.Warning);
+            EditorGUILayout.HelpBox("This video background is enabled, even though the ARXCamera is in optical see-through mode.", MessageType.Warning);
         }
 
         BackgroundLayer.intValue = EditorGUILayout.LayerField("Layer", BackgroundLayer.intValue);

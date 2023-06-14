@@ -1,5 +1,5 @@
 ﻿/*
- *  ARVideoConfigEditor.cs
+ *  ARXVideoConfigEditor.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -42,14 +42,14 @@ using UnityEngine;
 using System.IO;
 using System;
 
-[CustomEditor(typeof(ARVideoConfig))]
-public class ARVideoConfigEditor : Editor
+[CustomEditor(typeof(ARXVideoConfig))]
+public class ARXVideoConfigEditor : Editor
 {
     bool[] showPlatformConfig = null;
 
     public override void OnInspectorGUI()
     {
-        ARVideoConfig arvideoconfig = (ARVideoConfig)target;
+        ARXVideoConfig arvideoconfig = (ARXVideoConfig)target;
         if (arvideoconfig == null) return;
 
         using (new EditorGUI.DisabledScope(true))
@@ -85,7 +85,7 @@ public class ARVideoConfigEditor : Editor
         for (int pci = 0; pci < arvideoconfig.configs.Count; pci++)
         {
             // Copy the config entry from the list.
-            ARVideoConfig.ARVideoPlatformConfig pc = arvideoconfig.configs[pci];
+            ARXVideoConfig.ARVideoPlatformConfig pc = arvideoconfig.configs[pci];
 
             showPlatformConfig[pci] = EditorGUILayout.Foldout(showPlatformConfig[pci], pc.name);
             if (!showPlatformConfig[pci]) continue;
@@ -95,21 +95,21 @@ public class ARVideoConfigEditor : Editor
             // This function is called against each enum, and if it returns false, that enum value isn't shown.
             // We use it to avoid showing the "index" and "position" options for modules that don't support them.
             Func<Enum, bool> checkSelectionMethod = (e) => {
-                ARVideoConfig.ARVideoConfigInputSelectionMethod ism = (ARVideoConfig.ARVideoConfigInputSelectionMethod)e;
-                if (!ARVideoConfig.modules[pc.module].supportsSelectionByIndex
-                    && (ism == ARVideoConfig.ARVideoConfigInputSelectionMethod.NthCamera || ism == ARVideoConfig.ARVideoConfigInputSelectionMethod.NthCameraAtPosition))
+                ARXVideoConfig.ARVideoConfigInputSelectionMethod ism = (ARXVideoConfig.ARVideoConfigInputSelectionMethod)e;
+                if (!ARXVideoConfig.modules[pc.module].supportsSelectionByIndex
+                    && (ism == ARXVideoConfig.ARVideoConfigInputSelectionMethod.NthCamera || ism == ARXVideoConfig.ARVideoConfigInputSelectionMethod.NthCameraAtPosition))
                 {
                     return false;
                 }
-                else if (!ARVideoConfig.modules[pc.module].supportsSelectionByPosition
-                    && (ism == ARVideoConfig.ARVideoConfigInputSelectionMethod.CameraAtPosition || ism == ARVideoConfig.ARVideoConfigInputSelectionMethod.NthCameraAtPosition))
+                else if (!ARXVideoConfig.modules[pc.module].supportsSelectionByPosition
+                    && (ism == ARXVideoConfig.ARVideoConfigInputSelectionMethod.CameraAtPosition || ism == ARXVideoConfig.ARVideoConfigInputSelectionMethod.NthCameraAtPosition))
                 {
                     return false;
                 }
                 return true;
             };
 
-            ARVideoConfig.ARVideoConfigInputSelectionMethod tempIsm = (ARVideoConfig.ARVideoConfigInputSelectionMethod)EditorGUILayout.EnumPopup(new GUIContent("Select input by"), pc.inputSelectionMethod, checkSelectionMethod, false);
+            ARXVideoConfig.ARVideoConfigInputSelectionMethod tempIsm = (ARXVideoConfig.ARVideoConfigInputSelectionMethod)EditorGUILayout.EnumPopup(new GUIContent("Select input by"), pc.inputSelectionMethod, checkSelectionMethod, false);
             if (tempIsm != pc.inputSelectionMethod)
             {
                 pc.inputSelectionMethod = tempIsm;
@@ -117,13 +117,13 @@ public class ARVideoConfigEditor : Editor
             }
 
             // If we should put up a source info list, and we're on that platform, do it.
-            if (pc.inputSelectionMethod == ARVideoConfig.ARVideoConfigInputSelectionMethod.VideoSourceInfoList && pc.platform == Application.platform)
+            if (pc.inputSelectionMethod == ARXVideoConfig.ARVideoConfigInputSelectionMethod.VideoSourceInfoList && pc.platform == Application.platform)
             {
                 if (arvideoconfig.sourceInfoList == null || GUILayout.Button("Refresh"))
                 {
                     if (arvideoconfig.arcontroller != null)
                     {
-                        arvideoconfig.sourceInfoList = arvideoconfig.arcontroller.GetVideoSourceInfoList(ARVideoConfig.modules[pc.module].moduleSelectionString);
+                        arvideoconfig.sourceInfoList = arvideoconfig.arcontroller.GetVideoSourceInfoList(ARXVideoConfig.modules[pc.module].moduleSelectionString);
                     }
                 }
                 if (arvideoconfig.sourceInfoList != null && arvideoconfig.sourceInfoList.Count > 0)
@@ -139,23 +139,23 @@ public class ARVideoConfigEditor : Editor
                     }
                 }
             }
-            if (pc.inputSelectionMethod == ARVideoConfig.ARVideoConfigInputSelectionMethod.CameraAtPosition || pc.inputSelectionMethod == ARVideoConfig.ARVideoConfigInputSelectionMethod.NthCameraAtPosition)
+            if (pc.inputSelectionMethod == ARXVideoConfig.ARVideoConfigInputSelectionMethod.CameraAtPosition || pc.inputSelectionMethod == ARXVideoConfig.ARVideoConfigInputSelectionMethod.NthCameraAtPosition)
             {
                 Func<Enum, bool> checkPosition = (e) =>
                 {
-                    ARController.AR_VIDEO_POSITION p = (ARController.AR_VIDEO_POSITION)e;
-                    if (p == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK || p == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) return true;
-                    else if (p == ARController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER && pc.platform == RuntimePlatform.Android) return true;
+                    ARXController.AR_VIDEO_POSITION p = (ARXController.AR_VIDEO_POSITION)e;
+                    if (p == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK || p == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) return true;
+                    else if (p == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER && pc.platform == RuntimePlatform.Android) return true;
                     return false;
                 };
-                ARController.AR_VIDEO_POSITION tempPos = (ARController.AR_VIDEO_POSITION)EditorGUILayout.EnumPopup(new GUIContent("Camera position"), pc.position, checkPosition, false);
+                ARXController.AR_VIDEO_POSITION tempPos = (ARXController.AR_VIDEO_POSITION)EditorGUILayout.EnumPopup(new GUIContent("Camera position"), pc.position, checkPosition, false);
                 if (tempPos != pc.position)
                 {
                     pc.position = tempPos;
                     needSave = true;
                 }
             }
-            if (pc.inputSelectionMethod == ARVideoConfig.ARVideoConfigInputSelectionMethod.NthCamera || pc.inputSelectionMethod == ARVideoConfig.ARVideoConfigInputSelectionMethod.NthCameraAtPosition)
+            if (pc.inputSelectionMethod == ARXVideoConfig.ARVideoConfigInputSelectionMethod.NthCamera || pc.inputSelectionMethod == ARXVideoConfig.ARVideoConfigInputSelectionMethod.NthCameraAtPosition)
             {
                 int tempIndex = EditorGUILayout.IntField("Camera number", pc.index + 1) - 1;
                 if (tempIndex != pc.index)
@@ -165,10 +165,10 @@ public class ARVideoConfigEditor : Editor
                 }
             }
 
-            switch (ARVideoConfig.modules[pc.module].sizeSelectionStrategy)
+            switch (ARXVideoConfig.modules[pc.module].sizeSelectionStrategy)
             {
-                case ARVideoConfig.ARVideoSizeSelectionStrategy.AVFoundationPreset:
-                    var presets = ARVideoConfig.AVFoundationPresets.Where(kv => pc.platform == RuntimePlatform.IPhonePlayer ? kv.Value.availableiOS : kv.Value.availableMac).ToList();
+                case ARXVideoConfig.ARVideoSizeSelectionStrategy.AVFoundationPreset:
+                    var presets = ARXVideoConfig.AVFoundationPresets.Where(kv => pc.platform == RuntimePlatform.IPhonePlayer ? kv.Value.availableiOS : kv.Value.availableMac).ToList();
                     int pi = presets.FindIndex(p => p.Key == pc.AVFoundationPreset);
                     pi = pi < 0 ? 0 : pi;
                     int tempPresetIndex = EditorGUILayout.Popup("Size preset", pi, presets.Select(p => p.Value.description).ToArray());
@@ -178,22 +178,22 @@ public class ARVideoConfigEditor : Editor
                         needSave = true;
                     }
                     break;
-                case ARVideoConfig.ARVideoSizeSelectionStrategy.SizePreference:
-                    var keys = ARVideoConfig.SizePreferences.Keys.ToList();
+                case ARXVideoConfig.ARVideoSizeSelectionStrategy.SizePreference:
+                    var keys = ARXVideoConfig.SizePreferences.Keys.ToList();
                     int spi = keys.FindIndex(p => p == pc.sizePreference);
                     spi = spi < 0 ? 0 : spi;
-                    int tempSizePrefIndex = EditorGUILayout.Popup("Size preference", spi, ARVideoConfig.SizePreferences.Values.Select(sp => sp.description).ToArray());
+                    int tempSizePrefIndex = EditorGUILayout.Popup("Size preference", spi, ARXVideoConfig.SizePreferences.Values.Select(sp => sp.description).ToArray());
                     if (tempSizePrefIndex != spi)
                     {
                         pc.sizePreference = keys[tempSizePrefIndex];
                         needSave = true;
                     }
-                    if (ARVideoConfig.SizePreferences[pc.sizePreference].usesWidthAndHeightFields)
+                    if (ARXVideoConfig.SizePreferences[pc.sizePreference].usesWidthAndHeightFields)
                     {
-                        goto case ARVideoConfig.ARVideoSizeSelectionStrategy.WidthAndHeight;
+                        goto case ARXVideoConfig.ARVideoSizeSelectionStrategy.WidthAndHeight;
                     }
                     break;
-                case ARVideoConfig.ARVideoSizeSelectionStrategy.WidthAndHeight:
+                case ARXVideoConfig.ARVideoSizeSelectionStrategy.WidthAndHeight:
                     EditorGUILayout.BeginHorizontal();
                     int tempWidth = EditorGUILayout.IntField("Width", pc.width);
                     int tempHeight = EditorGUILayout.IntField("Height", pc.height);
@@ -205,7 +205,7 @@ public class ARVideoConfigEditor : Editor
                         needSave = true;
                     }
                     break;
-                case ARVideoConfig.ARVideoSizeSelectionStrategy.None:
+                case ARXVideoConfig.ARVideoSizeSelectionStrategy.None:
                 default:
                     break;
             }

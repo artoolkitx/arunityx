@@ -1,5 +1,5 @@
 /*
- *  ARController.cs
+ *  ARXController.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -50,37 +50,37 @@ using UnityEngine.Rendering;
 /// Manages core ARToolKit behaviour.
 ///
 /// There should be exactly one instance of this component in the scene to provide ARToolKit functionality.
-/// 
+///
 /// Script execution order is set to -101 on this component, to ensure that a tracking update has completed
-/// prior to ARTrackable components fetching their pose information.
+/// prior to ARXTrackable components fetching their pose information.
 /// </summary>
 [ExecuteInEditMode]
 [DisallowMultipleComponent]
 [DefaultExecutionOrder(-101)]
-[RequireComponent(typeof(ARVideoConfig))]
-public class ARController : MonoBehaviour
+[RequireComponent(typeof(ARXVideoConfig))]
+public class ARXController : MonoBehaviour
 {
     //
     // Logging.
     //
     private static List<String> logMessages = new List<String>();
     private const int MaximumLogMessages = 1000;
-    private const string LogTag = "ARController: ";
+    private const string LogTag = "ARXController: ";
 
-    private static ARController _instance = null;
-    public static ARController Instance
+    private static ARXController _instance = null;
+    public static ARXController Instance
     {
         get {
             if (_instance == null)
             {
-                ARController[] c = FindObjectsOfType<ARController>();
+                ARXController[] c = FindObjectsOfType<ARXController>();
                 if (c.Length == 0)
                 {
-                    Debug.LogError("There are no instances of " + typeof(ARController) + " in the scene.");
+                    Debug.LogError("There are no instances of " + typeof(ARXController) + " in the scene.");
                 }
                 else if (c.Length > 1)
                 {
-                    Debug.LogError("There is more than one instance of " + typeof(ARController) + " in the scene.");
+                    Debug.LogError("There is more than one instance of " + typeof(ARXController) + " in the scene.");
                 }
                 else
                 {
@@ -346,7 +346,7 @@ public class ARController : MonoBehaviour
     private float currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth = 0.08f;
 
     // Links to other components.
-    private ARVideoConfig arvideoconfig = null;
+    private ARXVideoConfig arvideoconfig = null;
 
     // Notifications.
     public UnityEvent onVideoStarted = new UnityEvent();
@@ -359,13 +359,13 @@ public class ARController : MonoBehaviour
     //
     void Awake()
     {
-        //Log(LogTag + "ARController.Awake())");
+        //Log(LogTag + "ARXController.Awake())");
     }
 
     void OnEnable()
     {
         PluginFunctions = new PluginFunctionsARX();
-        arvideoconfig = gameObject.GetComponent<ARVideoConfig>();
+        arvideoconfig = gameObject.GetComponent<ARXVideoConfig>();
 #if !UNITY_EDITOR
 #  if UNITY_IOS
         ARX_pinvoke.aruRequestCamera();
@@ -373,7 +373,7 @@ public class ARController : MonoBehaviour
 #  endif
 #endif // !UNITY_EDITOR
 
-        Log(LogTag + "ARController.OnEnable()");
+        Log(LogTag + "ARXController.OnEnable()");
         Application.runInBackground = true;
 
         // Register the log callback. This can be set irrespective of whether PluginFunctions.inited is true or false.
@@ -398,7 +398,7 @@ public class ARController : MonoBehaviour
         }
         PluginFunctions.arwSetLogLevel((int)currentLogLevel);
 
-        // ARController is up, so init.
+        // ARXController is up, so init.
         if (!PluginFunctions.IsInited())
         {
             InitializeAR();
@@ -451,7 +451,7 @@ public class ARController : MonoBehaviour
 
     void Start()
     {
-        Log(LogTag + "ARController.Start(): Application.isPlaying = " + Application.isPlaying + " autoStart: " + AutoStartAR);
+        Log(LogTag + "ARXController.Start(): Application.isPlaying = " + Application.isPlaying + " autoStart: " + AutoStartAR);
         if (!Application.isPlaying) return; // Editor Start.
 
         // Player start.
@@ -463,7 +463,7 @@ public class ARController : MonoBehaviour
 
     void OnApplicationPause(bool paused)
     {
-        //Log(LogTag + "ARController.OnApplicationPause(" + paused + ")");
+        //Log(LogTag + "ARXController.OnApplicationPause(" + paused + ")");
         if (paused)
         {
             if (_running)
@@ -484,7 +484,7 @@ public class ARController : MonoBehaviour
 
     void Update()
     {
-        //Log(LogTag + "ARController.Update()");
+        //Log(LogTag + "ARXController.Update()");
         if (!Application.isPlaying) return; // Editor update.
 
         // Player update.
@@ -505,14 +505,14 @@ public class ARController : MonoBehaviour
     // Called when the user quits the application, or presses stop in the editor.
     void OnApplicationQuit()
     {
-        //Log(LogTag + "ARController.OnApplicationQuit()");
+        //Log(LogTag + "ARXController.OnApplicationQuit()");
 
         StopAR();
     }
 
     void OnDisable()
     {
-        Log(LogTag + "ARController.OnDisable()");
+        Log(LogTag + "ARXController.OnDisable()");
 
         if (PluginFunctions.IsInited())
         {
@@ -550,7 +550,7 @@ public class ARController : MonoBehaviour
 
     void FinalizeAR()
     {
-        //Log(LogTag + "ARController.FinalizeAR()");
+        //Log(LogTag + "ARXController.FinalizeAR()");
         if (_running) {
             StopAR();
         }
@@ -565,12 +565,12 @@ public class ARController : MonoBehaviour
         }
     }
 
-    // As OnDestroy() is called from the ARController object's destructor, don't do anything
-    // here that assumes that the ARController object is still valid. Do that sort of shutdown
+    // As OnDestroy() is called from the ARXController object's destructor, don't do anything
+    // here that assumes that the ARXController object is still valid. Do that sort of shutdown
     // in OnDisable() instead.
     void OnDestroy()
     {
-        //Log(LogTag + "ARController.OnDestroy()");
+        //Log(LogTag + "ARXController.OnDestroy()");
 
         // Classes inheriting from MonoBehavior should set all static member variables to null on unload.
         logMessages.Clear();
@@ -640,7 +640,7 @@ public class ARController : MonoBehaviour
 #endif
 
             // Retrieve video configuration, and append any required per-platform overrides.
-            // For native GL texturing we need monoplanar video; iOS and Android default to biplanar format. 
+            // For native GL texturing we need monoplanar video; iOS and Android default to biplanar format.
             string videoConfiguration0 = arvideoconfig.GetVideoConfigString();
             string videoConfiguration1 = arvideoconfig.GetVideoConfigString(true);
             switch (Application.platform)
@@ -686,7 +686,7 @@ public class ARController : MonoBehaviour
                 TextAsset ta = Resources.Load("ardata/" + videoCParamName0, typeof(TextAsset)) as TextAsset;
                 if (ta == null)
                 {
-                    // Error - the camera_para.dat file isn't in the right place            
+                    // Error - the camera_para.dat file isn't in the right place
                     Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName0 + ".bytes");
                     yield break;
                 }
@@ -699,7 +699,7 @@ public class ARController : MonoBehaviour
                     TextAsset ta = Resources.Load("ardata/" + videoCParamName1, typeof(TextAsset)) as TextAsset;
                     if (ta == null)
                     {
-                        // Error - the camera_para.dat file isn't in the right place            
+                        // Error - the camera_para.dat file isn't in the right place
                         Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName1 + ".bytes");
                         yield break;
                     }
@@ -708,7 +708,7 @@ public class ARController : MonoBehaviour
                 TextAsset ta1 = Resources.Load("ardata/" + transL2RName, typeof(TextAsset)) as TextAsset;
                 if (ta1 == null)
                 {
-                    // Error - the transL2R.dat file isn't in the right place            
+                    // Error - the transL2R.dat file isn't in the right place
                     Log(LogTag + "StartAR(): Error: The stereo calibration file not found at Resources/ardata/" + transL2RName + ".bytes");
                     yield break;
                 }
@@ -874,7 +874,7 @@ public class ARController : MonoBehaviour
     // </summary>
     #region Tracker configuration.
 
-    public ARController.ARToolKitThresholdMode VideoThresholdMode
+    public ARXController.ARToolKitThresholdMode VideoThresholdMode
     {
         get
         {
@@ -882,8 +882,8 @@ public class ARController : MonoBehaviour
             if (_running)
             {
                 ret = PluginFunctions.arwGetVideoThresholdMode();
-                if (ret >= 0) currentThresholdMode = (ARController.ARToolKitThresholdMode)ret;
-                else currentThresholdMode = ARController.ARToolKitThresholdMode.Manual;
+                if (ret >= 0) currentThresholdMode = (ARXController.ARToolKitThresholdMode)ret;
+                else currentThresholdMode = ARXController.ARToolKitThresholdMode.Manual;
             }
             return currentThresholdMode;
         }
@@ -920,7 +920,7 @@ public class ARController : MonoBehaviour
         }
     }
 
-    public ARController.ARToolKitLabelingMode LabelingMode
+    public ARXController.ARToolKitLabelingMode LabelingMode
     {
         get
         {
@@ -928,8 +928,8 @@ public class ARController : MonoBehaviour
             if (_running)
             {
                 ret = PluginFunctions.arwGetLabelingMode();
-                if (ret >= 0) currentLabelingMode = (ARController.ARToolKitLabelingMode)ret;
-                else currentLabelingMode = ARController.ARToolKitLabelingMode.BlackRegion;
+                if (ret >= 0) currentLabelingMode = (ARXController.ARToolKitLabelingMode)ret;
+                else currentLabelingMode = ARXController.ARToolKitLabelingMode.BlackRegion;
             }
             return currentLabelingMode;
         }
@@ -996,7 +996,7 @@ public class ARController : MonoBehaviour
         }
     }
 
-    public ARController.ARToolKitPatternDetectionMode PatternDetectionMode
+    public ARXController.ARToolKitPatternDetectionMode PatternDetectionMode
     {
         get
         {
@@ -1004,8 +1004,8 @@ public class ARController : MonoBehaviour
             if (_running)
             {
                 ret = PluginFunctions.arwGetPatternDetectionMode();
-                if (ret >= 0) currentPatternDetectionMode = (ARController.ARToolKitPatternDetectionMode)ret;
-                else currentPatternDetectionMode = ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR;
+                if (ret >= 0) currentPatternDetectionMode = (ARXController.ARToolKitPatternDetectionMode)ret;
+                else currentPatternDetectionMode = ARXController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR;
             }
             return currentPatternDetectionMode;
         }
@@ -1020,7 +1020,7 @@ public class ARController : MonoBehaviour
         }
     }
 
-    public ARController.ARToolKitMatrixCodeType MatrixCodeType
+    public ARXController.ARToolKitMatrixCodeType MatrixCodeType
     {
         get
         {
@@ -1028,8 +1028,8 @@ public class ARController : MonoBehaviour
             if (_running)
             {
                 ret = PluginFunctions.arwGetMatrixCodeType();
-                if (ret >= 0) currentMatrixCodeType = (ARController.ARToolKitMatrixCodeType)ret;
-                else currentMatrixCodeType = ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3;
+                if (ret >= 0) currentMatrixCodeType = (ARXController.ARToolKitMatrixCodeType)ret;
+                else currentMatrixCodeType = ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3;
             }
             return currentMatrixCodeType;
         }
@@ -1044,7 +1044,7 @@ public class ARController : MonoBehaviour
         }
     }
 
-    public ARController.ARToolKitImageProcMode ImageProcMode
+    public ARXController.ARToolKitImageProcMode ImageProcMode
     {
         get
         {
@@ -1052,8 +1052,8 @@ public class ARController : MonoBehaviour
             if (_running)
             {
                 ret = PluginFunctions.arwGetImageProcMode();
-                if (ret >= 0) currentImageProcMode = (ARController.ARToolKitImageProcMode)ret;
-                else currentImageProcMode = ARController.ARToolKitImageProcMode.AR_IMAGE_PROC_FRAME_IMAGE;
+                if (ret >= 0) currentImageProcMode = (ARXController.ARToolKitImageProcMode)ret;
+                else currentImageProcMode = ARXController.ARToolKitImageProcMode.AR_IMAGE_PROC_FRAME_IMAGE;
             }
             return currentImageProcMode;
         }
@@ -1153,7 +1153,7 @@ public class ARController : MonoBehaviour
             currentSquareMatrixModeAutocreateNewTrackables = value;
             if (_running)
             {
-                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(value, currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth, ARTrackable.OnTrackableEvent);
+                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(value, currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth, ARXTrackable.OnTrackableEvent);
             }
         }
     }
@@ -1166,7 +1166,7 @@ public class ARController : MonoBehaviour
             currentSquareMatrixModeAutocreateNewTrackablesDefaultWidth = value;
             if (_running)
             {
-                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(currentSquareMatrixModeAutocreateNewTrackables, value, ARTrackable.OnTrackableEvent);
+                PluginFunctions.arwSetSquareMatrixModeAutocreateNewTrackables(currentSquareMatrixModeAutocreateNewTrackables, value, ARXTrackable.OnTrackableEvent);
             }
         }
     }
@@ -1260,7 +1260,7 @@ public class ARController : MonoBehaviour
                 if (showGUIDebugLogConsole) DrawLogConsole();
             }
 
-            //if (GUI.Button(new Rect(570, 390, 150, 50), "Content mode: " + ARCamera.ContentModeNames[ARCamera.CameraContentMode])) ARCamera.CycleContentMode();
+            //if (GUI.Button(new Rect(570, 390, 150, 50), "Content mode: " + ARXCamera.ContentModeNames[ARXCamera.CameraContentMode])) ARXCamera.CycleContentMode();
 #if UNITY_ANDROID
         if (Application.platform == RuntimePlatform.Android) {
             if (GUI.Button(new Rect(400, 250, 150, 50), "Camera preferences")) {
@@ -1324,8 +1324,8 @@ public class ARController : MonoBehaviour
 
         int y = 350;
 
-        ARTrackable[] trackables = Component.FindObjectsOfType(typeof(ARTrackable)) as ARTrackable[];
-        foreach (ARTrackable m in trackables)
+        ARXTrackable[] trackables = Component.FindObjectsOfType(typeof(ARXTrackable)) as ARXTrackable[];
+        foreach (ARXTrackable m in trackables)
         {
             GUI.Label(new Rect(10, y, 500, 25), "Marker: " + m.UID + ", " + m.Visible);
             y += 25;

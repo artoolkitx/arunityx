@@ -1,5 +1,5 @@
 ﻿/*
- *  ARTrackableEditor.cs
+ *  ARXTrackableEditor.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -43,30 +43,30 @@ using UnityEditor;
 using UnityEngine;
 using System.IO;
 
-[CustomEditor(typeof(ARTrackable))]
-public class ARTrackableEditor : Editor
+[CustomEditor(typeof(ARXTrackable))]
+public class ARXTrackableEditor : Editor
 {
     public bool showFilterOptions = false;
 
-    private static Dictionary<ARController.ARToolKitMatrixCodeType, long> barcodeCounts = new Dictionary<ARController.ARToolKitMatrixCodeType, long>() {
-		{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3, 64},
-    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_PARITY65, 32},
-    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_HAMMING63, 8},
-    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4, 8192},
-    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4_BCH_13_9_3, 512},
-		{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4_BCH_13_5_5, 32},
-    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5, 4194304},
-    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_12_5, 4096},
-    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_7_7, 128},
-    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592}
-//    	{ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 18446744073709551616}
+    private static Dictionary<ARXController.ARToolKitMatrixCodeType, long> barcodeCounts = new Dictionary<ARXController.ARToolKitMatrixCodeType, long>() {
+		{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3, 64},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_PARITY65, 32},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_HAMMING63, 8},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4, 8192},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4_BCH_13_9_3, 512},
+		{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_4x4_BCH_13_5_5, 32},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5, 4194304},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_12_5, 4096},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_7_7, 128},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592}
+//    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 18446744073709551616}
 	};
-	
+
     public override void OnInspectorGUI()
     {
-   
-		// Get the ARTrackable that this panel will edit.
-        ARTrackable m = (ARTrackable)target;
+
+		// Get the ARXTrackable that this panel will edit.
+        ARXTrackable m = (ARXTrackable)target;
         if (m == null) return;
 
 		EditorGUILayout.BeginVertical();
@@ -76,23 +76,23 @@ public class ARTrackableEditor : Editor
 
 		// Attempt to load. Might not work out if e.g. for a single marker, pattern hasn't been
 		// assigned yet, or for an NFT marker, dataset hasn't been specified.
-		if (m.UID == ARTrackable.NO_ID) m.Load(); 
-		
+		if (m.UID == ARXTrackable.NO_ID) m.Load();
+
 		// Trackable tag
         m.Tag = EditorGUILayout.TextField("Trackable tag", m.Tag);
-        EditorGUILayout.LabelField("UID", (m.UID == ARTrackable.NO_ID ? "Not loaded": m.UID.ToString()));
-		
+        EditorGUILayout.LabelField("UID", (m.UID == ARXTrackable.NO_ID ? "Not loaded": m.UID.ToString()));
+
         EditorGUILayout.Separator();
-		
-		// Trackable type		
-        ARTrackable.TrackableType t = (ARTrackable.TrackableType)EditorGUILayout.EnumPopup("Type", m.Type);
-		
+
+		// Trackable type
+        ARXTrackable.TrackableType t = (ARXTrackable.TrackableType)EditorGUILayout.EnumPopup("Type", m.Type);
+
 		// Description of the type of marker
-        EditorGUILayout.LabelField("Description", ARTrackable.TrackableTypeNames[m.Type]);
+        EditorGUILayout.LabelField("Description", ARXTrackable.TrackableTypeNames[m.Type]);
 
 		switch (t) {
 
-			case ARTrackable.TrackableType.Square:
+			case ARXTrackable.TrackableType.Square:
                 {
 
 					// For pattern markers, offer a popup with marker pattern file names.
@@ -124,14 +124,14 @@ public class ARTrackableEditor : Editor
 				}
 				break;
 
-			case ARTrackable.TrackableType.SquareBarcode:
+			case ARXTrackable.TrackableType.SquareBarcode:
                 {
 					// For barcode markers, allow the user to specify the barcode ID.
 					long barcodeID = EditorGUILayout.LongField("Barcode ID", (long)m.BarcodeID);
 					if (barcodeID < 0) barcodeID = 0;
-					if (ARController.Instance)
+					if (ARXController.Instance)
 					{
-						long maxBarcodeID = barcodeCounts[ARController.Instance.MatrixCodeType] - 1;
+						long maxBarcodeID = barcodeCounts[ARXController.Instance.MatrixCodeType] - 1;
 						if (barcodeID > maxBarcodeID) barcodeID = maxBarcodeID;
 						EditorGUILayout.LabelField("(in range 0 to " + maxBarcodeID + ")");
 					}
@@ -146,8 +146,8 @@ public class ARTrackableEditor : Editor
 					}
 				}
 				break;
-			
-            case ARTrackable.TrackableType.Multimarker:
+
+            case ARXTrackable.TrackableType.Multimarker:
                 {
 					string multiConfigFile = EditorGUILayout.TextField("Multimarker config.", m.MultiConfigFile);
 					if (m.Type != t || multiConfigFile != m.MultiConfigFile)
@@ -158,7 +158,7 @@ public class ARTrackableEditor : Editor
 				}
 				break;
 
-            case ARTrackable.TrackableType.NFT:
+            case ARXTrackable.TrackableType.NFT:
                 {
 					string nftDataSetName = EditorGUILayout.TextField("NFT dataset name", m.NFTDataName);
 					if (m.Type != t || nftDataSetName != m.NFTDataName)
@@ -176,7 +176,7 @@ public class ARTrackableEditor : Editor
 				}
 				break;
 
-            case ARTrackable.TrackableType.TwoD:
+            case ARXTrackable.TrackableType.TwoD:
                 {
 					string twoDImageFile = EditorGUILayout.TextField("Image file", m.TwoDImageFile);
 					float twoDImageWidth = EditorGUILayout.FloatField("Image width", m.TwoDImageWidth);
@@ -188,9 +188,9 @@ public class ARTrackableEditor : Editor
 				}
 				break;
         }
-		
+
         EditorGUILayout.Separator();
-		
+
         showFilterOptions = EditorGUILayout.Foldout(showFilterOptions, "Filter Options");
         if (showFilterOptions) {
 			m.Filtered = EditorGUILayout.Toggle("Filtered:", m.Filtered);
@@ -212,7 +212,7 @@ public class ARTrackableEditor : Editor
                 //GUILayout.Label(new GUIContent("Pattern " + i + ", " + m.Patterns[i].width.ToString("n3") + " m", m.Patterns[i].getTexture()), GUILayout.ExpandWidth(false)); // n3 -> 3 decimal places.
             }
         }
-		
+
         //EditorGUILayout.EndHorizontal();
 		EditorGUILayout.EndVertical();
 

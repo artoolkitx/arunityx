@@ -1,5 +1,5 @@
 ﻿/*
- *  ARControllerEditor.cs
+ *  ARXControllerEditor.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -43,8 +43,8 @@ using UnityEditor;
 using UnityEngine;
 using System.IO;
 
-[CustomEditor(typeof(ARController))]
-public class ARControllerEditor : Editor
+[CustomEditor(typeof(ARXController))]
+public class ARXControllerEditor : Editor
 {
 
 	public bool showVideoOptions = true;
@@ -66,13 +66,13 @@ public class ARControllerEditor : Editor
     protected SerializedProperty AutoStartAR;
     protected SerializedProperty QuitOnEscOrBack;
 
-    private readonly static Dictionary<ARController.ARToolKitThresholdMode, string> thresholdModeDescriptions = new Dictionary<ARController.ARToolKitThresholdMode, string>
+    private readonly static Dictionary<ARXController.ARToolKitThresholdMode, string> thresholdModeDescriptions = new Dictionary<ARXController.ARToolKitThresholdMode, string>
     {
-        {ARController.ARToolKitThresholdMode.Manual, "Uses a fixed threshold value"},
-        {ARController.ARToolKitThresholdMode.Median, "Automatically adjusts threshold to whole-image median"},
-        {ARController.ARToolKitThresholdMode.Otsu, "Automatically adjusts threshold using Otsu's method for foreground/background determination"},
-        {ARController.ARToolKitThresholdMode.Adaptive, "Uses adaptive dynamic thresholding (warning: computationally expensive)"},
-        {ARController.ARToolKitThresholdMode.Bracketing, "Automatically adjusts threshold using bracketed threshold values"}
+        {ARXController.ARToolKitThresholdMode.Manual, "Uses a fixed threshold value"},
+        {ARXController.ARToolKitThresholdMode.Median, "Automatically adjusts threshold to whole-image median"},
+        {ARXController.ARToolKitThresholdMode.Otsu, "Automatically adjusts threshold using Otsu's method for foreground/background determination"},
+        {ARXController.ARToolKitThresholdMode.Adaptive, "Uses adaptive dynamic thresholding (warning: computationally expensive)"},
+        {ARXController.ARToolKitThresholdMode.Bracketing, "Automatically adjusts threshold using bracketed threshold values"}
     };
 
     protected virtual void OnEnable()
@@ -93,7 +93,7 @@ public class ARControllerEditor : Editor
     public override void OnInspectorGUI()
     {
 
-        ARController arcontroller = (ARController)target;
+        ARXController arcontroller = (ARXController)target;
         if (arcontroller == null) return;
 
         serializedObject.Update();
@@ -148,8 +148,8 @@ public class ARControllerEditor : Editor
             if (showThresholdOptions)
             {
                 // Threshold mode selection
-                ARController.ARToolKitThresholdMode currentThreshMode = arcontroller.VideoThresholdMode;
-                ARController.ARToolKitThresholdMode newThreshMode = (ARController.ARToolKitThresholdMode)EditorGUILayout.EnumPopup("Mode:", currentThreshMode);
+                ARXController.ARToolKitThresholdMode currentThreshMode = arcontroller.VideoThresholdMode;
+                ARXController.ARToolKitThresholdMode newThreshMode = (ARXController.ARToolKitThresholdMode)EditorGUILayout.EnumPopup("Mode:", currentThreshMode);
                 if (newThreshMode != currentThreshMode)
                 {
                     Undo.RecordObject(arcontroller, "Set threshold mode");
@@ -160,7 +160,7 @@ public class ARControllerEditor : Editor
                 EditorGUILayout.LabelField("", thresholdModeDescriptions[newThreshMode]);
 
                 // Show threshold slider only in manual or bracketing modes.
-                if (newThreshMode == ARController.ARToolKitThresholdMode.Manual || newThreshMode == ARController.ARToolKitThresholdMode.Bracketing)
+                if (newThreshMode == ARXController.ARToolKitThresholdMode.Manual || newThreshMode == ARXController.ARToolKitThresholdMode.Bracketing)
                 {
 
                     int currentThreshold = arcontroller.VideoThreshold;
@@ -177,8 +177,8 @@ public class ARControllerEditor : Editor
             EditorGUILayout.Separator();
 
             // Labeling mode selection.
-            ARController.ARToolKitLabelingMode currentLabelingMode = arcontroller.LabelingMode;
-            ARController.ARToolKitLabelingMode newLabelingMode = (ARController.ARToolKitLabelingMode)EditorGUILayout.EnumPopup("Trackable borders:", currentLabelingMode);
+            ARXController.ARToolKitLabelingMode currentLabelingMode = arcontroller.LabelingMode;
+            ARXController.ARToolKitLabelingMode newLabelingMode = (ARXController.ARToolKitLabelingMode)EditorGUILayout.EnumPopup("Trackable borders:", currentLabelingMode);
             if (newLabelingMode != currentLabelingMode)
             {
                 Undo.RecordObject(arcontroller, "Set labeling mode");
@@ -186,21 +186,21 @@ public class ARControllerEditor : Editor
             }
 
             // Pattern detection mode selection.
-            ARController.ARToolKitPatternDetectionMode currentPatternDetectionMode = arcontroller.PatternDetectionMode;
-            ARController.ARToolKitPatternDetectionMode newPatternDetectionMode = (ARController.ARToolKitPatternDetectionMode)EditorGUILayout.EnumPopup("Pattern detection mode:", currentPatternDetectionMode);
+            ARXController.ARToolKitPatternDetectionMode currentPatternDetectionMode = arcontroller.PatternDetectionMode;
+            ARXController.ARToolKitPatternDetectionMode newPatternDetectionMode = (ARXController.ARToolKitPatternDetectionMode)EditorGUILayout.EnumPopup("Pattern detection mode:", currentPatternDetectionMode);
             if (newPatternDetectionMode != currentPatternDetectionMode)
             {
                 Undo.RecordObject(arcontroller, "Set pattern detection mode");
                 arcontroller.PatternDetectionMode = newPatternDetectionMode;
             }
 
-            bool doTemplateMatching = newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR
-                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO
-                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX
-                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX;
-            bool doMatrixMatching = newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_MATRIX_CODE_DETECTION
-                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX
-                || newPatternDetectionMode == ARController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX;
+            bool doTemplateMatching = newPatternDetectionMode == ARXController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR
+                || newPatternDetectionMode == ARXController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO
+                || newPatternDetectionMode == ARXController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX
+                || newPatternDetectionMode == ARXController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX;
+            bool doMatrixMatching = newPatternDetectionMode == ARXController.ARToolKitPatternDetectionMode.AR_MATRIX_CODE_DETECTION
+                || newPatternDetectionMode == ARXController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_COLOR_AND_MATRIX
+                || newPatternDetectionMode == ARXController.ARToolKitPatternDetectionMode.AR_TEMPLATE_MATCHING_MONO_AND_MATRIX;
 
             if (doTemplateMatching)
             {
@@ -223,8 +223,8 @@ public class ARControllerEditor : Editor
             // Matrix code type selection (only when in one of the matrix modes).
             if (doMatrixMatching)
             {
-                ARController.ARToolKitMatrixCodeType currentMatrixCodeType = arcontroller.MatrixCodeType;
-                ARController.ARToolKitMatrixCodeType newMatrixCodeType = (ARController.ARToolKitMatrixCodeType)EditorGUILayout.EnumPopup("Matrix code type:", currentMatrixCodeType);
+                ARXController.ARToolKitMatrixCodeType currentMatrixCodeType = arcontroller.MatrixCodeType;
+                ARXController.ARToolKitMatrixCodeType newMatrixCodeType = (ARXController.ARToolKitMatrixCodeType)EditorGUILayout.EnumPopup("Matrix code type:", currentMatrixCodeType);
                 if (newMatrixCodeType != currentMatrixCodeType)
                 {
                     Undo.RecordObject(arcontroller, "Set matrix code type");
@@ -249,7 +249,7 @@ public class ARControllerEditor : Editor
             }
 
             // Border size selection.
-            if (!doMatrixMatching || arcontroller.MatrixCodeType != ARController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID)
+            if (!doMatrixMatching || arcontroller.MatrixCodeType != ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID)
             {
                 float currentBorderSize = arcontroller.BorderSize;
                 float newBorderSize = UnityEngine.Mathf.Clamp(EditorGUILayout.FloatField("Border size:", currentBorderSize), 0.0f, 0.5f);
@@ -261,8 +261,8 @@ public class ARControllerEditor : Editor
             }
 
             // Image processing mode selection.
-            ARController.ARToolKitImageProcMode currentImageProcMode = arcontroller.ImageProcMode;
-            ARController.ARToolKitImageProcMode newImageProcMode = (ARController.ARToolKitImageProcMode)EditorGUILayout.EnumPopup("Image processing mode:", currentImageProcMode);
+            ARXController.ARToolKitImageProcMode currentImageProcMode = arcontroller.ImageProcMode;
+            ARXController.ARToolKitImageProcMode newImageProcMode = (ARXController.ARToolKitImageProcMode)EditorGUILayout.EnumPopup("Image processing mode:", currentImageProcMode);
             if (newImageProcMode != currentImageProcMode)
             {
                 Undo.RecordObject(arcontroller, "Set image processing mode");
@@ -292,12 +292,12 @@ public class ARControllerEditor : Editor
 		showApplicationOptions = EditorGUILayout.Foldout(showApplicationOptions, "Application Options");
 		if (showApplicationOptions) {
             EditorGUILayout.PropertyField(AutoStartAR, new GUIContent("Auto-start AR."));
-			if (AutoStartAR.boolValue) EditorGUILayout.HelpBox("ARController.StartAR() will be called during MonoBehavior.Start().", MessageType.Info);
-			else EditorGUILayout.HelpBox("ARController.StartAR() will not be called during MonoBehavior.Start(); you must call it yourself.", MessageType.Info);
+			if (AutoStartAR.boolValue) EditorGUILayout.HelpBox("ARXController.StartAR() will be called during MonoBehavior.Start().", MessageType.Info);
+			else EditorGUILayout.HelpBox("ARXController.StartAR() will not be called during MonoBehavior.Start(); you must call it yourself.", MessageType.Info);
             EditorGUILayout.PropertyField(QuitOnEscOrBack, new GUIContent("Quit on [Esc]."));
             if (QuitOnEscOrBack.boolValue) EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will quit the app.", MessageType.Info);
 			else EditorGUILayout.HelpBox("The [esc] key (Windows, OS X) or the [Back] button (Android) will be ignored by artoolkitX.", MessageType.Info);
-			ARController.AR_LOG_LEVEL newLogLevel = (ARController.AR_LOG_LEVEL)EditorGUILayout.EnumPopup("Log level:", arcontroller.LogLevel);
+			ARXController.AR_LOG_LEVEL newLogLevel = (ARXController.AR_LOG_LEVEL)EditorGUILayout.EnumPopup("Log level:", arcontroller.LogLevel);
             if (newLogLevel != arcontroller.LogLevel)
             {
                 Undo.RecordObject(arcontroller, "Set log level");

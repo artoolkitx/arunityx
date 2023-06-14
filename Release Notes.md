@@ -1,6 +1,26 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.1.11
+### 2023-06-14
+
+ * Major change in naming to new "ARX" prefix on components, to help disambiguate when using Unity's AR components.
+ * Major refactor of video background handling, out of ARXController and into new ARXVideoBackground component, which attaches to an ARXCamera.
+ * ARXController has new events for video start/frame/stop, which are used to init ARXCamera and ARXVideoBackground.
+ * Video background no longer scales via its camera viewport (pixelrect) but scales itself via ortho projection, and it will respect Camera viewport and near/far clipping plane distances. With this change, the "fill" mode on the video background is *finally* supported.
+ * Removed "ClearCamera" and merge into ARXVideoBackground, or its attached Camera when none..
+ * Minor renaming of and removal of duplicated sample scenes.
+ * Minor improvements to ARXController.Log function. Now won't keep on-screen logs in non-development builds.
+ * Better singleton implementation in ARXController.
+ * Added android logcat package.
+ * Script order is now set via [DefaultExecutionOrder] on scripts, so shouldn't be necessary to manually set script execution order.
+ * Restored functionality in the Fisticuffs example.
+ * Fixed setting log level on ARXController.
+ * Fixed local artoolkitX debug build cmd-line switch.
+ * Allow quit to stop play in Editor.
+ * Fixed handling of camera position string in video config.
+ * Improved display of video config for target platform.
+
 ## Version 1.1.10
 ### 2023-05-18
 
@@ -37,7 +57,7 @@ Changes:
 
 ## Version 1.1.6
 ### 2023-04-21
- 
+
 Bug fixes:
  * Fix ARControllerEditor serialization; changes made to ARController in the Unity Editor should be saved now.
  * Correct origin on 2D trackable gizmos. Correct prototype for plugin function for pattern image retrieval. Unload when changing trackable properties.
@@ -49,8 +69,8 @@ Changes:
  * Refactored ARTrackable to add factory methods for creating new trackables at run time, plus one-shot config for different trackable types.
  * Change ARController to be findable by singleton instance.
  * Corrected 2D planar tracker orientation and scaling issues.
- * Clarified that "2D tracker scale factor" specifies image width, not height. 
- * Overhauled ARPattern handling, including new support for 2D and NFT surfaces, plus barcodes. 
+ * Clarified that "2D tracker scale factor" specifies image width, not height.
+ * Overhauled ARPattern handling, including new support for 2D and NFT surfaces, plus barcodes.
 
 ## Version 1.1.4
 ### 2023-03-30

@@ -1,5 +1,5 @@
 ﻿/*
- *  ARTrackedObject.cs
+ *  ARXTrackedObject.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -43,15 +43,15 @@ using UnityEngine;
 
 [RequireComponent(typeof(Transform))]
 [ExecuteInEditMode]
-public class ARTrackedObject : MonoBehaviour
+public class ARXTrackedObject : MonoBehaviour
 {
-	private const string LogTag = "ARTrackedObject: ";
+	private const string LogTag = "ARXTrackedObject: ";
 
-	private AROrigin _origin = null;
-    private ARTrackable _trackable = null;
+	private ARXOrigin _origin = null;
+    private ARXTrackable _trackable = null;
 
 	[SerializeField]
-	[Tooltip("Set this to the same value defined in the ARTrackable object that defines this object's pose.")]
+	[Tooltip("Set this to the same value defined in the ARXTrackable object that defines this object's pose.")]
 	private string _trackableTag = "";                  // Unique tag for the marker to get tracking from
 	public string TrackableTag
 	{
@@ -69,25 +69,25 @@ public class ARTrackedObject : MonoBehaviour
 
 	private bool visible = false;                   // Current visibility from tracking
 	private float timeTrackingLost = 0;             // Time when tracking was last lost
-	[Tooltip("The number of seconds this object should remain visible when the associated ARTrackable object is no longer visible.")]
+	[Tooltip("The number of seconds this object should remain visible when the associated ARXTrackable object is no longer visible.")]
 	public float secondsToRemainVisible = 0.0f;		// How long to remain visible after tracking is lost (to reduce flicker)
 	private bool visibleOrRemain = false;           // Whether to show the content (based on above variables)
 
-	public ARUnityEventUnityObject OnTrackedObjectFound;
-	public ARUnityEventUnityObject OnTrackedObjectTracked;
-	public ARUnityEventUnityObject OnTrackedObjectLost;
+	public ARXUnityEventUnityObject OnTrackedObjectFound;
+	public ARXUnityEventUnityObject OnTrackedObjectTracked;
+	public ARXUnityEventUnityObject OnTrackedObjectLost;
 
 	[Tooltip("Legecy event mechanism using Unity messaging. Event methods will be called on the referenced object and all children.")]
 	public GameObject eventReceiver;
 
 	// Return the trackable associated with this component.
 	// Uses cached value if available, otherwise performs a find operation.
-	public virtual ARTrackable GetTrackable()
+	public virtual ARXTrackable GetTrackable()
 	{
 		if (_trackable == null) {
             // Locate the trackable identified by the tag
-			ARTrackable[] ms = FindObjectsOfType<ARTrackable>();
-			foreach (ARTrackable m in ms) {
+			ARXTrackable[] ms = FindObjectsOfType<ARXTrackable>();
+			foreach (ARXTrackable m in ms) {
 				if (m.Tag == _trackableTag) {
 					_trackable = m;
 					break;
@@ -99,18 +99,18 @@ public class ARTrackedObject : MonoBehaviour
 
 	// Return the origin associated with this component.
 	// Uses cached value if available, otherwise performs a find operation.
-	public virtual AROrigin GetOrigin()
+	public virtual ARXOrigin GetOrigin()
 	{
 		if (_origin == null) {
 			// Locate the origin in parent.
-			_origin = this.gameObject.GetComponentInParent<AROrigin>();
+			_origin = this.gameObject.GetComponentInParent<ARXOrigin>();
 		}
 		return _origin;
 	}
 
 	void Start()
 	{
-		//ARController.Log(LogTag + "Start()");
+		//ARXController.Log(LogTag + "Start()");
 
 		if (Application.isPlaying)
 		{
@@ -124,7 +124,7 @@ public class ARTrackedObject : MonoBehaviour
 		}
 	}
 
-	// Note that [DefaultExecutionOrder] is used on ARTrackable to ensure the base ARTrackable has updated before we try and use the transformation.
+	// Note that [DefaultExecutionOrder] is used on ARXTrackable to ensure the base ARXTrackable has updated before we try and use the transformation.
 	void Update()
 	{
 		// Update tracking if we are running in the Player.
@@ -133,16 +133,16 @@ public class ARTrackedObject : MonoBehaviour
 			return;
         }
 
-		// Sanity check, make sure we have an ARTrackable assigned.
-		ARTrackable trackable = GetTrackable();
+		// Sanity check, make sure we have an ARXTrackable assigned.
+		ARXTrackable trackable = GetTrackable();
 		if (trackable == null)
 		{
 			visible = visibleOrRemain = false;
 			return;
 		}
 
-		// Sanity check, make sure we have an AROrigin in parent hierachy.
-		AROrigin origin = GetOrigin();
+		// Sanity check, make sure we have an ARXOrigin in parent hierachy.
+		ARXOrigin origin = GetOrigin();
 		if (origin == null) {
 			visible = visibleOrRemain = false;
 			return;
@@ -150,8 +150,8 @@ public class ARTrackedObject : MonoBehaviour
 
 		// Note the current time
 		float timeNow = Time.realtimeSinceStartup;
-					
-        ARTrackable baseTrackable = origin.GetBaseTrackable();
+
+        ARXTrackable baseTrackable = origin.GetBaseTrackable();
 		if (baseTrackable != null && trackable.Visible)
 		{
 			if (!visible)
@@ -176,8 +176,8 @@ public class ARTrackedObject : MonoBehaviour
 			}
 			// Local scale is always 1 for now
 			transform.localScale = Vector3.one;
-			transform.position = ARUtilityFunctions.PositionFromMatrix(pose);
-			transform.rotation = ARUtilityFunctions.QuaternionFromMatrix(pose);
+			transform.position = ARXUtilityFunctions.PositionFromMatrix(pose);
+			transform.rotation = ARXUtilityFunctions.QuaternionFromMatrix(pose);
 
 			OnTrackedObjectTracked.Invoke(this);
 			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", trackable, SendMessageOptions.DontRequireReceiver);

@@ -1,5 +1,5 @@
 /*
- *  ARTrackedObjectGizmo.cs
+ *  ARXTrackedObjectGizmo.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -42,7 +42,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-class ARTrackedObjectGizmo
+class ARXTrackedObjectGizmo
 {
     private static Color MarkerBorderSelected = new Color(0.0f, 0.0f, 0.0f, 1.0f);
     private static Color MarkerBorderUnselected = new Color(0.2f, 0.2f, 0.2f, 0.5f);
@@ -51,49 +51,49 @@ class ARTrackedObjectGizmo
 
 
     [DrawGizmo(GizmoType.NotInSelectionHierarchy | GizmoType.Pickable)] // Draw the gizmo if it is not selected and also no parent/ancestor object is selected. The gizmo can be picked in the editor. First argument of method is the type for which the Gizmo will be drawn.
-    static void RenderARTrackedObjectGizmo(ARTrackedObject to, GizmoType gizmoType)
+    static void RenderARTrackedObjectGizmo(ARXTrackedObject to, GizmoType gizmoType)
     {
         DrawMarker(to, (gizmoType & GizmoType.Active) != 0);
     }
 
-    private static void DrawMarker(ARTrackedObject to, bool selected)
+    private static void DrawMarker(ARXTrackedObject to, bool selected)
     {
-        ARTrackable m = to.GetTrackable();
+        ARXTrackable m = to.GetTrackable();
         if (m == null || m.enabled == false) return;
         if (!m.gameObject.activeInHierarchy) return; // Don't attempt to load inactive ARMarkers.
-        
+
         // Attempt to load. Might not work out if e.g. for a single marker, pattern hasn't been
         // assigned yet, or for an NFT marker, dataset hasn't been specified.
-        if (m.UID == ARTrackable.NO_ID) {
+        if (m.UID == ARXTrackable.NO_ID) {
             m.Load();
         }
 
         Matrix4x4 pose = to.gameObject.transform.localToWorldMatrix;
-        //ARController.Log("pose=" + pose.ToString("F3"));
+        //ARXController.Log("pose=" + pose.ToString("F3"));
 
         switch (m.Type) {
 
-            case ARTrackable.TrackableType.Square:
-            case ARTrackable.TrackableType.SquareBarcode:
+            case ARXTrackable.TrackableType.Square:
+            case ARXTrackable.TrackableType.SquareBarcode:
                 DrawSingleMarker(m, pose, selected);
                 break;
 
-            case ARTrackable.TrackableType.Multimarker:
+            case ARXTrackable.TrackableType.Multimarker:
                 DrawMultiMarker(m, pose, selected);
                 break;
-            
-            case ARTrackable.TrackableType.NFT:
+
+            case ARXTrackable.TrackableType.NFT:
                 DrawNFTMarker(m, pose, selected, new Vector2(0.5f, 0.5f));
                 break;
 
-            case ARTrackable.TrackableType.TwoD:
+            case ARXTrackable.TrackableType.TwoD:
                 DrawNFTMarker(m, pose, selected, new Vector2(0.5f, -0.5f));
                 break;
 
         }
     }
 
-    private static void DrawSingleMarker(ARTrackable m, Matrix4x4 mat, bool selected) 
+    private static void DrawSingleMarker(ARXTrackable m, Matrix4x4 mat, bool selected)
     {
         float pattWidth = m.PatternWidth;
         Vector3 origin = mat.GetColumn(3);
@@ -101,21 +101,21 @@ class ARTrackedObjectGizmo
         Vector3 up = mat.GetColumn(1);
 
         //float d = selected ? 1.0f : 0.0f;
-     
+
         DrawRectangle(origin, up, right, pattWidth * 0.5f, pattWidth * 0.5f, selected ? MarkerBorderSelected : MarkerBorderUnselected); // Inside border.
         DrawRectangle(origin, up, right, pattWidth, pattWidth, selected ? MarkerBorderSelected : MarkerBorderUnselected); // Edge.
         DrawRectangle(origin, up, right, pattWidth * 1.05f, pattWidth * 1.05f, selected ? MarkerEdgeSelected : MarkerEdgeUnselected); // Highlighting.
 
         //Gizmos.DrawGUITexture(new Rect(origin.x, origin.y, 20, 20), m.MarkerImage);
-        
+
         float wordUnitSize = pattWidth * 0.02f;
         DrawWord(m.Tag, wordUnitSize, origin - up * (pattWidth * 0.6f + (wordUnitSize * 4)) - right * (pattWidth * 0.525f), up, right * 0.5f);
     }
 
-    private static void DrawMultiMarker(ARTrackable m, Matrix4x4 mat, bool selected) 
+    private static void DrawMultiMarker(ARXTrackable m, Matrix4x4 mat, bool selected)
     {
         //Sanity check if Patterns are loaded or Marker-UID != -1
-        if (m.Patterns == null || m.UID == ARTrackable.NO_ID) {
+        if (m.Patterns == null || m.UID == ARXTrackable.NO_ID) {
             return;
         }
 
@@ -138,13 +138,13 @@ class ARTrackedObjectGizmo
             float wordUnitSize = pattWidth * 0.02f;
             DrawWord(m.Tag + "(" + i + ")", wordUnitSize, origin - up * (pattWidth * 0.6f + (wordUnitSize * 4)) - right * (pattWidth * 0.525f), up, right * 0.5f);
         }
-               
+
         //Gizmos.DrawGUITexture(new Rect(origin.x, origin.y, 20, 20), m.MarkerImage);
     }
 
-    private static void DrawNFTMarker(ARTrackable m, Matrix4x4 mat, bool selected, Vector2 centreRelativeToOrigin) 
+    private static void DrawNFTMarker(ARXTrackable m, Matrix4x4 mat, bool selected, Vector2 centreRelativeToOrigin)
     {
-        if (m.Patterns == null || m.UID == ARTrackable.NO_ID)
+        if (m.Patterns == null || m.UID == ARXTrackable.NO_ID)
         {
             return;
         }
@@ -173,23 +173,23 @@ class ARTrackedObjectGizmo
             }
         }
     }
-    
-    private static void DrawRectangle(Vector3 centre, Vector3 up, Vector3 right, float width, float height, Color color) 
+
+    private static void DrawRectangle(Vector3 centre, Vector3 up, Vector3 right, float width, float height, Color color)
     {
 
         Gizmos.color = color;
 
-        //ARController.Log("DrawRectangle centre=" + centre.ToString("F3") + ", up=" + up.ToString("F3") + ", right=" + right.ToString("F3") + ", width=" + width.ToString("F3") + ", height=" + height.ToString("F3") + ".");
+        //ARXController.Log("DrawRectangle centre=" + centre.ToString("F3") + ", up=" + up.ToString("F3") + ", right=" + right.ToString("F3") + ", width=" + width.ToString("F3") + ", height=" + height.ToString("F3") + ".");
         Vector3 u = up * height;
         Vector3 r = right * width;
         Vector3 p = centre - (u * 0.5f) - (r * 0.5f);
-        
+
         Gizmos.DrawLine(p, p + u);
         Gizmos.DrawLine(p + u, p + u + r);
         Gizmos.DrawLine(p + u + r, p + r);
         Gizmos.DrawLine(p + r, p);
     }
-    
+
     private readonly static Dictionary<char, String> letters = new Dictionary<char, String>() {
         {' ', ""},
         {'!', "RR(U)U(UU)"},
@@ -206,7 +206,7 @@ class ARTrackedObjectGizmo
         {',', "R(UR)"},
         {'-', "UR(RR)"},
         {'.', "RR(U)"},
-        {'/', "R(UUUURR)"},        
+        {'/', "R(UUUURR)"},
         {'0', "(UUUU)(RRRR)(DDDD)(LLLL)"},
         {'1', "RR(UUUU)"},
         {'2', "UUU(UR)(RR)(DR)(DDDLLLL)(RRRR)"},
@@ -216,14 +216,14 @@ class ARTrackedObjectGizmo
         {'6', "UUUURRR(LL)(DDL)(DD)(RRRR)(UU)(LLLL)"},
         {'7', "UUUU(RRRR)(DDDDLL)"},
         {'8', "(UUUU)(RRRR)(DDDD)(LLLL)UU(RRRR)"},
-        {'9', "R(RR)(UUR)(LLLL)(UU)(RRRR)(DD)"},        
+        {'9', "R(RR)(UUR)(LLLL)(UU)(RRRR)(DD)"},
         {':', "RR(U)UU(U)"},
         {';', "R(UR)UU(U)"},
         {'<', "RRR(UULL)(RRUU)"},
         {'=', "UR(RR)UU(LL)"},
         {'>', "R(UURR)(LLUU)"},
         {'?', "RR(U)U(R)(UR)(UL)(L)(DL)"},
-        {'@', "RRR(LL)(UL)(UU)(UR)(RR)(DR)(DD)(LL)(U)(R)(D)"},        
+        {'@', "RRR(LL)(UL)(UU)(UR)(RR)(DR)(DD)(LL)(U)(R)(D)"},
         {'A', "(UUU)(UR)(RR)(DR)(DDD)UU(LLLL)"},
         {'B', "(UUUU)(RRR)(DR)(DD)(DL)(LLL)UU(RRRR)"},
         {'C', "RRRRU(DL)(LL)(UL)(UU)(UR)(RR)(DR)"},
@@ -259,27 +259,27 @@ class ARTrackedObjectGizmo
         {'{', "RRR(L)(U)(LU)(RU)(U)(R)"},
         {'|', "RR(UUUU)"},
         {'}', "R(R)(U)(RU)(LU)(U)(L)"},
-        {'~', "UU(UR)(DDRR)(UR)"}        
+        {'~', "UU(UR)(DDRR)(UR)"}
     };
-    
-    private static void DrawWord(String word, float size, Vector3 origin, Vector3 forward, Vector3 right) 
+
+    private static void DrawWord(String word, float size, Vector3 origin, Vector3 forward, Vector3 right)
     {
         foreach (char c in word.ToUpper()) {
             DrawLetter(c, size, origin, forward, right);
             origin += right * size * 6.0f;
         }
     }
-    
-    private static void DrawLetter(char letter, float size, Vector3 origin, Vector3 forward, Vector3 right) 
+
+    private static void DrawLetter(char letter, float size, Vector3 origin, Vector3 forward, Vector3 right)
     {
         String path = letters[letter];
-        
+
         Vector3 f = forward * size;
         Vector3 r = right * size;
-        
+
         Vector3 down = origin;
         Vector3 current = origin;
-        
+
         foreach (char c in path)  {
             switch (c) {
                 case '(':
@@ -299,7 +299,7 @@ class ARTrackedObjectGizmo
                     break;
                 case 'L':
                     current -= r;
-                    break;            
+                    break;
             }
         }
     }

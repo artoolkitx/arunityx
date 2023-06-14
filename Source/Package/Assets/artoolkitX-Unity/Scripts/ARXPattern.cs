@@ -1,5 +1,5 @@
 ﻿/*
- *  ARPattern.cs
+ *  ARXPattern.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -38,10 +38,10 @@
 using System;
 using UnityEngine;
 
-public class ARPattern
+public class ARXPattern
 {
     private Texture2D _texture = null;
-	private int _trackableID = ARTrackable.NO_ID;
+	private int _trackableID = ARXTrackable.NO_ID;
 	private int _patternID = 0;
 
     public Matrix4x4 matrix;
@@ -50,7 +50,7 @@ public class ARPattern
 	public int imageSizeX;
 	public int imageSizeY;
 
-    public ARPattern(int trackableID, int patternID)
+    public ARXPattern(int trackableID, int patternID)
     {
 		_trackableID = trackableID;
 		_patternID = patternID;
@@ -60,30 +60,30 @@ public class ARPattern
 		float heightRaw = 0.0f;
 
 		// Get the pattern local transformation and size.
-		if (!ARController.Instance || ARController.Instance.PluginFunctions == null || !ARController.Instance.PluginFunctions.IsInited())
+		if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited())
         {
-			throw new InvalidOperationException("ARController not initialised.");
+			throw new InvalidOperationException("ARXController not initialised.");
 		}
-        if (!ARController.Instance.PluginFunctions.arwGetTrackablePatternConfig(trackableID, patternID, matrixRawArray, out widthRaw, out heightRaw, out imageSizeX, out imageSizeY))
+        if (!ARXController.Instance.PluginFunctions.arwGetTrackablePatternConfig(trackableID, patternID, matrixRawArray, out widthRaw, out heightRaw, out imageSizeX, out imageSizeY))
 		{
 			throw new ArgumentException("Invalid argument", "trackableID,patternID");
 		}
 		width = widthRaw*0.001f;
 		height = heightRaw*0.001f;
-		//ARController.Log($"arwGetTrackablePatternConfig({trackableID}, { patternID}, ...) got widthRaw={widthRaw}, heightRaw={heightRaw}, imageSizeX={imageSizeX}, imageSizeY={imageSizeY}");
+		//ARXController.Log($"arwGetTrackablePatternConfig({trackableID}, { patternID}, ...) got widthRaw={widthRaw}, heightRaw={heightRaw}, imageSizeX={imageSizeX}, imageSizeY={imageSizeY}");
 
 		matrixRawArray[12] *= 0.001f; // Scale the position from artoolkitX units (mm) into Unity units (m).
 		matrixRawArray[13] *= 0.001f;
 		matrixRawArray[14] *= 0.001f;
 
-		Matrix4x4 matrixRaw = ARUtilityFunctions.MatrixFromFloatArray(matrixRawArray);
-		//ARController.Log($"arwGetTrackablePatternConfig({trackableID}, { patternID}, ...) got matrix: [" + Environment.NewLine + matrixRaw.ToString("F3").Trim() + "]");
+		Matrix4x4 matrixRaw = ARXUtilityFunctions.MatrixFromFloatArray(matrixRawArray);
+		//ARXController.Log($"arwGetTrackablePatternConfig({trackableID}, { patternID}, ...) got matrix: [" + Environment.NewLine + matrixRaw.ToString("F3").Trim() + "]");
 
 		// artoolkitX uses right-hand coordinate system where the marker lies in x-y plane with right in direction of +x,
 		// up in direction of +y, and forward (towards viewer) in direction of +z.
 		// Need to convert to Unity's left-hand coordinate system where marker lies in x-y plane with right in direction of +x,
 		// up in direction of +y, and forward (towards viewer) in direction of -z.
-		matrix = ARUtilityFunctions.LHMatrixFromRHMatrix(matrixRaw);
+		matrix = ARXUtilityFunctions.LHMatrixFromRHMatrix(matrixRaw);
     }
 
 	public Texture2D getTexture()
@@ -101,7 +101,7 @@ public class ARPattern
 
 			// Get the pattern image data and load it into the texture
 			Color32[] colors32 = new Color32[imageSizeX * imageSizeY];
-			if (ARController.Instance.PluginFunctions.arwGetTrackablePatternImage(_trackableID, _patternID, colors32))
+			if (ARXController.Instance.PluginFunctions.arwGetTrackablePatternImage(_trackableID, _patternID, colors32))
 			{
 				_texture.SetPixels32(colors32);
 				_texture.Apply();

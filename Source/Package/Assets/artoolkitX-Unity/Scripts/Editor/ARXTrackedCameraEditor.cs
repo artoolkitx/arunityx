@@ -1,5 +1,5 @@
 ﻿/*
- *  ARTrackedCameraEditor.cs
+ *  ARXTrackedCameraEditor.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -42,12 +42,12 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(ARTrackedCamera))] 
-public class ARTrackedCameraEditor : ARCameraEditor 
+[CustomEditor(typeof(ARXTrackedCamera))]
+public class ARXTrackedCameraEditor : ARXCameraEditor
 {
     public override void OnInspectorGUI()
     {
-		ARTrackedCamera artc = (ARTrackedCamera)target;
+		ARXTrackedCamera artc = (ARXTrackedCamera)target;
 		if (artc == null) return;
 
 		this.serializedObject.Update();
@@ -55,11 +55,11 @@ public class ARTrackedCameraEditor : ARCameraEditor
 			EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
 		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("_trackableTag"), true);
 
-		ARTrackable trackable = artc.GetTrackable();
+		ARXTrackable trackable = artc.GetTrackable();
 		EditorGUILayout.LabelField("Found trackable", trackable == null ? "no" : "yes");
 		if (trackable != null) {
-			string type = ARTrackable.TrackableTypeNames[trackable.Type];
-			EditorGUILayout.LabelField("Trackable UID", (trackable.UID != ARTrackable.NO_ID ? trackable.UID.ToString() : "Not loaded") + " (" + type + ")");	
+			string type = ARXTrackable.TrackableTypeNames[trackable.Type];
+			EditorGUILayout.LabelField("Trackable UID", (trackable.UID != ARXTrackable.NO_ID ? trackable.UID.ToString() : "Not loaded") + " (" + type + ")");
 		}
 
 		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("secondsToRemainVisible"), true);

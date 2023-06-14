@@ -1,5 +1,5 @@
 ﻿/*
- *  ARTrackedCamera.cs
+ *  ARXTrackedCamera.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -42,28 +42,28 @@ using System.Text;
 using UnityEngine;
 
 /// <summary>
-/// A class which directly associates an ARTrackable with a Unity Camera object.
-/// 
+/// A class which directly associates an ARXTrackable with a Unity Camera object.
+///
 /// To get a list of foreground Camera objects, do:
 ///
 ///     List<Camera> foregroundCameras = new List<Camera>();
-///     ARCamera[] arCameras = FindObjectsOfType<ARCamera>(); // (or FindObjectsOfType(typeof(ARCamera)) as ARCamera[])
-///     foreach (ARCamera arc in arCameras) {
+///     ARXCamera[] arCameras = FindObjectsOfType<ARXCamera>(); // (or FindObjectsOfType(typeof(ARXCamera)) as ARXCamera[])
+///     foreach (ARXCamera arc in arCameras) {
 ///         foregroundCameras.Add(arc.gameObject.camera);
 ///     }
 /// </summary>
-/// 
+///
 [RequireComponent(typeof(Transform))]   // A Transform is required to update the position and orientation from tracking
 [ExecuteInEditMode]                     // Run in the editor so we can keep the scale at 1
-public class ARTrackedCamera : ARCamera
+public class ARXTrackedCamera : ARXCamera
 {
-	private const string LogTag = "ARTrackedCamera: ";
+	private const string LogTag = "ARXTrackedCamera: ";
 
 	[NonSerialized]
 	protected int cullingMask = -1;					// Correct culling mask for content (set to 0 when not visible)
 
 	[SerializeField]
-	[Tooltip("Set this to the same value defined in the ARTrackable object that defines this camera's pose.")]
+	[Tooltip("Set this to the same value defined in the ARXTrackable object that defines this camera's pose.")]
 	private string _trackableTag = "";                  // Unique tag for the marker to get tracking from
 	public string TrackableTag
 	{
@@ -80,24 +80,24 @@ public class ARTrackedCamera : ARCamera
 	}
 
 	private bool lastArVisible = false;
-	[Tooltip("The number of seconds this object should remain visible when the associated ARTrackable object is no longer visible.")]
+	[Tooltip("The number of seconds this object should remain visible when the associated ARXTrackable object is no longer visible.")]
 	public float secondsToRemainVisible = 0.0f;     // How long to remain visible after tracking is lost (to reduce flicker)
 
-	public ARUnityEventUnityObject OnTrackedCameraFound;
-	public ARUnityEventUnityObject OnTrackedCameraTracked;
-	public ARUnityEventUnityObject OnTrackedCameraLost;
+	public ARXUnityEventUnityObject OnTrackedCameraFound;
+	public ARXUnityEventUnityObject OnTrackedCameraTracked;
+	public ARXUnityEventUnityObject OnTrackedCameraLost;
 	[Tooltip("Legacy event mechanism using Unity messaging. Event methods will be called on the referenced object and all children.")]
 	/// </summary>
 	public GameObject eventReceiver;
 
 	// Return the marker associated with this component.
 	// Uses cached value if available, otherwise performs a find operation.
-	public override ARTrackable GetTrackable()
+	public override ARXTrackable GetTrackable()
 	{
 		if (_trackable == null) {
 			// Locate the marker identified by the tag
-			ARTrackable[] ms = FindObjectsOfType<ARTrackable>();
-			foreach (ARTrackable m in ms) {
+			ARXTrackable[] ms = FindObjectsOfType<ARXTrackable>();
+			foreach (ARXTrackable m in ms) {
 				if (m.Tag == _trackableTag) {
 					_trackable = m;
 					break;
@@ -110,7 +110,7 @@ public class ARTrackedCamera : ARCamera
 	public virtual void Start()
 	{
 		// Store the camera's initial culling mask. When the marker is tracked, this mask will be used
-		// so that the virtual objects are rendered. When tracking is lost, 0 will be used, so that no 
+		// so that the virtual objects are rendered. When tracking is lost, 0 will be used, so that no
 		// objects are displayed.
 		if (cullingMask == -1) {
 			cullingMask = this.gameObject.GetComponent<Camera>().cullingMask;

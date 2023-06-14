@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 
-[RequireComponent(typeof(ARCamera))]
+[RequireComponent(typeof(ARXCamera))]
 public class ARXVideoBackground : MonoBehaviour
 {
     private const string LogTag = "ARXVideoBackground: ";
@@ -39,8 +39,8 @@ public class ARXVideoBackground : MonoBehaviour
         }
     }
 
-    private ARController arController;
-    private ARCamera arCamera;
+    private ARXController arController;
+    private ARXCamera arCamera;
     private Camera cam;
     private bool _cameraStereoRightEye = false;
     private int _videoWidth;
@@ -57,9 +57,9 @@ public class ARXVideoBackground : MonoBehaviour
 
     void OnEnable()
     {
-        arCamera = gameObject.GetComponent<ARCamera>();
+        arCamera = gameObject.GetComponent<ARXCamera>();
         cam = gameObject.GetComponent<Camera>();
-        arController = ARController.Instance;
+        arController = ARXController.Instance;
         arController.onVideoStarted.AddListener(OnVideoStarted);
         arController.onVideoStopped.AddListener(OnVideoStopped);
         arController.onVideoFrame.AddListener(OnVideoFrame);
@@ -80,8 +80,8 @@ public class ARXVideoBackground : MonoBehaviour
     public void OnVideoStarted()
     {
         // Get information on the video stream.
-        string nameSuffix = arCamera.Stereo ? (arCamera.StereoEye == ARCamera.ViewEye.Left ? " (L)" : " (R)") : "";
-        _cameraStereoRightEye = arCamera.Stereo && arCamera.StereoEye == ARCamera.ViewEye.Right;
+        string nameSuffix = arCamera.Stereo ? (arCamera.StereoEye == ARXCamera.ViewEye.Left ? " (L)" : " (R)") : "";
+        _cameraStereoRightEye = arCamera.Stereo && arCamera.StereoEye == ARXCamera.ViewEye.Right;
         if (!_cameraStereoRightEye || !arController.VideoIsStereo)
         {
             if (!arController.PluginFunctions.arwGetVideoParams(out _videoWidth, out _videoHeight, out _videoPixelSize, out _videoPixelFormatString)) return;
@@ -107,12 +107,12 @@ public class ARXVideoBackground : MonoBehaviour
             // Create a game object on which to draw the video.
             // Invert flipV for texture because artoolkitX video frame is top-down, Unity's is bottom-up.
             string name = "Video source" + (arController.VideoIsStereo ? nameSuffix : "");
-            ARController.Log(LogTag + name + " size " + _videoWidth + "x" + _videoHeight + "@" + _videoPixelSize + "Bpp (" + _videoPixelFormatString + ")");
+            ARXController.Log(LogTag + name + " size " + _videoWidth + "x" + _videoHeight + "@" + _videoPixelSize + "Bpp (" + _videoPixelFormatString + ")");
 
-            _videoBackgroundMeshGO = ARUtilityFunctions.CreateVideoObject(name, _videoWidth, _videoHeight, 1000.0f, arCamera.ContentFlipH, !arCamera.ContentFlipV, BackgroundLayer, out _videoTexture, out _videoMaterial);  // 1000.0f is arbitrary distance, since we'll observe with camera using orthogonal projection. Just needs to be between near and far.
+            _videoBackgroundMeshGO = ARXUtilityFunctions.CreateVideoObject(name, _videoWidth, _videoHeight, 1000.0f, arCamera.ContentFlipH, !arCamera.ContentFlipV, BackgroundLayer, out _videoTexture, out _videoMaterial);  // 1000.0f is arbitrary distance, since we'll observe with camera using orthogonal projection. Just needs to be between near and far.
             if (_videoBackgroundMeshGO == null || _videoTexture == null || _videoMaterial == null)
             {
-                ARController.Log(LogTag + "Error: unable to create video mesh.");
+                ARXController.Log(LogTag + "Error: unable to create video mesh.");
             }
             _videoColor32Array = /*_useNativeGLTexturing ? null : */ new Color32[_videoWidth * _videoHeight];
         }
@@ -122,13 +122,13 @@ public class ARXVideoBackground : MonoBehaviour
         _videoBackgroundCameraGO = new GameObject($"Video background{nameSuffix}");
         if (_videoBackgroundCameraGO == null)
         {
-            ARController.Log(LogTag + "Error: CreateVideoBackgroundCamera cannot create GameObject.");
+            ARXController.Log(LogTag + "Error: CreateVideoBackgroundCamera cannot create GameObject.");
             return;
         }
         _videoBackgroundCamera = _videoBackgroundCameraGO.AddComponent<Camera>();
         if (_videoBackgroundCamera == null)
         {
-            ARController.Log(LogTag + "Error: CreateVideoBackgroundCamera cannot add Camera to GameObject.");
+            ARXController.Log(LogTag + "Error: CreateVideoBackgroundCamera cannot add Camera to GameObject.");
             Destroy(_videoBackgroundCameraGO);
             return;
         }
@@ -164,15 +164,15 @@ public class ARXVideoBackground : MonoBehaviour
 #endif
 
         // Work out cropping for content mode.
-        if (arCamera.CameraContentMode != ARCamera.ContentMode.OneToOne)
+        if (arCamera.CameraContentMode != ARXCamera.ContentMode.OneToOne)
         {
             int videoWidthFinalOrientation = (arCamera.ContentRotate90 ? _videoHeight : _videoWidth);
             int videoHeightFinalOrientation = (arCamera.ContentRotate90 ? _videoWidth : _videoHeight);
-            if (arCamera.CameraContentMode == ARCamera.ContentMode.Fit || arCamera.CameraContentMode == ARCamera.ContentMode.Fill)
+            if (arCamera.CameraContentMode == ARXCamera.ContentMode.Fit || arCamera.CameraContentMode == ARXCamera.ContentMode.Fill)
             {
                 float scaleRatioWidth = w / (float)videoWidthFinalOrientation;
                 float scaleRatioHeight = h / (float)videoHeightFinalOrientation;
-                float scaleRatio = arCamera.CameraContentMode == ARCamera.ContentMode.Fill ? Math.Max(scaleRatioHeight, scaleRatioWidth) : Math.Min(scaleRatioHeight, scaleRatioWidth);
+                float scaleRatio = arCamera.CameraContentMode == ARXCamera.ContentMode.Fill ? Math.Max(scaleRatioHeight, scaleRatioWidth) : Math.Min(scaleRatioHeight, scaleRatioWidth);
                 w /= scaleRatio;
                 h /= scaleRatio;
             }
@@ -263,7 +263,7 @@ public class ARXVideoBackground : MonoBehaviour
             }
             else
             {
-                ARController.Log(LogTag + "Error: No video color array to update.");
+                ARXController.Log(LogTag + "Error: No video color array to update.");
             }
         }
     }

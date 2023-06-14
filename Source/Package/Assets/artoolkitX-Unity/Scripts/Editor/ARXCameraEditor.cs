@@ -1,5 +1,5 @@
 ﻿/*
- *  ARCameraEditor.cs
+ *  ARXCameraEditor.cs
  *  artoolkitX for Unity
  *
  *  This file is part of artoolkitX for Unity.
@@ -42,8 +42,8 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(ARCamera))] 
-public class ARCameraEditor : Editor 
+[CustomEditor(typeof(ARXCamera))]
+public class ARXCameraEditor : Editor
 {
 	private static TextAsset[] OpticalParamsAssets;
 	private static int OpticalParamsAssetCount;
@@ -59,19 +59,19 @@ public class ARCameraEditor : Editor
         ContentFlipH = serializedObject.FindProperty("ContentFlipH");
     }
 
-    public static void RefreshOpticalParamsFilenames() 
+    public static void RefreshOpticalParamsFilenames()
 	{
 		OpticalParamsAssets = Resources.LoadAll("ardata/optical", typeof(TextAsset)).Cast<TextAsset>().ToArray();
 		OpticalParamsAssetCount = OpticalParamsAssets.Length;
 		OpticalParamsFilenames = new string[OpticalParamsAssetCount];
-		for (int i = 0; i < OpticalParamsAssetCount; i++) {					
-			OpticalParamsFilenames[i] = OpticalParamsAssets[i].name;				
+		for (int i = 0; i < OpticalParamsAssetCount; i++) {
+			OpticalParamsFilenames[i] = OpticalParamsAssets[i].name;
 		}
 	}
 
     public override void OnInspectorGUI()
     {
-		ARCamera arc = (ARCamera)target;
+		ARXCamera arc = (ARXCamera)target;
 		if (arc == null) return;
 
         serializedObject.Update();
@@ -94,7 +94,7 @@ public class ARCameraEditor : Editor
         EditorGUILayout.Separator();
 		arc.Stereo = EditorGUILayout.Toggle("Part of a stereo pair", arc.Stereo);
 		if (arc.Stereo) {
-			arc.StereoEye = (ARCamera.ViewEye)EditorGUILayout.EnumPopup("Stereo eye:", arc.StereoEye);
+			arc.StereoEye = (ARXCamera.ViewEye)EditorGUILayout.EnumPopup("Stereo eye:", arc.StereoEye);
 		}
 
 		//
@@ -106,8 +106,8 @@ public class ARCameraEditor : Editor
 
         if (!arc.Optical)
         {
-            ARCamera.ContentMode currentContentMode = arc.CameraContentMode;
-            ARCamera.ContentMode newContentMode = (ARCamera.ContentMode)EditorGUILayout.EnumPopup("Content mode", currentContentMode);
+            ARXCamera.ContentMode currentContentMode = arc.CameraContentMode;
+            ARXCamera.ContentMode newContentMode = (ARXCamera.ContentMode)EditorGUILayout.EnumPopup("Content mode", currentContentMode);
             if (newContentMode != currentContentMode)
             {
                 Undo.RecordObject(arc, "Set content mode");
@@ -120,8 +120,8 @@ public class ARCameraEditor : Editor
         }
         else
         {
-            arc.OpticalCalibrationMode0 = (ARCamera.OpticalCalibrationMode)EditorGUILayout.EnumPopup("Optical calibration type", arc.OpticalCalibrationMode0);
-            if (arc.OpticalCalibrationMode0 == ARCamera.OpticalCalibrationMode.ARXOpticalParametersFile)
+            arc.OpticalCalibrationMode0 = (ARXCamera.OpticalCalibrationMode)EditorGUILayout.EnumPopup("Optical calibration type", arc.OpticalCalibrationMode0);
+            if (arc.OpticalCalibrationMode0 == ARXCamera.OpticalCalibrationMode.ARXOpticalParametersFile)
             {
                 // Offer a popup with optical params file names.
                 RefreshOpticalParamsFilenames(); // Update the list of available optical params from the resources dir

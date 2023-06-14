@@ -322,8 +322,8 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
+  near clip plane: 0.01
+  far clip plane: 100
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -406,7 +406,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   findTrackableTags: []
   _findTrackableMode: 0
-  _cameraIsBeingDrivenExternally: 0
 --- !u!1 &1192976668
 GameObject:
   m_ObjectHideFlags: 0
@@ -658,6 +657,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   onVideoFrame:
+    m_PersistentCalls:
+      m_Calls: []
+  onScreenGeometryChanged:
     m_PersistentCalls:
       m_Calls: []
   scrollPosition: {x: 0, y: 0}
