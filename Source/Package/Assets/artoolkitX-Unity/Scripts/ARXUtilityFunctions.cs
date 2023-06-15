@@ -36,11 +36,10 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Unity.Collections;
+#if ARX_ALLOW_UNITY_VIDEO_PROVIDERS
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 using UnityEngine;
 
 public static class ARXUtilityFunctions
@@ -144,6 +143,7 @@ public static class ARXUtilityFunctions
 		return lhm;
 	}
 
+#if ARX_ALLOW_UNITY_VIDEO_PROVIDERS
 	public static IntPtr GetIntPtr<T>(this NativeArray<T> array) where T : struct
 	{
 		unsafe
@@ -151,6 +151,7 @@ public static class ARXUtilityFunctions
 			return new IntPtr(NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(array));
 		}
 	}
+#endif
 
 	// Creates a GameObject in layer 'layer' which renders a mesh displaying the video stream.
 	// Places references to the Color array (as required), the texture and the material into the out parameters.
