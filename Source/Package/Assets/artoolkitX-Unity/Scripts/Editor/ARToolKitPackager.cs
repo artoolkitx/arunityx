@@ -148,7 +148,9 @@ class ARToolKitPackager {
 #endif // UNITY_ANDROID
 
         string[] assets = {
-            "Assets",
+            "Assets/artoolkitX-Unity",
+            "Assets/Patterns",
+            "Assets/StreamingAssets",
         };
 
 		AssetDatabase.ExportPackage(assets, packageName, ExportPackageOptions.Recurse);

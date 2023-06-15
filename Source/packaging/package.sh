@@ -31,14 +31,33 @@
 # -e = exit on errors
 set -e -x
 
-#One can pass the unity version as parameter is no version is passed the script will only look for an app called 'Unity'
-UNITY_VERSION=$1
-
 # Get our location.
 OURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ARUNITYX_HOME="$OURDIR/../.."
 PROJECT_PATH="${ARUNITYX_HOME}/Source/Package"
 PLUGINS_BASE="${PROJECT_PATH}/Assets/artoolkitX-Unity/Plugins"
+
+# Parse parameters
+while test $# -gt 0
+do
+    case "$1" in
+        --with-gpu) UNITY_WITH_GPU=
+            ;;
+        --log) touch "$2" && LOG="-logFile $2"; shift
+            ;;
+        --debug) DEBUG=
+            ;;
+        --dev) DEV=1
+            ;;
+        --*) echo "bad option $1"
+            usage
+            ;;
+        *) echo "bad argument $1"
+            usage
+            ;;
+    esac
+    shift
+done
 
 OS=$(uname -s)
 WINPATH=cygpath
@@ -113,7 +132,8 @@ sed -Ei "" "s/artoolkitX for Unity Version (([0-9]+\.[0-9]+)(\.[0-9]+)?(r[0-9]+)
     -stackTraceLogType Full \
     -projectPath "${UNITY_PROJECT_PATH}" \
     -arunityxpackagename arunityX-${VERSION}.unitypackage \
-    -executeMethod ARToolKitPackager.CreatePackage
+    -executeMethod ARToolKitPackager.CreatePackage \
+    ${LOG} \
 
 # Move the output.
 mv "${PROJECT_PATH}/arunityX-${VERSION}.unitypackage" "${ARUNITYX_HOME}"
