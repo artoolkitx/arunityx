@@ -67,5 +67,8 @@ Source/Package/Assets/artoolkitX-Unity/Plugins/iOS/*.framework
 Source/Package/Assets/artoolkitX-Unity/Plugins/x86/*.dll
 Source/Package/Assets/artoolkitX-Unity/Plugins/x86_64/*.dll
 
+#### User-side settings
+ARToolKitEditorSettings.asset*
+
 #### Other
 build-ios

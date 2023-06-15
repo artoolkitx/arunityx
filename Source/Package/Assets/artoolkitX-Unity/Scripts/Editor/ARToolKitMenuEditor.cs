@@ -42,72 +42,113 @@ using System.Text.RegularExpressions;
 
 [InitializeOnLoad]
 public class ARToolKitMenuEditor : MonoBehaviour {
-    private const  string FIRST_RUN             = "artoolkit_first_run";
-    private const  string MENU_PATH_BASE       = "artoolkitX";
-    private const  string TOOLS_MENU_PATH       = MENU_PATH_BASE + "/Download Tools";
-    private const  string TOOLS_UNITY_MESSAGE   = "To use artoolkitX, you will need tools to generate markers and calibrate your camera.\n" +
-            "please select \"{0}\" from the menu to download those tools.";
-    private const  string HOME_PAGE_URL         = "http://www.artoolkitx.org/";
-    private const  string DOCUMENTATION_URL     = "https://github.com/artoolkitx/artoolkitx/wiki";
-	private const  string COMMUNITY_URL         = "http://forums.artoolkitx.org/";
-    private const  string SOURCE_URL            = "https://github.com/artoolkitx/artoolkitx";
-    private const  string PLUGIN_SOURCE_URL     = "https://github.com/artoolkitx/arunityx";
-	//private const  string TOOLS_URL             = "http://artoolkit.org/download-artoolkit-sdk#unity";
-    private const  string VERSION               = MENU_PATH_BASE + "/artoolkitX for Unity Version 1.1.9";
-    private const  string WINDOWS_UNITY_MESSAGE = "Thank you for choosing artoolkitX for Unity! " +
-            "<b>artoolkitX requires the Microsoft C++ Redistributables to be installed on your system.</b>\n" +
-            "Please select \"{0}\" from the menu above, and install the required packages.";
-    private const  string GET_TOOLS_MESSAGE     = "artoolkitX for Unity Version 1.1.9! <b>To make your own markers, you'll need to download our tools.</b>\n" +
-		"Please select {0} from menu above to download them.";
+    private const string MENU_PATH_BASE       = "artoolkitX";
+    private const string HOME_PAGE_URL         = "http://www.artoolkitx.org/";
+    private const string DOCUMENTATION_URL     = "https://github.com/artoolkitx/artoolkitx/wiki";
+	private const string COMMUNITY_URL         = "http://forums.artoolkitx.org/";
+    private const string SOURCE_URL            = "https://github.com/artoolkitx/artoolkitx";
+    private const string PLUGIN_SOURCE_URL     = "https://github.com/artoolkitx/arunityx";
+    private const string TOOLS_URL             = "https://github.com/artoolkitx/artoolkitx/releases/latest";
+    private const string VERSION               = "artoolkitX for Unity Version 1.1.11";
+    private const string VERSION_MENU          = MENU_PATH_BASE + "/" + VERSION;
+    private const string WELCOME_MESSAGE       = "Welcome to " + VERSION + ".";
+    private static bool showDownloadTools = false;
+    private const string GET_TOOLS_MESSAGE     = "To make your own square pictorial markers or calibrate your camera, you'll need to download the tools.";
+    private const string WINDOWS_RUNTIME_MESSAGE = "artoolkitX requires the Microsoft C++ Redistributables to be installed on your system.";
 
     static ARToolKitMenuEditor() {
-        if (EditorPrefs.GetBool(FIRST_RUN, true)) {
-            EditorPrefs.SetBool(FIRST_RUN, false);
-            Debug.Log(string.Format(GET_TOOLS_MESSAGE, TOOLS_MENU_PATH));
-#if UNITY_EDITOR_WIN
-            Debug.Log(string.Format(WINDOWS_UNITY_MESSAGE, TOOLS_MENU_PATH));
-#endif
+        SerializedObject s = ARToolKitEditorSettings.GetSerializedSettings();
+        SerializedProperty hideWelcome = s.FindProperty("m_hideWelcome");
+        if (!hideWelcome.boolValue)
+        {
+            EditorWindow.GetWindow(typeof(ARToolKitWelcomeWindow));
         }
     }
     
-    [MenuItem (VERSION, false, 0)]
+    [MenuItem (VERSION_MENU, false, 0)]
     private static void Version() { }
 
-	[MenuItem (VERSION, true, 0)]
+    // Keeps the version menu item disabled.
+	[MenuItem (VERSION_MENU, true, 0)]
 	private static bool ValidateVersion() {
 		return false;
 	}
 
-//    [MenuItem (TOOLS_MENU_PATH, false, 1)]
-//    private static void DownloadTools() {
-//        Application.OpenURL(TOOLS_URL);
-//    }
+    [MenuItem(MENU_PATH_BASE + "/Open " + ARToolKitEditorSettingsProvider.ARToolKitEditorSettingsProviderTitle, false, 40)]
+    private static void OpenSettings()
+    {
+        SettingsService.OpenProjectSettings(ARToolKitEditorSettingsProvider.ARToolKitEditorSettingsProviderPath);
+    }
 
-    [MenuItem (MENU_PATH_BASE + "/Support/Home Page", false, 50)]
+    [MenuItem(MENU_PATH_BASE + "/Downloads/Download SDK including tools", false, 50)]
+    private static void DownloadTools()
+    {
+        Application.OpenURL(TOOLS_URL);
+    }
+
+    [MenuItem (MENU_PATH_BASE + "/Support/Home Page", false, 60)]
 	private static void HomePage() {
         Application.OpenURL(HOME_PAGE_URL);
     }
     
-    [MenuItem (MENU_PATH_BASE + "/Support/Documentation", false, 51)]
+    [MenuItem (MENU_PATH_BASE + "/Support/Documentation", false, 61)]
 	private static void Documentation() {
         Application.OpenURL(DOCUMENTATION_URL);
     }
-	[MenuItem (MENU_PATH_BASE + "/Build", false, 41)]
-	private static void Documentdation() {
-		ARToolKitPackager.CreatePackage();
-	}
-	[MenuItem (MENU_PATH_BASE + "/Support/Community Forums", false, 52)]
+
+	[MenuItem (MENU_PATH_BASE + "/Support/Community Forums", false, 62)]
 	private static void Community() {
         Application.OpenURL(COMMUNITY_URL);
     }
     
-    [MenuItem (MENU_PATH_BASE + "/Source Code/View artoolkitX Source", false, 53)]
+    [MenuItem (MENU_PATH_BASE + "/Source Code/View artoolkitX Source", false, 70)]
 	private static void Source() {
         Application.OpenURL(SOURCE_URL);
     }
     
-    [MenuItem (MENU_PATH_BASE + "/Source Code/View Unity Plugin Source", false, 54)]
+    [MenuItem (MENU_PATH_BASE + "/Source Code/View Unity Plugin Source", false, 71)]
 	private static void PluginSource() {
         Application.OpenURL(PLUGIN_SOURCE_URL);
+    }
+
+    class ARToolKitWelcomeWindow : EditorWindow
+    {
+        private void OnGUI()
+        {
+            SerializedObject s = ARToolKitEditorSettings.GetSerializedSettings();
+            SerializedProperty hideWelcome = s.FindProperty("m_hideWelcome");
+
+            titleContent = new GUIContent(MENU_PATH_BASE);
+
+            GUI.skin.label.wordWrap = true;
+            GUILayout.Label(WELCOME_MESSAGE);
+
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+
+            if (GUILayout.Button("Click here to open " + ARToolKitEditorSettingsProvider.ARToolKitEditorSettingsProviderTitle))
+            {
+                OpenSettings();
+            }
+
+            if (showDownloadTools)
+            {
+                GUILayout.Label(GET_TOOLS_MESSAGE);
+#if UNITY_EDITOR_WIN
+                GUILayout.Label(WINDOWS_RUNTIME_MESSAGE);
+#endif
+                if (GUILayout.Button("Click here to download SDK including tools."))
+                {
+                    DownloadTools();
+                }
+            }
+
+            GUILayout.FlexibleSpace();
+            float originalValue = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = 200;
+            EditorGUILayout.PropertyField(hideWelcome, new GUIContent("Don't show this window again"), GUILayout.ExpandWidth(true));
+            EditorGUIUtility.labelWidth = originalValue;
+
+            s.ApplyModifiedPropertiesWithoutUndo();
+        }
     }
 }

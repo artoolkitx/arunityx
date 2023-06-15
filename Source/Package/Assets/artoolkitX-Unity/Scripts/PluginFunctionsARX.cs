@@ -521,15 +521,20 @@ public class PluginFunctionsARX : IPluginFunctions
                 NativeArray<byte>? buf2 = null, int buf2PixelStride = 0, int buf2RowStride = 0,
                 NativeArray<byte>? buf3 = null, int buf3PixelStride = 0, int buf3RowStride = 0)
     {
+#if ARX_ALLOW_UNITY_VIDEO_PROVIDERS
         return ARX_pinvoke.arwVideoPush(videoSourceIndex,
                                         buf0.GetIntPtr(), buf0.Length, buf0PixelStride, buf0RowStride,
                                         buf1.HasValue ? buf1.Value.GetIntPtr() : IntPtr.Zero, buf1.HasValue ? buf1.Value.Length : 0, buf1PixelStride, buf1RowStride,
                                         buf2.HasValue ? buf2.Value.GetIntPtr() : IntPtr.Zero, buf2.HasValue ? buf2.Value.Length : 0, buf2PixelStride, buf2RowStride,
                                         buf3.HasValue ? buf3.Value.GetIntPtr() : IntPtr.Zero, buf3.HasValue ? buf3.Value.Length : 0, buf3PixelStride, buf3RowStride);
+#else
+        return -1;
+#endif
     }
 
     override public int arwVideoPushFinal(int videoSourceIndex)
     {
         return ARX_pinvoke.arwVideoPushFinal(videoSourceIndex);
     }
+
 }
