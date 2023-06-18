@@ -129,7 +129,8 @@ public class ARXCamera : MonoBehaviour
 	}*/
 
 	private ARXOrigin _origin = null;
-	protected ARXTrackable _trackable = null;                // Instance of trackable that will be used as the origin for the camera pose.
+	protected ARXTrackable _trackable = null;       // Instance of trackable that will be used as the origin for the camera pose.
+	private bool _startedStereoVideoAndDisplayingStereoRightEye;	// Between OnVideoStarted and OnVideoStopped, will be true if we're querying the right camera of a stereo camera pair.
 
 	[NonSerialized]
 	protected ARXController arController;
@@ -243,8 +244,8 @@ public class ARXCamera : MonoBehaviour
 
 			// Fetch the projection from the video source.
 			float[] projRaw = new float[16];
-			bool _cameraStereoRightEye = Stereo && StereoEye == ARXCamera.ViewEye.Right;
-			if (!_cameraStereoRightEye || !arController.VideoIsStereo)
+			_startedStereoVideoAndDisplayingStereoRightEye = arController.VideoIsStereo && Stereo && StereoEye == ARXCamera.ViewEye.Right;
+			if (!_startedStereoVideoAndDisplayingStereoRightEye)
 			{
 				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingMode(w, h, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, projRaw)) return;
 			}
@@ -336,7 +337,14 @@ public class ARXCamera : MonoBehaviour
 				if (Optical && opticalSetupOK) {
 					pose = (opticalViewMatrix * trackable.TransformationMatrix).inverse;
 				} else {
-					pose = trackable.TransformationMatrix.inverse;
+					if (!_startedStereoVideoAndDisplayingStereoRightEye)
+                    {
+						pose = trackable.TransformationMatrix.inverse;
+					}
+					else
+                    {
+						pose = trackable.TransformationMatrixR.inverse;
+					}
 				}
 
 				arPosition = ARXUtilityFunctions.PositionFromMatrix(pose);
