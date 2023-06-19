@@ -48,7 +48,8 @@ public class ARXTrackedObject : MonoBehaviour
 	private const string LogTag = "ARXTrackedObject: ";
 
 	private ARXOrigin _origin = null;
-    private ARXTrackable _trackable = null;
+	private ARXCamera _camera = null;				// When no ARXOrigin is in the scene, this will be set to point to the ARXCamera to take as the pose reference. Note that for stereo ARXCameras, this will always be the left camera.
+	private ARXTrackable _trackable = null;
 
 	[SerializeField]
 	[Tooltip("Set this to the same value defined in the ARXTrackable object that defines this object's pose.")]
@@ -67,11 +68,11 @@ public class ARXTrackedObject : MonoBehaviour
 		}
 	}
 
-	private bool visible = false;                   // Current visibility from tracking
-	private float timeTrackingLost = 0;             // Time when tracking was last lost
+	private bool _visible = false;                   // Current visibility from tracking
+	private float _timeTrackingLost = 0;             // Time when tracking was last lost
 	[Tooltip("The number of seconds this object should remain visible when the associated ARXTrackable object is no longer visible.")]
 	public float secondsToRemainVisible = 0.0f;		// How long to remain visible after tracking is lost (to reduce flicker)
-	private bool visibleOrRemain = false;           // Whether to show the content (based on above variables)
+	private bool _visibleOrRemain = false;           // Whether to show the content (based on above variables)
 
 	public ARXUnityEventUnityObject OnTrackedObjectFound;
 	public ARXUnityEventUnityObject OnTrackedObjectTracked;
@@ -108,6 +109,25 @@ public class ARXTrackedObject : MonoBehaviour
 		return _origin;
 	}
 
+	// Return the camera associated with this component.
+	// Uses cached value if available, otherwise performs a find operation.
+	public virtual ARXCamera GetCamera()
+	{
+		if (_camera == null)
+		{
+			ARXCamera[] cs = FindObjectsOfType<ARXCamera>();
+			foreach (ARXCamera c in cs)
+			{
+				if (!c.Stereo || c.StereoEye == ARXCamera.ViewEye.Left)
+				{
+					_camera = c;
+					break;
+				}
+			}
+		}
+		return _camera;
+	}
+
 	void Start()
 	{
 		//ARXController.Log(LogTag + "Start()");
@@ -124,7 +144,7 @@ public class ARXTrackedObject : MonoBehaviour
 		}
 	}
 
-	// Note that [DefaultExecutionOrder] is used on ARXTrackable to ensure the base ARXTrackable has updated before we try and use the transformation.
+	// Note that [DefaultExecutionOrder] is set on ARXTrackable to ensure it has updated before we try and use the transformation.
 	void Update()
 	{
 		// Update tracking if we are running in the Player.
@@ -137,71 +157,82 @@ public class ARXTrackedObject : MonoBehaviour
 		ARXTrackable trackable = GetTrackable();
 		if (trackable == null)
 		{
-			visible = visibleOrRemain = false;
+			_visible = _visibleOrRemain = false;
 			return;
 		}
 
-		// Sanity check, make sure we have an ARXOrigin in parent hierachy.
 		ARXOrigin origin = GetOrigin();
-		if (origin == null) {
-			visible = visibleOrRemain = false;
-			return;
-		}
-
-		// Note the current time
-		float timeNow = Time.realtimeSinceStartup;
-
-        ARXTrackable baseTrackable = origin.GetBaseTrackable();
-		if (baseTrackable != null && trackable.Visible)
+		if (origin != null)
 		{
-			if (!visible)
+			ARXTrackable baseTrackable = origin.GetBaseTrackable();
+			if (baseTrackable != null && trackable.Visible)
 			{
-				// Trackable was hidden but now is visible.
-				visible = visibleOrRemain = true;
-				OnTrackedObjectFound.Invoke(this);
-				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", trackable, SendMessageOptions.DontRequireReceiver);
-
-				for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
+				VisibleInternal(trackable == baseTrackable ? origin.transform.localToWorldMatrix : (origin.transform.localToWorldMatrix * baseTrackable.TransformationMatrix.inverse * trackable.TransformationMatrix));
 			}
-
-            Matrix4x4 pose;
-            if (trackable == baseTrackable)
+			else /* (baseTrackable == null || !trackable.Visible) */
 			{
-                // If this marker is the base, no need to take base inverse etc.
-                pose = origin.transform.localToWorldMatrix;
-            }
-			else
-			{
-				pose = (origin.transform.localToWorldMatrix * baseTrackable.TransformationMatrix.inverse * trackable.TransformationMatrix);
+				NotVisibleInternal();
 			}
-			// Local scale is always 1 for now
-			transform.localScale = Vector3.one;
-			transform.position = ARXUtilityFunctions.PositionFromMatrix(pose);
-			transform.rotation = ARXUtilityFunctions.QuaternionFromMatrix(pose);
-
-			OnTrackedObjectTracked.Invoke(this);
-			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", trackable, SendMessageOptions.DontRequireReceiver);
-
 		}
 		else
-		{
-			if (visible)
-			{
-				// Trackable was visible but now is hidden.
-				visible = false;
-				timeTrackingLost = timeNow;
-			}
+        {
+			ARXCamera c = GetCamera();
+			if (!c)
+            {
+				ARXController.LogError("Error: no ARXOrigin and no ARXCamera in scene.", this);
+				_visible = _visibleOrRemain = false;
+				return;
+            }
 
-			if (visibleOrRemain && (timeNow - timeTrackingLost >= secondsToRemainVisible))
-			{
-				visibleOrRemain = false;
-				OnTrackedObjectLost.Invoke(this);
-				if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", trackable, SendMessageOptions.DontRequireReceiver);
-				for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
+			if (trackable.Visible)
+            {
+				VisibleInternal(c.transform.localToWorldMatrix * trackable.TransformationMatrix);
 			}
+			else
+            {
+				NotVisibleInternal();
+            }
+		}
+	}
+
+	private void VisibleInternal(Matrix4x4 pose)
+	{
+		transform.localScale = Vector3.one; // Local scale is always 1 for now
+		transform.position = ARXUtilityFunctions.PositionFromMatrix(pose);
+		transform.rotation = ARXUtilityFunctions.QuaternionFromMatrix(pose);
+
+		if (!_visible)
+		{
+			// Trackable was hidden but now is visible.
+			_visible = _visibleOrRemain = true;
+			OnTrackedObjectFound.Invoke(this);
+			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", _trackable, SendMessageOptions.DontRequireReceiver);
+
+			for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
 		}
 
+		OnTrackedObjectTracked.Invoke(this);
+		if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableTracked", _trackable, SendMessageOptions.DontRequireReceiver);
+	}
 
+	private void NotVisibleInternal()
+	{
+		float timeNow = _visible || _visibleOrRemain ? Time.realtimeSinceStartup : 0.0f;
+
+		if (_visible)
+		{
+			// Trackable was visible but now is hidden.
+			_visible = false;
+			_timeTrackingLost = timeNow;
+		}
+
+		if (_visibleOrRemain && (timeNow - _timeTrackingLost >= secondsToRemainVisible))
+		{
+			_visibleOrRemain = false;
+			OnTrackedObjectLost.Invoke(this);
+			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", _trackable, SendMessageOptions.DontRequireReceiver);
+			for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
+		}
 	}
 
 }
