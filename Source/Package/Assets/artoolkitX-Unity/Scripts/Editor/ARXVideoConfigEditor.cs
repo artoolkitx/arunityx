@@ -1,4 +1,4 @@
-﻿/*
+/*
  *  ARXVideoConfigEditor.cs
  *  artoolkitX for Unity
  *
@@ -90,7 +90,15 @@ public class ARXVideoConfigEditor : Editor
             showPlatformConfig[pci] = EditorGUILayout.Foldout(showPlatformConfig[pci], pc.name);
             if (!showPlatformConfig[pci]) continue;
 
-            EditorGUI.BeginDisabledGroup(pc.isUsingManualConfig);
+#if !ARX_ALLOW_UNITY_VIDEO_PROVIDERS
+            if (pc.isUsingUnityVideoSource)
+            {
+                EditorGUILayout.HelpBox("Video config wants to use external video source, but \"Allow Unity video sources\" is not set in artoolkitX Unity Editor config.", MessageType.Error);
+                Debug.LogError("Video config wants to use external video source, but \"Allow Unity video sources\" is not set in artoolkitX Unity Editor config.");
+            }
+#endif
+
+            EditorGUI.BeginDisabledGroup(pc.isUsingManualConfig || pc.isUsingUnityVideoSource);
 
             // This function is called against each enum, and if it returns false, that enum value isn't shown.
             // We use it to avoid showing the "index" and "position" options for modules that don't support them.
