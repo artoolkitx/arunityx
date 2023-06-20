@@ -538,8 +538,8 @@ public class ARXTrackable : MonoBehaviour
                 }
             }
             visible = v;
-            return;
         }
+        return;
     }
 
     // Unload any native ARXTrackable structures, and clear the UID.
