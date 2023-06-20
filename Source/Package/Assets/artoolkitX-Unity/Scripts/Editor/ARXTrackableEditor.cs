@@ -62,6 +62,13 @@ public class ARXTrackableEditor : Editor
 //    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 18446744073709551616}
 	};
 
+	SerializedProperty Tag;
+
+	private void OnEnable()
+    {
+		Tag = serializedObject.FindProperty("Tag");
+	}
+
     public override void OnInspectorGUI()
     {
 
@@ -69,17 +76,20 @@ public class ARXTrackableEditor : Editor
         ARXTrackable m = (ARXTrackable)target;
         if (m == null) return;
 
-		EditorGUILayout.BeginVertical();
-
 		using (new EditorGUI.DisabledScope(true))
 			EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
+
+		this.serializedObject.Update();
+
+		EditorGUILayout.BeginVertical();
 
 		// Attempt to load. Might not work out if e.g. for a single marker, pattern hasn't been
 		// assigned yet, or for an NFT marker, dataset hasn't been specified.
 		if (m.UID == ARXTrackable.NO_ID) m.Load();
 
 		// Trackable tag
-        m.Tag = EditorGUILayout.TextField("Trackable tag", m.Tag);
+		EditorGUILayout.PropertyField(Tag, new GUIContent("Trackable tag"));
+
         EditorGUILayout.LabelField("UID", (m.UID == ARXTrackable.NO_ID ? "Not loaded": m.UID.ToString()));
 
         EditorGUILayout.Separator();
@@ -191,17 +201,32 @@ public class ARXTrackableEditor : Editor
 
         EditorGUILayout.Separator();
 
-        showFilterOptions = EditorGUILayout.Foldout(showFilterOptions, "Filter Options");
-        if (showFilterOptions) {
-			m.Filtered = EditorGUILayout.Toggle("Filtered:", m.Filtered);
-			m.FilterSampleRate = EditorGUILayout.Slider("Sample rate:", m.FilterSampleRate, 1.0f, 30.0f);
-			m.FilterCutoffFreq = EditorGUILayout.Slider("Cutoff freq.:", m.FilterCutoffFreq, 1.0f, 30.0f);
+		EditorGUI.BeginChangeCheck();
+		bool filtered = EditorGUILayout.Toggle("Filtered:", m.Filtered);
+		if (EditorGUI.EndChangeCheck())
+        {
+			m.Filtered = filtered;
+			EditorUtility.SetDirty(target);
+		}
+		EditorGUI.BeginChangeCheck();
+		float filterSampleRate = EditorGUILayout.FloatField("Sample rate:", m.FilterSampleRate);
+		if (EditorGUI.EndChangeCheck())
+        {
+			m.FilterSampleRate = filterSampleRate;
+			EditorUtility.SetDirty(target);
+		}
+		EditorGUI.BeginChangeCheck();
+		float filterCutoffFreq = EditorGUILayout.Slider("Cutoff freq.:", m.FilterCutoffFreq, 0.0f, filterSampleRate / 2.0f); // Low-pass filter nyquist limit is half the sample rate.
+		if (EditorGUI.EndChangeCheck())
+		{
+			m.FilterCutoffFreq = filterCutoffFreq;
+			EditorUtility.SetDirty(target);
 		}
 
-        //EditorGUILayout.BeginHorizontal();
+		//EditorGUILayout.BeginHorizontal();
 
-        // Draw all the marker images
-        if (m.Patterns != null) {
+		// Draw all the marker images
+		if (m.Patterns != null) {
             for (int i = 0; i < m.Patterns.Length; i++) {
 				float imageMinWidth = Math.Max(m.Patterns[i].imageSizeX, 32);
 				float imageMinHeight = Math.Max(m.Patterns[i].imageSizeY, 32);
@@ -216,6 +241,7 @@ public class ARXTrackableEditor : Editor
         //EditorGUILayout.EndHorizontal();
 		EditorGUILayout.EndVertical();
 
-    }
+		this.serializedObject.ApplyModifiedProperties();
+	}
 
 }

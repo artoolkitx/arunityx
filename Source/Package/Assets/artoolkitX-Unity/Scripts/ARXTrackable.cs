@@ -127,6 +127,7 @@ public class ARXTrackable : MonoBehaviour
     [field: SerializeField]
     public TrackableType Type { get; private set; } = TrackableType.TwoD;
 
+    [Tooltip("If an ARXTrackedObject has this tag, it will use the pose from this ARXTrackable.")]
     public string Tag = ""; // This links this trackable with an ARXTrackedObject or ARXTrackedCamera in the scene.
 
     // 2D image trackables have an image filename and image width.
