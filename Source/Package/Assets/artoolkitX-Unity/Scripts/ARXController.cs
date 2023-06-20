@@ -1179,6 +1179,24 @@ public class ARXController : MonoBehaviour
 
     public static void Log(String msg)
     {
+        if (msg.StartsWith("[error]")) Log(AR_LOG_LEVEL.AR_LOG_LEVEL_ERROR, msg);
+        else if (msg.StartsWith("[warning]")) Log(AR_LOG_LEVEL.AR_LOG_LEVEL_WARN, msg);
+        else Log(AR_LOG_LEVEL.AR_LOG_LEVEL_INFO, msg);
+    }
+    public static void LogError(String msg, UnityEngine.Object sender = null)
+    {
+        Log(AR_LOG_LEVEL.AR_LOG_LEVEL_ERROR, msg, sender);
+    }
+    public static void LogWarning(String msg, UnityEngine.Object sender = null)
+    {
+        Log(AR_LOG_LEVEL.AR_LOG_LEVEL_WARN, msg, sender);
+    }
+    public static void LogInfo(String msg, UnityEngine.Object sender = null)
+    {
+        Log(AR_LOG_LEVEL.AR_LOG_LEVEL_INFO, msg, sender);
+    }
+    public static void Log(AR_LOG_LEVEL logLevel, String msg, UnityEngine.Object sender = null)
+    {
         // Add the new log message to the collection. If the collection has grown too large
         // then remove the oldest messages.
         if (Debug.isDebugBuild)
@@ -1186,10 +1204,18 @@ public class ARXController : MonoBehaviour
             logMessages.Add(msg);
             while (logMessages.Count > MaximumLogMessages) logMessages.RemoveAt(0);
         }
-
-        if (msg.StartsWith("[error]")) Debug.LogError(msg);
-        else if (msg.StartsWith("[warning]")) Debug.LogWarning(msg);
-        else Debug.Log(msg);
+        switch (logLevel)
+        {
+            case AR_LOG_LEVEL.AR_LOG_LEVEL_ERROR:
+                Debug.LogError(msg, sender);
+                break;
+            case AR_LOG_LEVEL.AR_LOG_LEVEL_WARN:
+                Debug.LogWarning(msg, sender);
+                break;
+            default:
+                Debug.Log(msg, sender);
+                break;
+        }
     }
 
     private void CalculateFPS()
