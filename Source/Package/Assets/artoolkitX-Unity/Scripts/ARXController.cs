@@ -76,11 +76,11 @@ public class ARXController : MonoBehaviour
                 ARXController[] c = FindObjectsOfType<ARXController>();
                 if (c.Length == 0)
                 {
-                    Debug.LogError("There are no instances of " + typeof(ARXController) + " in the scene.");
+                    LogError("There are no instances of " + typeof(ARXController) + " in the scene.");
                 }
                 else if (c.Length > 1)
                 {
-                    Debug.LogError("There is more than one instance of " + typeof(ARXController) + " in the scene.");
+                    LogError("There is more than one instance of " + typeof(ARXController) + " in the scene.");
                 }
                 else
                 {
@@ -373,7 +373,7 @@ public class ARXController : MonoBehaviour
 #  endif
 #endif // !UNITY_EDITOR
 
-        Log(LogTag + "ARXController.OnEnable()");
+        LogInfo(LogTag + "ARXController.OnEnable()");
         Application.runInBackground = true;
 
         // Register the log callback. This can be set irrespective of whether PluginFunctions.inited is true or false.
@@ -440,18 +440,18 @@ public class ARXController : MonoBehaviour
             {
                 // artoolkitX version number
                 _version = PluginFunctions.arwGetARToolKitVersion();
-                Log(LogTag + "artoolkitX version " + _version + " initialised.");
+                LogInfo(LogTag + "artoolkitX version " + _version + " initialised.");
             }
             else
             {
-                Log(LogTag + "Error initialising artoolkitX");
+                LogError(LogTag + "Error initialising artoolkitX", this);
             }
         }
     }
 
     void Start()
     {
-        Log(LogTag + "ARXController.Start(): Application.isPlaying = " + Application.isPlaying + " autoStart: " + AutoStartAR);
+        LogInfo(LogTag + "ARXController.Start(): Application.isPlaying = " + Application.isPlaying + " autoStart: " + AutoStartAR);
         if (!Application.isPlaying) return; // Editor Start.
 
         // Player start.
@@ -512,7 +512,7 @@ public class ARXController : MonoBehaviour
 
     void OnDisable()
     {
-        Log(LogTag + "ARXController.OnDisable()");
+        LogInfo(LogTag + "ARXController.OnDisable()");
 
         if (PluginFunctions.IsInited())
         {
@@ -556,11 +556,11 @@ public class ARXController : MonoBehaviour
         }
 
         if (PluginFunctions.IsInited()) {
-            Log(LogTag + "Shutting down artoolkitX");
+            LogInfo(LogTag + "Shutting down artoolkitX");
             // arwShutdownAR() causes everything artoolkitX holds to be unloaded.
             if (!PluginFunctions.arwShutdownAR())
             {
-                Log(LogTag + "Error shutting down artoolkitX.");
+                LogError(LogTag + "Error shutting down artoolkitX.", this);
             }
         }
     }
@@ -589,7 +589,7 @@ public class ARXController : MonoBehaviour
         // Catch attempts to inadvertently call StartAR() twice.
         if (_running)
         {
-            Log(LogTag + "WARNING: StartAR() called while already running. Ignoring.\n");
+            LogWarning(LogTag + "WARNING: StartAR() called while already running. Ignoring.\n");
             yield break;
         }
 
@@ -600,11 +600,11 @@ public class ARXController : MonoBehaviour
         }
         if (PluginFunctions.IsInited())
         {
-            Log(LogTag + "Starting AR.");
+            LogInfo(LogTag + "Starting AR.");
 
 #if UNITY_ANDROID
             bool haveCameraPermission = Permission.HasUserAuthorizedPermission(Permission.Camera);
-            Log(LogTag + $"haveCameraPermission={haveCameraPermission}");
+            LogInfo(LogTag + $"haveCameraPermission={haveCameraPermission}");
             if (!haveCameraPermission)
             {
                 PermissionCallbacks pcs = new PermissionCallbacks();
@@ -630,7 +630,7 @@ public class ARXController : MonoBehaviour
             bool usingOpenGL = renderDeviceType == GraphicsDeviceType.OpenGLCore || renderDeviceType == GraphicsDeviceType.OpenGLES2 || renderDeviceType == GraphicsDeviceType.OpenGLES3;
             //_useNativeGLTexturing = usingOpenGL && UseNativeGLTexturingIfAvailable;
             _useNativeGLTexturing = false; // TODO: reinstate native texturing support.
-            Log(LogTag + "Render device: " + renderDeviceVersion + (_useNativeGLTexturing ? ", using native GL texturing." : ", using Unity texturing."));
+            LogInfo(LogTag + "Render device: " + renderDeviceVersion + (_useNativeGLTexturing ? ", using native GL texturing." : ", using Unity texturing."));
 
             // Init screen geometry.
             _screenWidth = Screen.width;
@@ -687,7 +687,7 @@ public class ARXController : MonoBehaviour
                 if (ta == null)
                 {
                     // Error - the camera_para.dat file isn't in the right place
-                    Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName0 + ".bytes");
+                    LogError(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName0 + ".bytes", this);
                     yield break;
                 }
                 cparam0 = ta.bytes;
@@ -700,7 +700,7 @@ public class ARXController : MonoBehaviour
                     if (ta == null)
                     {
                         // Error - the camera_para.dat file isn't in the right place
-                        Log(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName1 + ".bytes");
+                        LogError(LogTag + "StartAR(): Error: Camera parameters file not found at Resources/ardata/" + videoCParamName1 + ".bytes", this);
                         yield break;
                     }
                     cparam1 = ta.bytes;
@@ -709,7 +709,7 @@ public class ARXController : MonoBehaviour
                 if (ta1 == null)
                 {
                     // Error - the transL2R.dat file isn't in the right place
-                    Log(LogTag + "StartAR(): Error: The stereo calibration file not found at Resources/ardata/" + transL2RName + ".bytes");
+                    LogError(LogTag + "StartAR(): Error: The stereo calibration file not found at Resources/ardata/" + transL2RName + ".bytes", this);
                     yield break;
                 }
                 transL2R = ta1.bytes;
@@ -718,12 +718,12 @@ public class ARXController : MonoBehaviour
             // Begin video capture and marker detection.
             if (!VideoIsStereo)
             {
-                Log(LogTag + "Starting artoolkitX video with vconf '" + videoConfiguration0 + "'.");
+                LogInfo(LogTag + "Starting artoolkitX video with vconf '" + videoConfiguration0 + "'.");
                 _running = PluginFunctions.arwStartRunningB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0));
             }
             else
             {
-                Log(LogTag + "Starting artoolkitX video with vconfL '" + videoConfiguration0 + "', vconfR '" + videoConfiguration1 + "'.");
+                LogInfo(LogTag + "Starting artoolkitX video with vconfL '" + videoConfiguration0 + "', vconfR '" + videoConfiguration1 + "'.");
                 _running = PluginFunctions.arwStartRunningStereoB(videoConfiguration0, cparam0, (cparam0 != null ? cparam0.Length : 0), videoConfiguration1, cparam1, (cparam1 != null ? cparam1.Length : 0), transL2R, (transL2R != null ? transL2R.Length : 0));
 
             }
@@ -731,7 +731,7 @@ public class ARXController : MonoBehaviour
             if (!_running)
             {
 
-                Log(LogTag + "Error starting running");
+                LogError(LogTag + "Error starting running", this);
                 ARW_ERROR error = (ARW_ERROR)PluginFunctions.arwGetError();
                 if (error == ARW_ERROR.ARW_ERROR_DEVICE_UNAVAILABLE)
                 {
@@ -746,7 +746,7 @@ public class ARXController : MonoBehaviour
             }
 
             // After calling arwStartRunningB/arwStartRunningStereoB, set artoolkitX configuration.
-            Log(LogTag + "Setting artoolkitX tracking settings.");
+            LogInfo(LogTag + "Setting artoolkitX tracking settings.");
             VideoThreshold = currentThreshold;
             VideoThresholdMode = currentThresholdMode;
             LabelingMode = currentLabelingMode;
@@ -780,17 +780,17 @@ public class ARXController : MonoBehaviour
             {
                 if (!_sceneConfiguredForVideoWaitingMessageLogged)
                 {
-                    Log(LogTag + "UpdateAR: Waiting for artoolkitX video.");
+                    LogInfo(LogTag + "UpdateAR: Waiting for artoolkitX video.");
                     _sceneConfiguredForVideoWaitingMessageLogged = true;
                 }
             }
             else
             {
-                Log(LogTag + "UpdateAR: artoolkitX video is running. Configuring Unity scene for video.");
+                LogInfo(LogTag + "UpdateAR: artoolkitX video is running. Configuring Unity scene for video.");
 
                 onVideoStarted.Invoke();
 
-                Log(LogTag + "Scene configured for video.");
+                LogInfo(LogTag + "Scene configured for video.");
                 _sceneConfiguredForVideo = true;
             } // !running
         } // !sceneConfiguredForVideo
@@ -827,12 +827,12 @@ public class ARXController : MonoBehaviour
             return false;
         }
 
-        Log(LogTag + "Stopping AR.");
+        LogInfo(LogTag + "Stopping AR.");
 
         // Stop video capture and marker detection.
         if (!PluginFunctions.arwStopRunning())
         {
-            Log(LogTag + "Error stopping AR.");
+            LogError(LogTag + "Error stopping AR.", this);
         }
 
         onVideoStopped.Invoke();
@@ -978,7 +978,7 @@ public class ARXController : MonoBehaviour
         set
         {
             currentTemplateSize = value;
-            Log(LogTag + "Warning: template size changed. Please reload scene.");
+            LogWarning(LogTag + "Warning: template size changed. Please reload scene.");
         }
     }
 
@@ -992,7 +992,7 @@ public class ARXController : MonoBehaviour
         set
         {
             currentTemplateCountMax = value;
-            Log(LogTag + "Warning: template maximum count changed. Please reload scene.");
+            LogWarning(LogTag + "Warning: template maximum count changed. Please reload scene.");
         }
     }
 
@@ -1179,6 +1179,24 @@ public class ARXController : MonoBehaviour
 
     public static void Log(String msg)
     {
+        if (msg.StartsWith("[error]")) Log(AR_LOG_LEVEL.AR_LOG_LEVEL_ERROR, msg);
+        else if (msg.StartsWith("[warning]")) Log(AR_LOG_LEVEL.AR_LOG_LEVEL_WARN, msg);
+        else Log(AR_LOG_LEVEL.AR_LOG_LEVEL_INFO, msg);
+    }
+    public static void LogError(String msg, UnityEngine.Object sender = null)
+    {
+        Log(AR_LOG_LEVEL.AR_LOG_LEVEL_ERROR, msg, sender);
+    }
+    public static void LogWarning(String msg, UnityEngine.Object sender = null)
+    {
+        Log(AR_LOG_LEVEL.AR_LOG_LEVEL_WARN, msg, sender);
+    }
+    public static void LogInfo(String msg, UnityEngine.Object sender = null)
+    {
+        Log(AR_LOG_LEVEL.AR_LOG_LEVEL_INFO, msg, sender);
+    }
+    public static void Log(AR_LOG_LEVEL logLevel, String msg, UnityEngine.Object sender = null)
+    {
         // Add the new log message to the collection. If the collection has grown too large
         // then remove the oldest messages.
         if (Debug.isDebugBuild)
@@ -1186,10 +1204,18 @@ public class ARXController : MonoBehaviour
             logMessages.Add(msg);
             while (logMessages.Count > MaximumLogMessages) logMessages.RemoveAt(0);
         }
-
-        if (msg.StartsWith("[error]")) Debug.LogError(msg);
-        else if (msg.StartsWith("[warning]")) Debug.LogWarning(msg);
-        else Debug.Log(msg);
+        switch (logLevel)
+        {
+            case AR_LOG_LEVEL.AR_LOG_LEVEL_ERROR:
+                Debug.LogError(msg, sender);
+                break;
+            case AR_LOG_LEVEL.AR_LOG_LEVEL_WARN:
+                Debug.LogWarning(msg, sender);
+                break;
+            default:
+                Debug.Log(msg, sender);
+                break;
+        }
     }
 
     private void CalculateFPS()

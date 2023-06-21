@@ -127,6 +127,7 @@ public class ARXTrackable : MonoBehaviour
     [field: SerializeField]
     public TrackableType Type { get; private set; } = TrackableType.TwoD;
 
+    [Tooltip("If an ARXTrackedObject has this tag, it will use the pose from this ARXTrackable.")]
     public string Tag = ""; // This links this trackable with an ARXTrackedObject or ARXTrackedCamera in the scene.
 
     // 2D image trackables have an image filename and image width.
@@ -225,9 +226,8 @@ public class ARXTrackable : MonoBehaviour
 
     // Realtime tracking information
     private bool visible = false;                                           // Trackable is visible or not
-    private Matrix4x4 transformationMatrix;                                 // Full transformation matrix as a Unity matrix
-//    private Quaternion rotation = new Quaternion(0.0f, 0.0f, 0.0f, 1.0f);   // Rotation corrected for Unity
-//    private Vector3 position = new Vector3(0.0f, 0.0f, 0.0f);               // Position corrected for Unity
+    private Matrix4x4 transformationMatrix;                                 // Full transformation matrix as a Unity matrix.
+    private Matrix4x4 transformationMatrixR;                                // For stereo video sources, full transformation matrix as viewed from the right camera, as a Unity matrix.
 
     private object loadLock = new object();
 
@@ -517,7 +517,16 @@ public class ARXTrackable : MonoBehaviour
                 if (UID != NO_ID)
                 {
                     float[] matrixRawArray = new float[16];
-                    v = ARXController.Instance.PluginFunctions.arwQueryTrackableVisibilityAndTransformation(UID, matrixRawArray);
+                    float[] matrixRawArrayR = new float[16];
+                    bool stereoVideo = ARXController.Instance.VideoIsStereo;
+                    if (!stereoVideo)
+                    {
+                        v = ARXController.Instance.PluginFunctions.arwQueryTrackableVisibilityAndTransformation(UID, matrixRawArray);
+                    }
+                    else
+                    {
+                        v = ARXController.Instance.PluginFunctions.arwQueryTrackableVisibilityAndTransformationStereo(UID, matrixRawArray, matrixRawArrayR);
+                    }
                     //ARXController.Log(LogTag + "ARXTrackable.Update() UID=" + UID + ", visible=" + v);
 
                     if (v)
@@ -534,12 +543,22 @@ public class ARXTrackable : MonoBehaviour
                         // Need to convert to Unity's left-hand coordinate system where marker lies in x-y plane with right in direction of +x,
                         // up in direction of +y, and forward (towards viewer) in direction of -z.
                         transformationMatrix = ARXUtilityFunctions.LHMatrixFromRHMatrix(matrixRaw);
+
+                        if (stereoVideo)
+                        {
+                            matrixRawArrayR[12] *= 0.001f;
+                            matrixRawArrayR[13] *= 0.001f;
+                            matrixRawArrayR[14] *= 0.001f;
+                            Matrix4x4 matrixRawR = ARXUtilityFunctions.MatrixFromFloatArray(matrixRawArrayR);
+                            //.Log("arwQueryTrackableTransformationStereo(" + UID + ") got matrixR: [" + Environment.NewLine + matrixRawR.ToString("F3").Trim() + "]");
+                            transformationMatrixR = ARXUtilityFunctions.LHMatrixFromRHMatrix(matrixRawR);
+                        }
                     }
                 }
             }
             visible = v;
-            return;
         }
+        return;
     }
 
     // Unload any native ARXTrackable structures, and clear the UID.
@@ -571,21 +590,13 @@ public class ARXTrackable : MonoBehaviour
         }
     }
 
-//    public Vector3 Position
-//    {
-//        get
-//        {
-//            return position;
-//        }
-//    }
-//
-//    public Quaternion Rotation
-//    {
-//        get
-//        {
-//            return rotation;
-//        }
-//    }
+    public Matrix4x4 TransformationMatrixR
+    {
+        get
+        {
+            return transformationMatrixR;
+        }
+    }
 
     public bool Visible
     {

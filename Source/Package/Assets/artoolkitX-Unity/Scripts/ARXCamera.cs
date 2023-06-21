@@ -91,7 +91,9 @@ public class ARXCamera : MonoBehaviour
 			}
 		}
 	}
+	[HideInInspector] // Not currently supported in native code.
 	public ARXController.ARW_H_ALIGN CameraContentHAlign = ARXController.ARW_H_ALIGN.ARW_H_ALIGN_CENTRE;
+	[HideInInspector] // Not currently supported in native code.
 	public ARXController.ARW_V_ALIGN CameraContentVAlign = ARXController.ARW_V_ALIGN.ARW_V_ALIGN_CENTRE;
 	public bool ContentRotate90 = false;
 	public bool ContentFlipH = false;
@@ -127,7 +129,8 @@ public class ARXCamera : MonoBehaviour
 	}*/
 
 	private ARXOrigin _origin = null;
-	protected ARXTrackable _trackable = null;                // Instance of trackable that will be used as the origin for the camera pose.
+	protected ARXTrackable _trackable = null;       // Instance of trackable that will be used as the origin for the camera pose.
+	private bool _startedStereoVideoAndDisplayingStereoRightEye;	// Between OnVideoStarted and OnVideoStopped, will be true if we're querying the right camera of a stereo camera pair.
 
 	[NonSerialized]
 	protected ARXController arController;
@@ -241,8 +244,8 @@ public class ARXCamera : MonoBehaviour
 
 			// Fetch the projection from the video source.
 			float[] projRaw = new float[16];
-			bool _cameraStereoRightEye = Stereo && StereoEye == ARXCamera.ViewEye.Right;
-			if (!_cameraStereoRightEye || !arController.VideoIsStereo)
+			_startedStereoVideoAndDisplayingStereoRightEye = arController.VideoIsStereo && Stereo && StereoEye == ARXCamera.ViewEye.Right;
+			if (!_startedStereoVideoAndDisplayingStereoRightEye)
 			{
 				if (!arController.PluginFunctions.arwGetProjectionMatrixForViewportSizeAndFittingMode(w, h, (int)CameraContentMode, (int)CameraContentHAlign, (int)CameraContentVAlign, camNearClipPlane, camFarClipPlane, projRaw)) return;
 			}
@@ -284,10 +287,13 @@ public class ARXCamera : MonoBehaviour
 		// Renders after the clear and background cameras
 		//c.depth = 0;
 
-		// Start at origin.
-		cam.transform.position = Vector3.zero;
-		cam.transform.rotation = Quaternion.identity;
-		cam.transform.localScale = Vector3.one;
+		if (GetOrigin() != null)
+        {
+			// Start at origin.
+			cam.transform.position = Vector3.zero;
+			cam.transform.rotation = Quaternion.identity;
+			cam.transform.localScale = Vector3.one;
+		}
 	}
 
 	// Return the origin associated with this component.
@@ -302,7 +308,7 @@ public class ARXCamera : MonoBehaviour
 	}
 
 	// Get the marker, if any, currently acting as the base.
-	public virtual ARXTrackable GetTrackable()
+	public virtual ARXTrackable GetTrackable() // i.e. GetBaseTrackable.
 	{
 		ARXOrigin origin = GetOrigin();
 		if (origin == null) return null;
@@ -316,7 +322,7 @@ public class ARXCamera : MonoBehaviour
 		timeLastUpdate = Time.realtimeSinceStartup;
 
 		// First, ensure we have a base marker. If none, then no markers are currently in view.
-        ARXTrackable trackable = GetTrackable();
+        ARXTrackable trackable = GetTrackable(); // i.e. GetBaseTrackable.
 		if (trackable == null) {
 			if (arVisible) {
 				// Marker was visible but now is hidden.
@@ -331,7 +337,14 @@ public class ARXCamera : MonoBehaviour
 				if (Optical && opticalSetupOK) {
 					pose = (opticalViewMatrix * trackable.TransformationMatrix).inverse;
 				} else {
-					pose = trackable.TransformationMatrix.inverse;
+					if (!_startedStereoVideoAndDisplayingStereoRightEye)
+                    {
+						pose = trackable.TransformationMatrix.inverse;
+					}
+					else
+                    {
+						pose = trackable.TransformationMatrixR.inverse;
+					}
 				}
 
 				arPosition = ARXUtilityFunctions.PositionFromMatrix(pose);
@@ -361,17 +374,15 @@ public class ARXCamera : MonoBehaviour
 		if (arVisible) {
 			transform.localPosition = arPosition; // TODO: Change to transform.position = PositionFromMatrix(origin.transform.localToWorldMatrix * pose) etc;
 			transform.localRotation = arRotation;
+			transform.localScale = Vector3.one; // Local scale is always 1 for now
 		}
 	}
 
 	// Note that [DefaultExecutionOrder] is used on ARXTrackable to ensure the base ARXTrackable has updated before we try and use the transformation.
 	protected virtual void Update()
 	{
-		// Local scale is always 1 for now
-		transform.localScale = Vector3.one;
-
 		// Update tracking if we are running in Player.
-		if (Application.isPlaying) {
+		if (Application.isPlaying && _origin != null) {
 			UpdateTracking();
 			ApplyTracking();
 		}
