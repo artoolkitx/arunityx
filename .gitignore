@@ -8,18 +8,17 @@ ehthumbs.db
 Thumbs.db
 
 #### Unity
-Source/Package/[Ll]ibrary/
-Source/Package/[Tt]emp/
-Source/Package/[Oo]bj/
-Source/Package/[Bb]uild/
-Source/Package/UnityGenerated/
-Source/Package/Assets/AssetStoreTools*
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/UnityGenerated/
+/Assets/AssetStoreTools*
 
 # Android Studio
 *.iml
 /**/.gradle/
 /**/.idea/
-/**/build
 /**/local.properties
 **/ProjectVersion.txt
 
@@ -42,9 +41,9 @@ sysinfo.txt
 
 # Visual Studio Tools for Unity
 /Assets/UnityVS*
-Source/Package/.vs
-Source/Package/Logs
-Source/Package/UserSettings
+/.vs
+/Logs
+/UserSettings
 
 #### Other VCS
 .svn/
@@ -52,23 +51,24 @@ Source/Package/UserSettings
 #### Built products
 *.apk
 *.app
+/**/build*
 
 #### Plugin source packages and binaries
-Source/artoolkit[xX]-*.zip
-Source/artoolkit[xX]*.dmg
-Source/Package/Assets/artoolkitX-Unity/Plugins/ARX.bundle
-Source/Package/Assets/artoolkitX-Unity/Plugins/ARX.bundle.meta
-Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/arm64-v8a/*.so
-Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/armeabi-v7a/*.so
-Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/x86/*.so
-Source/Package/Assets/artoolkitX-Unity/Plugins/Android/libs/x86_64/*.so
-Source/Package/Assets/artoolkitX-Unity/Plugins/iOS/*.a
-Source/Package/Assets/artoolkitX-Unity/Plugins/iOS/*.framework
-Source/Package/Assets/artoolkitX-Unity/Plugins/x86/*.dll
-Source/Package/Assets/artoolkitX-Unity/Plugins/x86_64/*.dll
+/dev/artoolkitx-git
+/dev/artoolkit[xX]-*.zip
+/dev/artoolkit[xX]*.dmg
+/Packages/artoolkitX-Unity/Runtime/Plugins/ARX.bundle
+/Packages/artoolkitX-Unity/Runtime/Plugins/ARX.bundle.meta
+/Packages/artoolkitX-Unity/Runtime/Plugins/Android/libs/arm64-v8a/*.so
+/Packages/artoolkitX-Unity/Runtime/Plugins/Android/libs/armeabi-v7a/*.so
+/Packages/artoolkitX-Unity/Runtime/Plugins/Android/libs/x86/*.so
+/Packages/artoolkitX-Unity/Runtime/Plugins/Android/libs/x86_64/*.so
+/Packages/artoolkitX-Unity/Runtime/Plugins/iOS/*.a
+/Packages/artoolkitX-Unity/Runtime/Plugins/iOS/*.framework
+/Packages/artoolkitX-Unity/Runtime/Plugins/x86/*.dll
+/Packages/artoolkitX-Unity/Runtime/Plugins/x86_64/*.dll
 
 #### User-side settings
 ARToolKitEditorSettings.asset*
 
 #### Other
-build-ios
