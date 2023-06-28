@@ -141,11 +141,7 @@ refresh_plugin_for_platform_from_source() {
         done
     elif [ "$PLATFORM" = "iOS" ] ; then
         rm -f "${PLUGINS_BASE}/iOS/libARX.a"
-        rm -f "${PLUGINS_BASE}/iOS/libcurl.a"
-        rm -rf "${PLUGINS_BASE}/iOS/opencv2.framework"
         cp "${SOURCE}/SDK/lib/libARX.a" "${PLUGINS_BASE}/iOS/"
-        cp "${SOURCE}/Source/depends/ios/lib/libcurl.a" "${PLUGINS_BASE}/iOS/"
-        cp -RPp "${SOURCE}/Source/depends/ios/Frameworks/opencv2.framework" "${PLUGINS_BASE}/iOS/"
     elif [ "$PLATFORM" = "macOS" ] ; then
         rm -rf "${PLUGINS_BASE}/ARX.bundle"
         cp -RPp "${SOURCE}/SDK/Plugins/ARX.bundle" "${PLUGINS_BASE}/"

@@ -7,4 +7,3 @@
 *.a filter=lfs diff=lfs merge=lfs -text
 *.aar filter=lfs diff=lfs merge=lfs -text
 **/ARX.bundle/Contents/MacOS/ARX filter=lfs diff=lfs merge=lfs -text
-**/opencv2.framework/Versions/A/opencv2 filter=lfs diff=lfs merge=lfs -text

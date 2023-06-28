@@ -1,6 +1,22 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.1
+### 2023-06-29
+
+ * Minor change for iOS: libARX.a is prelinked and no longer requires libcurl.a or opencv2.framework in the plugins folder.
+
+## Version 1.2
+### 2023-06-29
+
+ * No API changes, but a major change in package layout to allow for UPM packaging.
+ * Added package.json and asmdefs for scripts.
+ * Path-handling changes in various places to handle new layout incuding build.sh, ARXTrackableEditor, git config,
+ * Removed obsolete packaging left over from ARToolKit for Unity v5.x.
+ * Added some docs, and moved some (including Release Notes.txt to CHANGELOG.md) so they're accessible in the package editor.
+ * Moved marker images into individual samples.
+ * Known issue: the asset packaging script is currently out-of-date. Asset packaging will be added back in a future release.
+
 ## Version 1.1.11
 ### 2023-06-14
 
