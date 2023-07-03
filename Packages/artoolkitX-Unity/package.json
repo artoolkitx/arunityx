@@ -1,9 +1,11 @@
 {
   "name": "org.artoolkitx.artoolkitx-unity",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "displayName": "artoolkitX-Unity",
   "description": "The artoolkitX for Unity augmented reality toolkit",
+  "homepage": "https://www.artoolkitx.org/",
   "unity": "2020.2",
+  "license": "SEE LICENSE IN LICENSE.md",
   "licensesUrl": "https://github.com/artoolkitx/artoolkitx/wiki/artoolkitX-License-Terms",
   "documentationUrl": "https://github.com/artoolkitx/arunityx/wiki",
   "keywords": [
@@ -21,6 +23,14 @@
     "name": "artoolkitX",
     "email": "info@artoolkitx.org",
     "url": "https://www.artoolkitx.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/artoolkitx/arunityx.git",
+    "directory": "Packages/artoolkitX-Unity"
+  },
+  "bugs": {
+    "url" : "https://github.com/artoolkitx/arunityx/issues"
   },
   "hideInEditor": false,
   "samples": [
