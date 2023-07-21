@@ -125,15 +125,8 @@ class ARToolKitEditorSettingsProvider : SettingsProvider
     {
         if (m_CustomSettings.FindProperty("m_allowUnityVideoProviders").boolValue)
         {
+            // Don't need to set PlayerSettings.allowUnsafeCode = true anymore since the unsafe code is in its own assembly.
             ARToolKitEditorUtilities.ChangeScriptingDefine("ARX_ALLOW_UNITY_VIDEO_PROVIDERS", ARToolKitEditorUtilities.AddOrRemove.Add);
-            try
-            {
-                PlayerSettings.allowUnsafeCode = true;
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error {e} setting PlayerSettings.allowUnsafeCode");
-            }
         }
         else
         {

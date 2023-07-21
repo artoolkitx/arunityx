@@ -29,16 +29,15 @@
  *  statement from your version.
  *
  *  Copyright 2015 Daqri, LLC.
+ *  Copyright 2023 Philip Lamb
  *
- *  Author(s): Wally Young
+ *  Author(s): Wally Young, Philip Lamb.
  *
  */
 
 
 using UnityEngine;
 using UnityEditor;
-using System.IO;
-using System.Text.RegularExpressions;
 
 [InitializeOnLoad]
 public class ARToolKitMenuEditor : MonoBehaviour {
@@ -56,15 +55,6 @@ public class ARToolKitMenuEditor : MonoBehaviour {
     private const string GET_TOOLS_MESSAGE     = "To make your own square pictorial markers or calibrate your camera, you'll need to download the tools.";
     private const string WINDOWS_RUNTIME_MESSAGE = "artoolkitX requires the Microsoft C++ Redistributables to be installed on your system.";
 
-    static ARToolKitMenuEditor() {
-        SerializedObject s = ARToolKitEditorSettings.GetSerializedSettings();
-        SerializedProperty hideWelcome = s.FindProperty("m_hideWelcome");
-        if (!hideWelcome.boolValue)
-        {
-            EditorWindow.GetWindow(typeof(ARToolKitWelcomeWindow));
-        }
-    }
-    
     [MenuItem (VERSION_MENU, false, 0)]
     private static void Version() { }
 
@@ -111,8 +101,25 @@ public class ARToolKitMenuEditor : MonoBehaviour {
         Application.OpenURL(PLUGIN_SOURCE_URL);
     }
 
+    [InitializeOnLoad]
     class ARToolKitWelcomeWindow : EditorWindow
     {
+        static ARToolKitWelcomeWindow()
+        {
+            EditorApplication.update += OnEditorStart;
+        }
+
+        static void OnEditorStart()
+        {
+            EditorApplication.update -= OnEditorStart;
+            SerializedObject s = ARToolKitEditorSettings.GetSerializedSettings();
+            SerializedProperty hideWelcome = s.FindProperty("m_hideWelcome");
+            if (!s.FindProperty("m_hideWelcome").boolValue)
+            {
+                EditorWindow.GetWindow(typeof(ARToolKitWelcomeWindow));
+            }
+        }
+
         private void OnGUI()
         {
             SerializedObject s = ARToolKitEditorSettings.GetSerializedSettings();

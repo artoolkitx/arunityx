@@ -46,6 +46,14 @@ public class ARToolKitEditorUtilities
         Remove
     }
 
+    public static bool HasScriptingDefine(string define)
+    {
+        BuildTargetGroup buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
+        string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(buildTargetGroup);
+        List<string> allDefines = definesString.Split(';').ToList();
+        return allDefines.Contains(define);
+    }
+
     public static void ChangeScriptingDefine(string define, AddOrRemove addOrRemove)
     {
         BuildTargetGroup buildTargetGroup = EditorUserBuildSettings.selectedBuildTargetGroup;
