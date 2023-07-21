@@ -103,7 +103,7 @@ else
     CPUS=1
 fi
 
-ARTOOLKITX_VERSION=$(cat ${OURDIR}/artoolkitx-version.txt)
+ARTOOLKITX_VERSION=$(cat ${OURDIR}/artoolkitx-version.txt | tr -d '[:space:]')
 
 # Locate ARTOOLKITX_HOME or clone into submodule
 locate_artoolkitx() {
