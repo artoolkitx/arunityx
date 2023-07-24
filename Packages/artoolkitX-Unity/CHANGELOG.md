@@ -1,6 +1,18 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.2
+### 2023-07-03
+
+ * Fixed issues affecting first-run of newly-checked out repository.
+ * Fixed unsafe code flag now set inside assembly-only, and not entire project.
+ * Fixed Samples not working inside Unity Editor by adding a class that copies samples' local StreamingAssets to the main StreamingAssets folder.
+
+## Version 1.2.1
+### 2023-07-03
+
+ * Fixed plugin packaging for mac OS.
+
 ## Version 1.2.1
 ### 2023-06-29
 
