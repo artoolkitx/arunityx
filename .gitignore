@@ -53,6 +53,9 @@ sysinfo.txt
 *.app
 /**/build*
 
+#### Runtime-modifiable files
+/Assets/StreamingAssets/.gitignore
+
 #### Plugin source packages and binaries
 /dev/artoolkitx-git
 /dev/artoolkit[xX]-*.zip
