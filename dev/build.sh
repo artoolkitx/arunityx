@@ -144,7 +144,7 @@ refresh_plugin_for_platform_from_source() {
         cp "${SOURCE}/SDK/lib/libARX.a" "${PLUGINS_BASE}/iOS/"
     elif [ "$PLATFORM" = "macOS" ] ; then
         rm -rf "${PLUGINS_BASE}/ARX.bundle"
-        cp -RPp "${SOURCE}/SDK/Plugins/ARX.bundle" "${PLUGINS_BASE}/"
+        ditto "${SOURCE}/SDK/Plugins/ARX.bundle" "${PLUGINS_BASE}/ARX.bundle"
     elif [ "$PLATFORM" = "Windows" ] ; then
         rm -f "${PLUGINS_BASE}/x86_64/ARX.dll"
         cp "${SOURCE}/SDK/bin/ARX.dll" "${PLUGINS_BASE}/x86_64/"
