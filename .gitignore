@@ -60,7 +60,8 @@ sysinfo.txt
 /dev/artoolkitx-git
 /dev/artoolkit[xX]-*.zip
 /dev/artoolkit[xX]*.dmg
-/Packages/artoolkitX-Unity/Runtime/Plugins/ARX.bundle
+/Packages/artoolkitX-Unity/Runtime/Plugins/ARX.bundle/Contents/MacOS/ARX
+/Packages/artoolkitX-Unity/Runtime/Plugins/ARX.bundle/Contents/_CodeSignature/CodeResources
 /Packages/artoolkitX-Unity/Runtime/Plugins/Android/libs/arm64-v8a/*.so
 /Packages/artoolkitX-Unity/Runtime/Plugins/Android/libs/armeabi-v7a/*.so
 /Packages/artoolkitX-Unity/Runtime/Plugins/Android/libs/x86/*.so
