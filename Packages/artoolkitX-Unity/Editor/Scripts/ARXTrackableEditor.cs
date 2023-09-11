@@ -58,8 +58,8 @@ public class ARXTrackableEditor : Editor
     	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5, 4194304},
     	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_12_5, 4096},
     	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_7_7, 128},
-    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592}
-//    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 18446744073709551616}
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 9223372036854775807} // Actually 9223372036854775808 but that overflows signed long.
 	};
 
 	SerializedProperty Tag;

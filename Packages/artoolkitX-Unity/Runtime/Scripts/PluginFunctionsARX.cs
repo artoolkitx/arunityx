@@ -120,12 +120,13 @@ public class PluginFunctionsARX : IPluginFunctions
         ARX_pinvoke.arwSetLogLevel(logLevel);
     }
 
-    override public bool arwInitialiseAR(int pattSize = 16, int pattCountMax = 25)
+    override public bool arwInitialiseAR(int pattSize = 16, int pattCountMax = 25, int matrixCodeType = 0x03)
     {
         bool ok = ARX_pinvoke.arwInitialiseAR();
         if (ok) {
             arwSetPatternSize(pattSize);
             arwSetPatternCountMax(pattCountMax);
+            arwSetMatrixCodeType(matrixCodeType);
             this.inited = true;
         }
         return ok;
@@ -299,6 +300,19 @@ public class PluginFunctionsARX : IPluginFunctions
     override public void arwSetTrackableOptionFloat(int markerID, int option, float value)
     {
         ARX_pinvoke.arwSetTrackableOptionFloat(markerID, option, value);
+    }
+
+    override public string arwGetTrackableOptionString(int markerID, int option)
+    {
+        StringBuilder sb = new StringBuilder(1024);
+        bool ok = ARX_pinvoke.arwGetTrackableOptionString(markerID, option, sb, sb.Capacity);
+        if (ok) return sb.ToString();
+        else return "";
+    }
+
+    override public void arwSetTrackableOptionString(int markerID, int option, string value)
+    {
+        ARX_pinvoke.arwSetTrackableOptionString(markerID, option, value);
     }
 
     override public void arwSetVideoDebugMode(bool debug)

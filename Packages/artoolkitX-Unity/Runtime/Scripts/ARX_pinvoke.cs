@@ -164,6 +164,13 @@ public static class ARX_pinvoke
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	public static extern void arwSetTrackableOptionFloat(int trackableId, int option, float value);
 	
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+	[return: MarshalAsAttribute(UnmanagedType.I1)]
+	public static extern bool arwGetTrackableOptionString(int trackableId, int option, [MarshalAs(UnmanagedType.LPStr)] StringBuilder stringBuf, int stringBufLen);
+
+	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
+	public static extern void arwSetTrackableOptionString(int trackableId, int option, string value);
+
 	[DllImport(LIBRARY_NAME, CallingConvention=CallingConvention.Cdecl)]
 	public static extern void arwSetTrackerOptionBool(int option, bool debug);
 	

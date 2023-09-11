@@ -75,6 +75,7 @@ public abstract class IPluginFunctions
     abstract public bool arwGetTrackableOptionBool(int markerID, int option);
     abstract public float arwGetTrackableOptionFloat(int markerID, int option);
     abstract public int arwGetTrackableOptionInt(int markerID, int option);
+    abstract public string arwGetTrackableOptionString(int markerID, int option);
     abstract public bool arwGetTrackablePatternConfig(int markerID, int patternID, float[] matrix, out float width, out float height, out int imageSizeX, out int imageSizeY);
     abstract public int arwGetTrackablePatternCount(int markerID);
     abstract public bool arwGetTrackablePatternImage(int markerID, int patternID, [In, Out] Color32[] colors32);
@@ -94,7 +95,7 @@ public abstract class IPluginFunctions
     abstract public bool arwGetVideoParamsStereo(out int widthL, out int heightL, out int pixelSizeL, out string pixelFormatL, out int widthR, out int heightR, out int pixelSizeR, out string pixelFormatR);
     abstract public int arwGetVideoThreshold();
     abstract public int arwGetVideoThresholdMode();
-    abstract public bool arwInitialiseAR(int pattSize = 16, int pattCountMax = 25);
+    abstract public bool arwInitialiseAR(int pattSize = 16, int pattCountMax = 25, int matrixCodeType = 0x03);
     abstract public bool arwIsRunning();
     abstract public bool arwLoadOpticalParams(string optical_param_name, byte[] optical_param_buff, int optical_param_buffLen, float projectionNearPlane, float projectionFarPlane, out float fovy_p, out float aspect_p, float[] m, float[] p);
     abstract public bool arwQueryTrackableVisibilityAndTransformation(int markerID, float[] matrix);
@@ -109,6 +110,7 @@ public abstract class IPluginFunctions
     abstract public void arwSetTrackableOptionBool(int markerID, int option, bool value);
     abstract public void arwSetTrackableOptionFloat(int markerID, int option, float value);
     abstract public void arwSetTrackableOptionInt(int markerID, int option, int value);
+    abstract public void arwSetTrackableOptionString(int markerID, int option, string value);
     abstract public void arwSetMatrixCodeType(int type);
     abstract public void arwSetNFTMultiMode(bool on);
     abstract public void arwSetPatternCountMax(int count);

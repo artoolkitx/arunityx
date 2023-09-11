@@ -1,6 +1,24 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.5
+### 2023-09-11
+
+ * Adds static UnityEvent hooks in ARXTrackable for auto-created/removed trackables.
+ * Auto-created trackables will now fetch correct barcode ID and width.
+ * Corrects in-editor display of matrix (barcode) trackables patterns.
+ * Added missing printable images for cube marker sample.
+
+## Version 1.2.4
+### 2023-08-04
+
+ * Internal version (skipped).
+
+## Version 1.2.3
+### 2023-07-26
+
+ * Fixed inclusion of mac OS bundle metafiles that had prevented correct importing of the native plugin.
+
 ## Version 1.2.2
 ### 2023-07-03
 
