@@ -82,6 +82,7 @@ public class ARXTrackable : MonoBehaviour
         ARW_TRACKABLE_OPTION_MULTI_MIN_INLIER_PROB = 11,           ///< float, minimum inlier probability value for robust multimarker pose estimation (range 1.0 - 0.0).
         ARW_TRACKABLE_OPTION_SQUARE_WIDTH = 12,                    ///< float, square marker width
         ARW_TRACKABLE_OPTION_2D_SCALE = 13,                        ///< float, 2D trackable scale (i.e. width).
+        ARW_TRACKABLE_OPTION_SQUARE_BARCODE_ID = 14,               ///< readonly string, for square matrix (barcode) markers, the uint64_t barcodeID converted to a string.
     }
 
     public readonly static Dictionary<TrackableType, string> TrackableTypeNames = new Dictionary<TrackableType, string>
@@ -284,6 +285,20 @@ public class ARXTrackable : MonoBehaviour
     }
 
     /// <summary>
+    /// Register to receive an event that fires when a trackable is auto-added to the tracker, e.g.
+    /// if a new barcode marker is tracked and auto-create trackables is enabled.
+    /// The trackable is already created, so it is safe to call plugin functions on it.
+    /// </summary>
+    public static ARXUnityEventUnityObject OnTrackableAutoCreated = new ARXUnityEventUnityObject();
+
+    /// <summary>
+    /// Register to receive and event that fires in the case that a trackable is auto-removed from the tracker.
+    /// Note that if you receive this event, the native trackable is already gone, so don't
+    /// call any plugin functions on it. This event is just a courtesy for your internal book keeping.
+    /// </summary>
+    public static ARXUnityEventUnityObject OnTrackableAutoRemoved = new ARXUnityEventUnityObject();
+
+    /// <summary>
     /// Adds an ARXTrackable for an auto-created trackable.
     /// </summary>
     /// <param name="UID"></param>
@@ -297,7 +312,21 @@ public class ARXTrackable : MonoBehaviour
                 ARXTrackable t = ARXController.Instance.gameObject.AddComponent<ARXTrackable>();
                 t.uid = UID;
                 t.Type = (TrackableType)ARXController.Instance.PluginFunctions.arwGetTrackableOptionInt(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_TYPE);
+                if (t.Type == TrackableType.SquareBarcode || t.Type == TrackableType.Square)
+                {
+                    t.PatternWidth = ARXController.Instance.PluginFunctions.arwGetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_SQUARE_WIDTH) * 0.001f;
+                    if (t.Type == TrackableType.SquareBarcode)
+                    {
+                        string barcodeIDString = ARXController.Instance.PluginFunctions.arwGetTrackableOptionString(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_SQUARE_BARCODE_ID);
+                        ulong barcodeID;
+                        if (ulong.TryParse(barcodeIDString, out barcodeID))
+                        {
+                            t.BarcodeID = barcodeID;
+                        }
+                    }
+                }
                 t.hideFlags = HideFlags.NotEditable | HideFlags.DontSaveInEditor;
+                OnTrackableAutoCreated.Invoke(t);
                 break;
             case ARW_TRACKABLE_EVENT_TYPE.ARW_TRACKABLE_EVENT_TYPE_AUTOREMOVED:
                 if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return;
@@ -306,6 +335,7 @@ public class ARXTrackable : MonoBehaviour
                 {
                     if (t1.UID == UID)
                     {
+                        OnTrackableAutoRemoved.Invoke(t1);
                         Destroy(t1.gameObject);
                         break;
                     }

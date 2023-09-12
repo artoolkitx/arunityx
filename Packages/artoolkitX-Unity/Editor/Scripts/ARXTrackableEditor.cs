@@ -48,7 +48,7 @@ public class ARXTrackableEditor : Editor
 {
     public bool showFilterOptions = false;
 
-    private static Dictionary<ARXController.ARToolKitMatrixCodeType, long> barcodeCounts = new Dictionary<ARXController.ARToolKitMatrixCodeType, long>() {
+    private static Dictionary<ARXController.ARToolKitMatrixCodeType, ulong> barcodeCounts = new Dictionary<ARXController.ARToolKitMatrixCodeType, ulong>() {
 		{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3, 64},
     	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_PARITY65, 32},
     	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_3x3_HAMMING63, 8},
@@ -58,8 +58,8 @@ public class ARXTrackableEditor : Editor
     	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5, 4194304},
     	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_12_5, 4096},
     	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_5x5_BCH_22_7_7, 128},
-    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592}
-//    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 18446744073709551616}
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_6x6, 8589934592},
+    	{ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID, 9223372036854775808}
 	};
 
 	SerializedProperty Tag;
@@ -147,7 +147,7 @@ public class ARXTrackableEditor : Editor
 					if (barcodeID < 0) barcodeID = 0;
 					if (ARXController.Instance)
 					{
-						long maxBarcodeID = barcodeCounts[ARXController.Instance.MatrixCodeType] - 1;
+						long maxBarcodeID = (long)(barcodeCounts[ARXController.Instance.MatrixCodeType] - 1);
 						if (barcodeID > maxBarcodeID) barcodeID = maxBarcodeID;
 						EditorGUILayout.LabelField("(in range 0 to " + maxBarcodeID + ")");
 					}

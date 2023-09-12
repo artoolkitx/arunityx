@@ -436,7 +436,7 @@ public class ARXController : MonoBehaviour
     {
         if (!PluginFunctions.IsInited())
         {
-            if (PluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax))
+            if (PluginFunctions.arwInitialiseAR(TemplateSize, TemplateCountMax, (int)MatrixCodeType))
             {
                 // artoolkitX version number
                 _version = PluginFunctions.arwGetARToolKitVersion();
