@@ -231,8 +231,8 @@ public class ARXTrackableEditor : Editor
 
 		//EditorGUILayout.BeginHorizontal();
 
-		// Draw all the marker images
-		if (m.Patterns != null) {
+		// Draw all the marker images.
+		if (m.Patterns != null && !(m.Type == ARXTrackable.TrackableType.SquareBarcode && ARXController.Instance != null && ARXController.Instance.MatrixCodeType == ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID)) {
             for (int i = 0; i < m.Patterns.Length; i++) {
 				float imageMinWidth = Math.Max(m.Patterns[i].imageSizeX, 32);
 				float imageMinHeight = Math.Max(m.Patterns[i].imageSizeY, 32);

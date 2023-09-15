@@ -325,7 +325,6 @@ public class ARXTrackable : MonoBehaviour
                         }
                     }
                 }
-                t.hideFlags = HideFlags.NotEditable | HideFlags.DontSaveInEditor;
                 OnTrackableAutoCreated.Invoke(t);
                 break;
             case ARW_TRACKABLE_EVENT_TYPE.ARW_TRACKABLE_EVENT_TYPE_AUTOREMOVED:
