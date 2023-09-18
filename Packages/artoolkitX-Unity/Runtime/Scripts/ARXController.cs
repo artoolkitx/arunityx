@@ -1177,6 +1177,7 @@ public class ARXController : MonoBehaviour
     // Internal methods.
     //
 
+    [AOT.MonoPInvokeCallback(typeof(PluginFunctionsLogCallback))]
     public static void Log(String msg)
     {
         if (msg.StartsWith("[error]")) Log(AR_LOG_LEVEL.AR_LOG_LEVEL_ERROR, msg);
