@@ -1,6 +1,14 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.6
+### 2023-09-11
+
+ * Update to artoolkitX v1.1.14 to fix iOS linkage issue that was causing conflict with Unity's use of libjpeg and minizip.
+ * Ensure callbacks have correct types for use on AOT platforms.
+ * Setting hideflags was preventing auto-created trackables being found by FindObjectsOfType e.g. in ARXTrackedObject, ARXOrigin, ARXCamera.
+ * Updated ARXTrackable to not attempt to display barcode imagery for globalID barcodes. These are available online only.
+
 ## Version 1.2.5
 ### 2023-09-11
 

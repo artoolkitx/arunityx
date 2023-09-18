@@ -37,8 +37,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using UnityEngine;
 
@@ -303,6 +301,7 @@ public class ARXTrackable : MonoBehaviour
     /// </summary>
     /// <param name="UID"></param>
     /// <returns></returns>
+    [AOT.MonoPInvokeCallback (typeof(PluginFunctionsTrackableEventCallback))]
     public static void OnTrackableEvent(int eventType, int UID)
     {
         switch ((ARW_TRACKABLE_EVENT_TYPE)eventType)
@@ -325,7 +324,6 @@ public class ARXTrackable : MonoBehaviour
                         }
                     }
                 }
-                t.hideFlags = HideFlags.NotEditable | HideFlags.DontSaveInEditor;
                 OnTrackableAutoCreated.Invoke(t);
                 break;
             case ARW_TRACKABLE_EVENT_TYPE.ARW_TRACKABLE_EVENT_TYPE_AUTOREMOVED:
