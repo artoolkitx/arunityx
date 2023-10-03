@@ -1,6 +1,11 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.7
+### 2023-10-04
+
+ * Minor update to add option to enable/disable automatic showing/hiding of child objects of ARXTrackedObject on trackable found/lost events.
+
 ## Version 1.2.6
 ### 2023-09-11
 

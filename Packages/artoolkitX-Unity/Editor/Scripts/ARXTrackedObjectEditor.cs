@@ -62,10 +62,12 @@ public class ARXTrackedObjectEditor : Editor
 			EditorGUILayout.LabelField("Trackable UID", (trackable.UID != ARXTrackable.NO_ID ? trackable.UID.ToString() : "Not loaded") + " (" + type + ")");
 		}
 
-		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("secondsToRemainVisible"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedObjectFoundActivateChildren"), true);
 		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedObjectFound"), true);
 		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedObjectTracked"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedObjectLostDeactivateChildren"), true);
 		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackedObjectLost"), true);
+		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("secondsToRemainVisible"), true);
 		EditorGUILayout.PropertyField(this.serializedObject.FindProperty("eventReceiver"), true);
 		this.serializedObject.ApplyModifiedProperties();
 	}

@@ -72,30 +72,33 @@ public class ARToolKitSampleDataHandler
             }
         }
 
-        string currentSceneAssetsPath = Path.Join(Path.GetDirectoryName(SceneManager.GetActiveScene().path), "StreamingAssets");
-        if (Directory.Exists(currentSceneAssetsPath))
+        Scene activeScene = SceneManager.GetActiveScene();
+        if (activeScene == null) return;
+        string scenePath = activeScene.path;
+        if (string.IsNullOrEmpty(scenePath)) return;
+        string currentSceneAssetsPath = Path.Join(Path.GetDirectoryName(scenePath), "StreamingAssets");
+        if (!Directory.Exists(currentSceneAssetsPath)) return;
+
+        bool writeIgnoreList = false;
+        string[] sceneAssets = Directory.GetFiles(currentSceneAssetsPath).Where(s => !s.EndsWith(".meta")).ToArray();
+        foreach (string sceneAssetSourcePath in sceneAssets)
         {
-            bool writeIgnoreList = false;
-            string[] sceneAssets = Directory.GetFiles(currentSceneAssetsPath).Where(s => !s.EndsWith(".meta")).ToArray();
-            foreach (string sceneAssetSourcePath in sceneAssets)
+            string sceneAssetName = Path.GetFileName(sceneAssetSourcePath);
+            string sceneAssetTargetPath = Path.Join(streamingAssetsPath, sceneAssetName);
+            if (!File.Exists(sceneAssetTargetPath))
             {
-                string sceneAssetName = Path.GetFileName(sceneAssetSourcePath);
-                string sceneAssetTargetPath = Path.Join(streamingAssetsPath, sceneAssetName);
-                if (!File.Exists(sceneAssetTargetPath))
+                File.Copy(sceneAssetSourcePath, sceneAssetTargetPath);
+                if (!ignoreList.Contains(sceneAssetName))
                 {
-                    File.Copy(sceneAssetSourcePath, sceneAssetTargetPath);
-                    if (!ignoreList.Contains(sceneAssetName))
-                    {
-                        ignoreList.Add(sceneAssetName);
-                        ignoreList.Add($"{sceneAssetName}.meta");
-                        writeIgnoreList = true;
-                    }
+                    ignoreList.Add(sceneAssetName);
+                    ignoreList.Add($"{sceneAssetName}.meta");
+                    writeIgnoreList = true;
                 }
             }
-            if (writeIgnoreList)
-            {
-                File.WriteAllLines(streamingAssetsIgnoreFile, ignoreList);
-            }
+        }
+        if (writeIgnoreList)
+        {
+            File.WriteAllLines(streamingAssetsIgnoreFile, ignoreList);
         }
     }
 }

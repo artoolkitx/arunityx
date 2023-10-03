@@ -78,6 +78,11 @@ public class ARXTrackedObject : MonoBehaviour
 	public ARXUnityEventUnityObject OnTrackedObjectTracked;
 	public ARXUnityEventUnityObject OnTrackedObjectLost;
 
+    [Tooltip("If set, the children of this GameObject will be activated when the trackable is found. Normally set, but you might wish to clear if you want to manually control child object activation.")]
+	public bool OnTrackedObjectLostDeactivateChildren = true;
+    [Tooltip("If set, the children of this GameObject will be deactivated when the trackable is lost. Normally set, but you might wish to clear if you want to manually control child object deactivation.")]
+	public bool OnTrackedObjectFoundActivateChildren = true;
+
 	[Tooltip("Legecy event mechanism using Unity messaging. Event methods will be called on the referenced object and all children.")]
 	public GameObject eventReceiver;
 
@@ -207,8 +212,13 @@ public class ARXTrackedObject : MonoBehaviour
 			_visible = _visibleOrRemain = true;
 			OnTrackedObjectFound.Invoke(this);
 			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableFound", _trackable, SendMessageOptions.DontRequireReceiver);
-
-			for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
+            if (OnTrackedObjectFoundActivateChildren)
+			{
+			    for (int i = 0; i < this.transform.childCount; i++)
+			    {
+			        this.transform.GetChild(i).gameObject.SetActive(true);
+			    }
+			}
 		}
 
 		OnTrackedObjectTracked.Invoke(this);
@@ -231,7 +241,13 @@ public class ARXTrackedObject : MonoBehaviour
 			_visibleOrRemain = false;
 			OnTrackedObjectLost.Invoke(this);
 			if (eventReceiver != null) eventReceiver.BroadcastMessage("OnTrackableLost", _trackable, SendMessageOptions.DontRequireReceiver);
-			for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
+			if (OnTrackedObjectLostDeactivateChildren)
+			{
+			    for (int i = 0; i < this.transform.childCount; i++)
+			    {
+			        this.transform.GetChild(i).gameObject.SetActive(false);
+			    }
+			}
 		}
 	}
 
