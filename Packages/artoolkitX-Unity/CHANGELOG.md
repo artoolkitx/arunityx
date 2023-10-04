@@ -1,6 +1,13 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.8
+### 2023-10-04
+
+ * Update artoolkitX to v1.1.5.
+ * Add Found/Lost events to ARXTrackable. Usually, you'll want to link to found/lost events on ARXTrackedObject instead, but in the event you need to dynamically create the ARXTrackedObject at runtime in response to an ARXTrackable being detected, you can use these events to achieve that.
+ * ARController.StartAR is now directly callable again. (If you want to invoke it as a Coroutine instead, use the renamed StartARCo.)
+
 ## Version 1.2.7
 ### 2023-10-04
 

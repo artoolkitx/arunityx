@@ -74,9 +74,9 @@ public class ARXTrackedObject : MonoBehaviour
 	public float secondsToRemainVisible = 0.0f;		// How long to remain visible after tracking is lost (to reduce flicker)
 	private bool _visibleOrRemain = false;           // Whether to show the content (based on above variables)
 
-	public ARXUnityEventUnityObject OnTrackedObjectFound;
-	public ARXUnityEventUnityObject OnTrackedObjectTracked;
-	public ARXUnityEventUnityObject OnTrackedObjectLost;
+	public ARXUnityEventUnityObject OnTrackedObjectFound = new ARXUnityEventUnityObject();
+	public ARXUnityEventUnityObject OnTrackedObjectTracked = new ARXUnityEventUnityObject();
+	public ARXUnityEventUnityObject OnTrackedObjectLost = new ARXUnityEventUnityObject();
 
     [Tooltip("If set, the children of this GameObject will be activated when the trackable is found. Normally set, but you might wish to clear if you want to manually control child object activation.")]
 	public bool OnTrackedObjectLostDeactivateChildren = true;

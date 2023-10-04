@@ -228,6 +228,11 @@ public class ARXTrackable : MonoBehaviour
     private Matrix4x4 transformationMatrix;                                 // Full transformation matrix as a Unity matrix.
     private Matrix4x4 transformationMatrixR;                                // For stereo video sources, full transformation matrix as viewed from the right camera, as a Unity matrix.
 
+    [Tooltip("Register to receive an event that fires when a trackable is detected.")]
+    public ARXUnityEventUnityObject OnTrackableFound = new ARXUnityEventUnityObject();
+    [Tooltip("Register to receive an event that fires when a trackable is no longer detected.")]
+    public ARXUnityEventUnityObject OnTrackableLost = new ARXUnityEventUnityObject();
+
     private object loadLock = new object();
 
     /// <summary>
@@ -581,8 +586,14 @@ public class ARXTrackable : MonoBehaviour
                             //.Log("arwQueryTrackableTransformationStereo(" + UID + ") got matrixR: [" + Environment.NewLine + matrixRawR.ToString("F3").Trim() + "]");
                             transformationMatrixR = ARXUtilityFunctions.LHMatrixFromRHMatrix(matrixRawR);
                         }
+
                     }
                 }
+            }
+            if (v != visible)
+            {
+                if (v) OnTrackableFound.Invoke(this);
+                else OnTrackableLost.Invoke(this);
             }
             visible = v;
         }
@@ -607,6 +618,7 @@ public class ARXTrackable : MonoBehaviour
             uid = NO_ID;
             loadError = false;
             patterns = null; // Delete the patterns too.
+            visible = false;
         }
     }
 
