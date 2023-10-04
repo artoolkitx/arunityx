@@ -1,0 +1,156 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!74 &7400000
+AnimationClip:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: CharacterPopUp
+  serializedVersion: 3
+  m_AnimationType: 1
+  m_Compressed: 0
+  m_RotationCurves: []
+  m_CompressedRotationCurves: []
+  m_PositionCurves:
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: {x: 0, y: -73, z: -2.79263806}
+        inSlope: {x: 0, y: 0, z: 0}
+        outSlope: {x: 0, y: -0, z: 0}
+        tangentMode: 208486416
+      - time: .0833333358
+        value: {x: 0, y: -73, z: -2.79263806}
+        inSlope: {x: 0, y: 0, z: 0}
+        outSlope: {x: 0, y: 257.500031, z: 0}
+        tangentMode: 0
+      - time: .283333331
+        value: {x: 0, y: 50, z: -2.79263806}
+        inSlope: {x: 0, y: 47.5000916, z: 0}
+        outSlope: {x: 0, y: 47.5000916, z: 0}
+        tangentMode: 0
+      - time: .333333343
+        value: {x: 0, y: 24, z: -2.79263806}
+        inSlope: {x: 0, y: -199.999908, z: 0}
+        outSlope: {x: 0, y: -199.999908, z: 0}
+        tangentMode: 0
+      - time: .383333325
+        value: {x: 0, y: 30, z: -2.79263806}
+        inSlope: {x: 0, y: 120.000046, z: 0}
+        outSlope: {x: 0, y: 120.000046, z: 0}
+        tangentMode: 209069168
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    path: Character
+  m_ScaleCurves: []
+  m_FloatCurves: []
+  m_SampleRate: 60
+  m_WrapMode: 1
+  m_Bounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  m_MuscleClipInfo:
+    m_StartTime: 0
+    m_StopTime: 1
+    m_OrientationOffsetY: 0
+    m_Level: 0
+    m_CycleOffset: 0
+    m_LoopBlend: 0
+    m_LoopBlendOrientation: 0
+    m_LoopBlendPositionY: 0
+    m_LoopBlendPositionXZ: 0
+    m_KeepOriginalOrientation: 0
+    m_KeepOriginalPositionY: 1
+    m_KeepOriginalPositionXZ: 0
+    m_HeightFromFeet: 0
+    m_Mirror: 0
+  m_EditorCurves:
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .383333325
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.x
+    path: Character
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -73
+        inSlope: 0
+        outSlope: -0
+        tangentMode: 17
+      - time: .0833333358
+        value: -73
+        inSlope: 0
+        outSlope: 257.500031
+        tangentMode: 5
+      - time: .283333331
+        value: 50
+        inSlope: 47.5000916
+        outSlope: 47.5000916
+        tangentMode: 10
+      - time: .333333343
+        value: 24
+        inSlope: -199.999908
+        outSlope: -199.999908
+        tangentMode: 10
+      - time: .383333325
+        value: 30
+        inSlope: 120.000046
+        outSlope: 120.000046
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.y
+    path: Character
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -2.79263806
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .383333325
+        value: -2.79263806
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.z
+    path: Character
+    classID: 4
+    script: {fileID: 0}
+  m_EulerEditorCurves: []
+  m_Events:
+  - time: .116666667
+    functionName: PlaySound
+    data: pop
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
+  - time: .383333325
+    functionName: PlayAnimation
+    data: CharacterHover
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
