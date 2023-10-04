@@ -83,9 +83,9 @@ public class ARXTrackedCamera : ARXCamera
 	[Tooltip("The number of seconds this object should remain visible when the associated ARXTrackable object is no longer visible.")]
 	public float secondsToRemainVisible = 0.0f;     // How long to remain visible after tracking is lost (to reduce flicker)
 
-	public ARXUnityEventUnityObject OnTrackedCameraFound;
-	public ARXUnityEventUnityObject OnTrackedCameraTracked;
-	public ARXUnityEventUnityObject OnTrackedCameraLost;
+	public ARXUnityEventUnityObject OnTrackedCameraFound = new ARXUnityEventUnityObject();
+	public ARXUnityEventUnityObject OnTrackedCameraTracked = new ARXUnityEventUnityObject();
+	public ARXUnityEventUnityObject OnTrackedCameraLost = new ARXUnityEventUnityObject();
 	[Tooltip("Legacy event mechanism using Unity messaging. Event methods will be called on the referenced object and all children.")]
 	/// </summary>
 	public GameObject eventReceiver;

@@ -207,6 +207,11 @@ public class ARXTrackableEditor : Editor
 
         EditorGUILayout.Separator();
 
+        EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackableFound"), true);
+        EditorGUILayout.PropertyField(this.serializedObject.FindProperty("OnTrackableLost"), true);
+
+        EditorGUILayout.Separator();
+
 		EditorGUI.BeginChangeCheck();
 		bool filtered = EditorGUILayout.Toggle("Filtered:", m.Filtered);
 		if (EditorGUI.EndChangeCheck())
@@ -229,10 +234,10 @@ public class ARXTrackableEditor : Editor
 			EditorUtility.SetDirty(target);
 		}
 
-		//EditorGUILayout.BeginHorizontal();
+        //EditorGUILayout.BeginHorizontal();
 
-		// Draw all the marker images.
-		if (m.Patterns != null && !(m.Type == ARXTrackable.TrackableType.SquareBarcode && ARXController.Instance != null && ARXController.Instance.MatrixCodeType == ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID)) {
+        // Draw all the marker images.
+        if (m.Patterns != null && !(m.Type == ARXTrackable.TrackableType.SquareBarcode && ARXController.Instance != null && ARXController.Instance.MatrixCodeType == ARXController.ARToolKitMatrixCodeType.AR_MATRIX_CODE_GLOBAL_ID)) {
             for (int i = 0; i < m.Patterns.Length; i++) {
 				float imageMinWidth = Math.Max(m.Patterns[i].imageSizeX, 32);
 				float imageMinHeight = Math.Max(m.Patterns[i].imageSizeY, 32);

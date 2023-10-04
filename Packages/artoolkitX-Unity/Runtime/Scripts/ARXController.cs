@@ -457,7 +457,7 @@ public class ARXController : MonoBehaviour
         // Player start.
         if (AutoStartAR)
         {
-            StartCoroutine(StartAR());
+            StartAR();
         }
     }
 
@@ -476,7 +476,7 @@ public class ARXController : MonoBehaviour
         {
             if (_runOnUnpause)
             {
-                StartCoroutine(StartAR());
+                StartAR();
                 _runOnUnpause = false;
             }
         }
@@ -584,7 +584,12 @@ public class ARXController : MonoBehaviour
     // User-callable AR methods.
     //
 
-    public IEnumerator StartAR()
+    public void StartAR()
+    {
+        StartCoroutine(StartARCo());
+    }
+
+    public IEnumerator StartARCo()
     {
         // Catch attempts to inadvertently call StartAR() twice.
         if (_running)
@@ -608,7 +613,7 @@ public class ARXController : MonoBehaviour
             if (!haveCameraPermission)
             {
                 PermissionCallbacks pcs = new PermissionCallbacks();
-                pcs.PermissionGranted += (string permissionName) => StartCoroutine(StartAR());
+                pcs.PermissionGranted += (string permissionName) => StartAR();
                 pcs.PermissionDenied += (string permissionName) => {
                     showGUIErrorDialogContent = "As you have denied camera access, unable to start AR tracking.";
                     showGUIErrorDialog = true;
