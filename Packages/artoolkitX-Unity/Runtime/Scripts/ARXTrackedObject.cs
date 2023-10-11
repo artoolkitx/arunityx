@@ -162,7 +162,7 @@ public class ARXTrackedObject : MonoBehaviour
 		ARXTrackable trackable = GetTrackable();
 		if (trackable == null)
 		{
-			_visible = _visibleOrRemain = false;
+            NotVisibleInternal();
 			return;
 		}
 
@@ -185,7 +185,7 @@ public class ARXTrackedObject : MonoBehaviour
 			if (!c)
             {
 				ARXController.LogError("Error: no ARXOrigin and no ARXCamera in scene.", this);
-				_visible = _visibleOrRemain = false;
+                NotVisibleInternal();
 				return;
             }
 

@@ -1,6 +1,12 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.9
+### 2023-10-11
+
+ * Update artoolkitX to v1.1.6.
+ * Bug fix: Ensure ARXTrackedObject runs its "On Lost" routine if its ARXTrackable is reset.
+
 ## Version 1.2.8
 ### 2023-10-04
 
