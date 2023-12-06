@@ -1,6 +1,11 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.10
+### 2023-12-06
+
+ * Update artoolkitX to v1.1.7 with support for videoExternal nocopy.
+
 ## Version 1.2.9
 ### 2023-10-11
 
