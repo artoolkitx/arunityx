@@ -876,7 +876,7 @@ public class ARXController : MonoBehaviour
 
     //
     // Tracker configuration
-    // </summary>
+    //
     #region Tracker configuration.
 
     public ARXController.ARToolKitThresholdMode VideoThresholdMode

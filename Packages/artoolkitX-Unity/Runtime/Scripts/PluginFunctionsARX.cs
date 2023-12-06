@@ -529,18 +529,42 @@ public class PluginFunctionsARX : IPluginFunctions
         return ARX_pinvoke.arwVideoPushInit(videoSourceIndex, width, height, pixelFormat, cameraIndex, cameraPosition);
     }
 
+    private struct arwVideoPushReleaseCallbackStubData
+    {
+        public PluginFunctionsVideoPushReleaseCallback releaseCallback;
+        public object releaseCallbackUserdata;
+    }
+
+    [AOT.MonoPInvokeCallback(typeof(ARX_pinvoke.arwVideoPushReleaseCallback))]
+    private static void arwVideoPushReleaseCallbackStub(IntPtr userData)
+    {
+        GCHandle gch = GCHandle.FromIntPtr(userData);
+        arwVideoPushReleaseCallbackStubData data = (arwVideoPushReleaseCallbackStubData)gch.Target;
+        data.releaseCallback.Invoke(data.releaseCallbackUserdata);
+        gch.Free();
+    }
+
     override public int arwVideoPush(int videoSourceIndex,
                 NativeArray<byte> buf0, int buf0PixelStride, int buf0RowStride,
                 NativeArray<byte>? buf1 = null, int buf1PixelStride = 0, int buf1RowStride = 0,
                 NativeArray<byte>? buf2 = null, int buf2PixelStride = 0, int buf2RowStride = 0,
-                NativeArray<byte>? buf3 = null, int buf3PixelStride = 0, int buf3RowStride = 0)
+                NativeArray<byte>? buf3 = null, int buf3PixelStride = 0, int buf3RowStride = 0,
+                PluginFunctionsVideoPushReleaseCallback releaseCallback = null, object releaseCallbackUserdata = null)
     {
 #if ARX_ALLOW_UNITY_VIDEO_PROVIDERS
+        ARX_pinvoke.arwVideoPushReleaseCallback callback = null;
+        IntPtr callbackUserdata = IntPtr.Zero;
+        if (releaseCallback != null)
+        {
+            callback = arwVideoPushReleaseCallbackStub;
+            callbackUserdata = GCHandle.ToIntPtr(GCHandle.Alloc(new arwVideoPushReleaseCallbackStubData { releaseCallback = releaseCallback, releaseCallbackUserdata = releaseCallbackUserdata }));
+        }
         return ARX_pinvoke.arwVideoPush(videoSourceIndex,
                                         buf0.GetIntPtr(), buf0.Length, buf0PixelStride, buf0RowStride,
                                         buf1.HasValue ? buf1.Value.GetIntPtr() : IntPtr.Zero, buf1.HasValue ? buf1.Value.Length : 0, buf1PixelStride, buf1RowStride,
                                         buf2.HasValue ? buf2.Value.GetIntPtr() : IntPtr.Zero, buf2.HasValue ? buf2.Value.Length : 0, buf2PixelStride, buf2RowStride,
-                                        buf3.HasValue ? buf3.Value.GetIntPtr() : IntPtr.Zero, buf3.HasValue ? buf3.Value.Length : 0, buf3PixelStride, buf3RowStride);
+                                        buf3.HasValue ? buf3.Value.GetIntPtr() : IntPtr.Zero, buf3.HasValue ? buf3.Value.Length : 0, buf3PixelStride, buf3RowStride,
+                                        callback, callbackUserdata);
 #else
         return -1;
 #endif

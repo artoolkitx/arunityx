@@ -34,6 +34,7 @@
  *
  */
 
+using System;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine;
@@ -42,6 +43,8 @@ using UnityEngine;
 public delegate void PluginFunctionsLogCallback([MarshalAs(UnmanagedType.LPStr)] string msg);
 
 public delegate void PluginFunctionsTrackableEventCallback(int trackableEventType, int trackableUID);
+
+public delegate void PluginFunctionsVideoPushReleaseCallback(object userData);
 
 /// <summary>
 /// Defines a plugin interface via which artoolkitX functionality can be invoked.
@@ -136,6 +139,7 @@ public abstract class IPluginFunctions
                 NativeArray<byte> buf0, int buf0PixelStride, int buf0RowStride,
                 NativeArray<byte>? buf1 = null, int buf1PixelStride = 0, int buf1RowStride = 0,
                 NativeArray<byte>? buf2 = null, int buf2PixelStride = 0, int buf2RowStride = 0,
-                NativeArray<byte>? buf3 = null, int buf3PixelStride = 0, int buf3RowStride = 0);
+                NativeArray<byte>? buf3 = null, int buf3PixelStride = 0, int buf3RowStride = 0,
+                PluginFunctionsVideoPushReleaseCallback releaseCallback = null, object releaseCallbackUserdata = null);
     abstract public int arwVideoPushFinal(int videoSourceIndex);
 }
