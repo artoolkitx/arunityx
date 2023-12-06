@@ -1,0 +1,78 @@
+{
+  "name": "org.artoolkitx.artoolkitx-unity",
+  "version": "1.2.10",
+  "displayName": "artoolkitX-Unity",
+  "description": "The artoolkitX for Unity augmented reality toolkit",
+  "homepage": "https://www.artoolkitx.org/",
+  "unity": "2020.2",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "licensesUrl": "https://github.com/artoolkitx/artoolkitx/wiki/artoolkitX-License-Terms",
+  "documentationUrl": "https://github.com/artoolkitx/arunityx/wiki",
+  "keywords": [
+    "artoolkitx",
+    "artoolkit",
+    "ar",
+    "augmented reality",
+    "mr",
+    "mixed reality",
+    "cv",
+    "computer vision",
+    "tracking"
+  ],
+  "author": {
+    "name": "artoolkitX",
+    "email": "info@artoolkitx.org",
+    "url": "https://www.artoolkitx.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/artoolkitx/arunityx.git",
+    "directory": "Packages/artoolkitX-Unity"
+  },
+  "bugs": {
+    "url" : "https://github.com/artoolkitx/arunityx/issues"
+  },
+  "hideInEditor": false,
+  "samples": [
+    {
+      "displayName": "2D Texture Sample",
+      "description": "A basic configuration of the artoolkitX 2D texture tracker",
+      "path": "Samples~/2DTextureSample"
+    },
+    {
+      "displayName": "Square Sample",
+      "description": "A basic configuration of the artoolkitX square tracker with pictorial (template) markers",
+      "path": "Samples~/SquareSample"
+    },
+    {
+      "displayName": "Barcode Sample",
+      "description": "A basic configuration of the artoolkitX square tracker with barcode (matrix code) markers",
+      "path": "Samples~/BarcodeSample"
+    },
+    {
+      "displayName": "Cube Sample",
+      "description": "A configuration of the artoolkitX square tracker with a cube-shaped multimarker barcode set",
+      "path": "Samples~/CubeSample"
+    },
+    {
+      "displayName": "Multimarker Sheet Sample",
+      "description": "A configuration of the artoolkitX square tracker with a multimarker barcode set on a flat sheet",
+      "path": "Samples~/MultimarkerSheetSample"
+    },
+    {
+      "displayName": "Stereo Optical Passthrough Sample",
+      "description": "An example of stereo optical passthrough display with a single video source",
+      "path": "Samples~/StereoOpticalPassthroughSample"
+    },
+    {
+      "displayName": "Stereo Video Passthrough Sample",
+      "description": "An example of stereo video sources with stereo video-passthrough display",
+      "path": "Samples~/StereoVideoPassthroughSample"
+    },
+    {
+      "displayName": "Fisticuffs",
+      "description": "Fisticuffs, a feature complete mini-game built on artoolkitX",
+      "path": "Samples~/Fisticuffs"
+    }
+  ]
+}
