@@ -748,6 +748,7 @@ public class ARXVideoConfig : MonoBehaviour
                 {
                     // All Unity video sources require external module.
                     config = modules[ARVideoModule.External].moduleSelectionString;
+                    config += " -nocopy";
                 }
             }
         }

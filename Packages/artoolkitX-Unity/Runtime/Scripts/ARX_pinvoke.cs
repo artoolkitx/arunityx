@@ -241,12 +241,15 @@ public static class ARX_pinvoke
 	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int arwVideoPushInit(int videoSourceIndex, int width, int height, string pixelFormat, int cameraIndex, int cameraPosition);
 
+	public delegate void arwVideoPushReleaseCallback(IntPtr userData);
+
 	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int arwVideoPush(int videoSourceIndex,
                 IntPtr buf0p, int buf0Size, int buf0PixelStride, int buf0RowStride,
 				IntPtr buf1p, int buf1Size, int buf1PixelStride, int buf1RowStride,
 				IntPtr buf2p, int buf2Size, int buf2PixelStride, int buf2RowStride,
-				IntPtr buf3p, int buf3Size, int buf3PixelStride, int buf3RowStride);
+				IntPtr buf3p, int buf3Size, int buf3PixelStride, int buf3RowStride,
+                arwVideoPushReleaseCallback releaseCallback, IntPtr releaseCallbackUserdata);
 
 	[DllImport(LIBRARY_NAME, CallingConvention = CallingConvention.Cdecl)]
 	public static extern int arwVideoPushFinal(int videoSourceIndex);
