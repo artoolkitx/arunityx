@@ -1,21 +1,26 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.11
+### 2024-01-17
+
+ * Update artoolkitX to v1.1.18 with change in 2D tracker feature frame size handling.
+
 ## Version 1.2.10
 ### 2023-12-06
 
- * Update artoolkitX to v1.1.7 with support for videoExternal nocopy.
+ * Update artoolkitX to v1.1.17 with support for videoExternal nocopy.
 
 ## Version 1.2.9
 ### 2023-10-11
 
- * Update artoolkitX to v1.1.6.
+ * Update artoolkitX to v1.1.16.
  * Bug fix: Ensure ARXTrackedObject runs its "On Lost" routine if its ARXTrackable is reset.
 
 ## Version 1.2.8
 ### 2023-10-04
 
- * Update artoolkitX to v1.1.5.
+ * Update artoolkitX to v1.1.15.
  * Add Found/Lost events to ARXTrackable. Usually, you'll want to link to found/lost events on ARXTrackedObject instead, but in the event you need to dynamically create the ARXTrackedObject at runtime in response to an ARXTrackable being detected, you can use these events to achieve that.
  * ARController.StartAR is now directly callable again. (If you want to invoke it as a Coroutine instead, use the renamed StartARCo.)
 
