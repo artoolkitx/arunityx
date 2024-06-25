@@ -1,6 +1,11 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.2.12
+### 2024-06-25
+
+ * Update artoolkitX to v1.1.20 with improved resolution/tracking distance in 2D tracker, especially for textures far from camera.
+
 ## Version 1.2.11
 ### 2024-01-17
 

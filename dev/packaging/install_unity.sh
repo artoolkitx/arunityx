@@ -70,7 +70,7 @@ done
 
 
 # If user didn't specify a version, use a default.
-UNITY_VERSION=${UNITY_VERSION:-2021.3.2f1}
+UNITY_VERSION=${UNITY_VERSION:-2022.3.20f1}
 
 cd "unity_installers"
 
@@ -95,9 +95,46 @@ then
 fi
 
 if [[ -n $WITH_ANDROID ]]; then
-    if [ "$UNITY_VERSION" = "2021.3.2f1" ]; then
+    if [[ "$UNITY_VERSION" =~ 2022\.3\..* ]]; then
         if [ "$OS" = "Windows" ]; then
-            sdkInstallRoot=$(${WINPATH} -u C:\\Program\ Files\\Unity\\Editor\\Data\\PlaybackEngines\\AndroidPlayer)
+            sdkInstallRoot=$(${WINPATH} -u C:\\Program\ Files\\Unity\ ${UNITY_VERSION}\\Editor\\Data\\PlaybackEngines\\AndroidPlayer)
+            # JDK
+            unzip "OpenJDK11U-jdk_x64_windows_hotspot_11.0.14.1_1.zip" -d "${sdkInstallRoot}"
+            mv "${sdkInstallRoot}/jdk-11.0.14.1+1" "${sdkInstallRoot}/OpenJDK"
+            # SDK
+            unzip -q "sdk-tools-windows-4333796.zip" -d "${sdkInstallRoot}/SDK"
+            unzip -q "210b77e4bc623bd4cdda4dae790048f227972bd2.build-tools_r32-windows.zip" -d "${sdkInstallRoot}/SDK/build-tools"
+            mv "${sdkInstallRoot}/SDK/build-tools/android-12" "${sdkInstallRoot}/SDK/build-tools/32.0.0"
+            unzip -q "platform-tools_r32.0.0-windows.zip" -d "${sdkInstallRoot}/SDK"
+            unzip -q "android-ndk-r23b-windows.zip" -d "${sdkInstallRoot}"
+            mv "${sdkInstallRoot}/android-ndk-r23b" "${sdkInstallRoot}/NDK"
+            mkdir "${sdkInstallRoot}/SDK/cmdline-tools"
+            unzip -q "commandlinetools-win-8092744_latest.zip" -d "${sdkInstallRoot}/SDK/cmdline-tools"
+            mv "${sdkInstallRoot}/SDK/cmdline-tools/cmdline-tools" "${sdkInstallRoot}/SDK/cmdline-tools/6.0"
+        elif [ "$OS" = "Darwin" ]; then
+            sdkInstallRoot='/Applications/Unity/Editor/PlaybackEngines/AndroidPlayer'
+            # JDK. Mac package layout differs.
+            tar xzf "OpenJDK11U-jdk_x64_mac_hotspot_11.0.14.1_1.tar.gz" -C "${sdkInstallRoot}"
+            mv "${sdkInstallRoot}/jdk-11.0.14.1+1/Contents/Home" "${sdkInstallRoot}/OpenJDK"
+            rm -rf "${sdkInstallRoot}/jdk-11.0.14.1+1"
+            # SDK
+            unzip -q "sdk-tools-darwin-4333796.zip" -d "${sdkInstallRoot}/SDK"
+            unzip -q "5219cc671e844de73762e969ace287c29d2e14cd.build-tools_r32-macosx.zip" -d "${sdkInstallRoot}/SDK/build-tools"
+            mv "${sdkInstallRoot}/SDK/build-tools/android-12" "${sdkInstallRoot}/SDK/build-tools/32.0.0"
+            unzip -q "platform-tools_r32.0.0-darwin.zip" -d "${sdkInstallRoot}/SDK"
+            unzip -q "android-ndk-r23b-darwin.zip" -d "${sdkInstallRoot}"
+            mv "${sdkInstallRoot}/android-ndk-r23b" "${sdkInstallRoot}/NDK"
+            mkdir "${sdkInstallRoot}/SDK/cmdline-tools"
+            unzip -q "commandlinetools-mac-8092744_latest.zip" -d "${sdkInstallRoot}/SDK/cmdline-tools"
+            mv "${sdkInstallRoot}/SDK/cmdline-tools/cmdline-tools" "${sdkInstallRoot}/SDK/cmdline-tools/6.0"
+        fi
+        unzip -q "platform-31_r01.zip" -d "${sdkInstallRoot}/SDK/platforms"
+        mv "${sdkInstallRoot}/SDK/platforms/android-12" "${sdkInstallRoot}/SDK/platforms/android-31"
+        unzip -q "platform-32_r01.zip" -d "${sdkInstallRoot}/SDK/platforms"
+        mv "${sdkInstallRoot}/SDK/platforms/android-12" "${sdkInstallRoot}/SDK/platforms/android-32"
+    elif [[ "$UNITY_VERSION" =~ 2021\.3\..* ]]; then
+        if [ "$OS" = "Windows" ]; then
+            sdkInstallRoot=$(${WINPATH} -u C:\\Program\ Files\\Unity\ ${UNITY_VERSION}\\Editor\\Data\\PlaybackEngines\\AndroidPlayer)
             unzip "OpenJDK8U-jdk_x64_windows_hotspot_8u292b10.zip" -d "${sdkInstallRoot}"
             mv "${sdkInstallRoot}/jdk8u292-b10" "${sdkInstallRoot}/OpenJDK"
             unzip "sdk-tools-windows-4333796.zip" -d "${sdkInstallRoot}/SDK"
@@ -106,6 +143,9 @@ if [[ -n $WITH_ANDROID ]]; then
             unzip "platform-tools_r30.0.4-windows.zip" -d "${sdkInstallRoot}/SDK"
             unzip "android-ndk-r21d-windows-x86_64.zip" -d "${sdkInstallRoot}"
             mv "${sdkInstallRoot}/android-ndk-r21d" "${sdkInstallRoot}/NDK"
+            mkdir "${sdkInstallRoot}/SDK/cmdline-tools"
+            unzip -q "commandlinetools-win-6609375_latest.zip" -d "${sdkInstallRoot}/SDK/cmdline-tools"
+            mv "${sdkInstallRoot}/SDK/cmdline-tools/tools" "${sdkInstallRoot}/SDK/cmdline-tools/2.1"
         elif [ "$OS" = "Darwin" ]; then
             sdkInstallRoot='/Applications/Unity/Editor/PlaybackEngines/AndroidPlayer'
             tar xzf "OpenJDK8U-jdk_x64_mac_hotspot_8u292b10.tar.gz" -C "${sdkInstallRoot}"
@@ -116,6 +156,9 @@ if [[ -n $WITH_ANDROID ]]; then
             unzip "fbad467867e935dce68a0296b00e6d1e76f15b15.platform-tools_r30.0.4-darwin.zip" -d "${sdkInstallRoot}/SDK"
             unzip "android-ndk-r21d-darwin-x86_64.zip" -d "${sdkInstallRoot}"
             mv "${sdkInstallRoot}/android-ndk-r21d" "${sdkInstallRoot}/NDK"
+            mkdir "${sdkInstallRoot}/SDK/cmdline-tools"
+            unzip -q "commandlinetools-mac-6609375_latest.zip" -d "${sdkInstallRoot}/SDK/cmdline-tools"
+            mv "${sdkInstallRoot}/SDK/cmdline-tools/tools" "${sdkInstallRoot}/SDK/cmdline-tools/2.1"
         fi
         unzip "platform-29_r05.zip" -d "${sdkInstallRoot}/SDK/platforms"
         mv "${sdkInstallRoot}/SDK/platforms/android-10" "${sdkInstallRoot}/SDK/platforms/android-29"
