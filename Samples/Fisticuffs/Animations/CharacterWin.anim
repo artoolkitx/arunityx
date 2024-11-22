@@ -1,0 +1,851 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!74 &7400000
+AnimationClip:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: CharacterWin
+  serializedVersion: 3
+  m_AnimationType: 1
+  m_Compressed: 0
+  m_RotationCurves:
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: {x: -.844124079, y: -5.01757071e-08, z: 5.01757071e-08, w: .536147833}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: -559038737
+      - time: 2
+        value: {x: -.844124079, y: -5.01757071e-08, z: 5.01757071e-08, w: .536147833}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: -559038737
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    path: Character/BoxingGlove_Holder_L
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: {x: -.762776196, y: -1.09847321e-07, z: -5.81708832e-08, w: .646662593}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: -559038737
+      - time: 2
+        value: {x: -.762776196, y: -1.09847321e-07, z: -5.81708832e-08, w: .646662593}
+        inSlope: {x: 0, y: 0, z: 0, w: 0}
+        outSlope: {x: 0, y: 0, z: 0, w: 0}
+        tangentMode: -559038737
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    path: Character/BoxingGlove_Holder_R
+  m_CompressedRotationCurves: []
+  m_PositionCurves:
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: {x: 0, y: 1.33947587, z: 0}
+        inSlope: {x: 0, y: 2.31513286, z: 0}
+        outSlope: {x: 0, y: 2.31513286, z: 0}
+        tangentMode: -559038737
+      - time: .366666734
+        value: {x: 0, y: 2.18835807, z: 0}
+        inSlope: {x: 0, y: -.0779815912, z: 0}
+        outSlope: {x: 0, y: -.0779815912, z: 0}
+        tangentMode: -559038737
+      - time: .716666758
+        value: {x: 0, y: 1.32347441, z: 0}
+        inSlope: {x: 0, y: .0929181576, z: 0}
+        outSlope: {x: 0, y: .0929181576, z: 0}
+        tangentMode: -559038737
+      - time: .99999994
+        value: {x: 0, y: 2.07627153, z: 0}
+        inSlope: {x: 0, y: -.0371792316, z: 0}
+        outSlope: {x: 0, y: -.0371792316, z: 0}
+        tangentMode: -559038737
+      - time: 1.31666672
+        value: {x: 0, y: 1.21136248, z: 0}
+        inSlope: {x: 0, y: -.186223626, z: 0}
+        outSlope: {x: 0, y: -.186223626, z: 0}
+        tangentMode: -559038737
+      - time: 1.68333328
+        value: {x: 0, y: 2.07627153, z: 0}
+        inSlope: {x: 0, y: .0160605907, z: 0}
+        outSlope: {x: 0, y: .0160605907, z: 0}
+        tangentMode: -559038737
+      - time: 2
+        value: {x: 0, y: 1.33947599, z: 0}
+        inSlope: {x: 0, y: -2.32672238, z: 0}
+        outSlope: {x: 0, y: -2.32672238, z: 0}
+        tangentMode: -559038737
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    path: Character/BoxingGlove_Holder_R
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: {x: 0, y: 30, z: 5.99999952}
+        inSlope: {x: 0, y: 0, z: 0}
+        outSlope: {x: 0, y: 0, z: 0}
+        tangentMode: -559038737
+      - time: 1
+        value: {x: 0, y: 50, z: 5.99999952}
+        inSlope: {x: 0, y: 0, z: 0}
+        outSlope: {x: 0, y: 0, z: 0}
+        tangentMode: -559038737
+      - time: 2
+        value: {x: 0, y: 30, z: 5.99999952}
+        inSlope: {x: 0, y: 0, z: 0}
+        outSlope: {x: 0, y: 0, z: 0}
+        tangentMode: -559038737
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    path: Character
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: {x: 0, y: 1.28986335, z: 0}
+        inSlope: {x: 0, y: 2.31513929, z: 0}
+        outSlope: {x: 0, y: 2.31513929, z: 0}
+        tangentMode: -559038737
+      - time: .366666734
+        value: {x: 0, y: 2.13874793, z: 0}
+        inSlope: {x: 0, y: -.0779764652, z: 0}
+        outSlope: {x: 0, y: -.0779764652, z: 0}
+        tangentMode: -559038737
+      - time: .716666758
+        value: {x: 0, y: 1.27386558, z: 0}
+        inSlope: {x: 0, y: .0929182768, z: 0}
+        outSlope: {x: 0, y: .0929182768, z: 0}
+        tangentMode: -559038737
+      - time: .99999994
+        value: {x: 0, y: 2.02666163, z: 0}
+        inSlope: {x: 0, y: -.0371804237, z: 0}
+        outSlope: {x: 0, y: -.0371804237, z: 0}
+        tangentMode: -559038737
+      - time: 1.31666672
+        value: {x: 0, y: 1.16175294, z: 0}
+        inSlope: {x: 0, y: -.186223507, z: 0}
+        outSlope: {x: 0, y: -.186223507, z: 0}
+        tangentMode: -559038737
+      - time: 1.68333328
+        value: {x: 0, y: 2.02666163, z: 0}
+        inSlope: {x: 0, y: .0160552263, z: 0}
+        outSlope: {x: 0, y: .0160552263, z: 0}
+        tangentMode: -559038737
+      - time: 2
+        value: {x: 0, y: 1.28986299, z: 0}
+        inSlope: {x: 0, y: -2.32673216, z: 0}
+        outSlope: {x: 0, y: -2.32673216, z: 0}
+        tangentMode: -559038737
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    path: Character/BoxingGlove_Holder_L
+  m_ScaleCurves: []
+  m_FloatCurves: []
+  m_SampleRate: 60
+  m_WrapMode: 2
+  m_Bounds:
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 0, y: 0, z: 0}
+  m_MuscleClipInfo:
+    m_StartTime: 0
+    m_StopTime: 1
+    m_OrientationOffsetY: 0
+    m_Level: 0
+    m_CycleOffset: 0
+    m_LoopBlend: 0
+    m_LoopBlendOrientation: 0
+    m_LoopBlendPositionY: 0
+    m_LoopBlendPositionXZ: 0
+    m_KeepOriginalOrientation: 0
+    m_KeepOriginalPositionY: 1
+    m_KeepOriginalPositionXZ: 0
+    m_HeightFromFeet: 0
+    m_Mirror: 0
+  m_EditorCurves:
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .366666734
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .716666758
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .99999994
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1.31666672
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1.68333328
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.x
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 1.33947587
+        inSlope: 2.31513286
+        outSlope: 2.31513286
+        tangentMode: 10
+      - time: .366666734
+        value: 2.18835807
+        inSlope: -.0779815912
+        outSlope: -.0779815912
+        tangentMode: 10
+      - time: .716666758
+        value: 1.32347441
+        inSlope: .0929181576
+        outSlope: .0929181576
+        tangentMode: 10
+      - time: .99999994
+        value: 2.07627153
+        inSlope: -.0371792316
+        outSlope: -.0371792316
+        tangentMode: 10
+      - time: 1.31666672
+        value: 1.21136248
+        inSlope: -.186223626
+        outSlope: -.186223626
+        tangentMode: 10
+      - time: 1.68333328
+        value: 2.07627153
+        inSlope: .0160605907
+        outSlope: .0160605907
+        tangentMode: 10
+      - time: 2
+        value: 1.33947599
+        inSlope: -2.32672238
+        outSlope: -2.32672238
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.y
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .366666734
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .716666758
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .99999994
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1.31666672
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1.68333328
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.z
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 5.99999952
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1
+        value: 5.99999952
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: 5.99999952
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.z
+    path: Character
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 30
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 1
+        value: 50
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: 30
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.y
+    path: Character
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.x
+    path: Character
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: .536147833
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 2
+        value: .536147833
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalRotation.w
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .366666734
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .716666758
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .99999994
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1.31666672
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1.68333328
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.x
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 1.28986335
+        inSlope: 2.31513929
+        outSlope: 2.31513929
+        tangentMode: 10
+      - time: .366666734
+        value: 2.13874793
+        inSlope: -.0779764652
+        outSlope: -.0779764652
+        tangentMode: 10
+      - time: .716666758
+        value: 1.27386558
+        inSlope: .0929182768
+        outSlope: .0929182768
+        tangentMode: 10
+      - time: .99999994
+        value: 2.02666163
+        inSlope: -.0371804237
+        outSlope: -.0371804237
+        tangentMode: 10
+      - time: 1.31666672
+        value: 1.16175294
+        inSlope: -.186223507
+        outSlope: -.186223507
+        tangentMode: 10
+      - time: 1.68333328
+        value: 2.02666163
+        inSlope: .0160552263
+        outSlope: .0160552263
+        tangentMode: 10
+      - time: 2
+        value: 1.28986299
+        inSlope: -2.32673216
+        outSlope: -2.32673216
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.y
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .366666734
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .716666758
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .99999994
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1.31666672
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 1.68333328
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalPosition.z
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 5.01757071e-08
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 2
+        value: 5.01757071e-08
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalRotation.z
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -5.01757071e-08
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 2
+        value: -5.01757071e-08
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalRotation.y
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -.844124079
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 2
+        value: -.844124079
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalRotation.x
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -.762776196
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 2
+        value: -.762776196
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalRotation.x
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -1.09847321e-07
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 2
+        value: -1.09847321e-07
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalRotation.y
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -5.81708832e-08
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 2
+        value: -5.81708832e-08
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalRotation.z
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: .646662593
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      - time: 2
+        value: .646662593
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: m_LocalRotation.w
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  m_EulerEditorCurves:
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -80.5808868
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 5
+      - time: .366666734
+        value: -80.5808868
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      - time: .99999994
+        value: -80.5808868
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      - time: 2
+        value: -80.5808868
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: localEulerAnglesBaked.x
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 5
+      - time: .366666734
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      - time: .99999994
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      - time: 2
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: localEulerAnglesBaked.y
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -180.000015
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 5
+      - time: .366666734
+        value: -180.000015
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      - time: .99999994
+        value: -180.000015
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      - time: 2
+        value: -180.000015
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 1
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: localEulerAnglesBaked.z
+    path: Character/BoxingGlove_Holder_R
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -64.8435669
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .366666734
+        value: -64.8435669
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .716666758
+        value: -64.8435669
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .99999994
+        value: -64.8435669
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: -64.8435669
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: localEulerAnglesBaked.x
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .366666734
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .716666758
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .99999994
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: 180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: localEulerAnglesBaked.y
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  - curve:
+      serializedVersion: 2
+      m_Curve:
+      - time: 0
+        value: -180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .366666734
+        value: -180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .716666758
+        value: -180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: .99999994
+        value: -180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      - time: 2
+        value: -180
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 10
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+    attribute: localEulerAnglesBaked.z
+    path: Character/BoxingGlove_Holder_L
+    classID: 4
+    script: {fileID: 0}
+  m_Events: []

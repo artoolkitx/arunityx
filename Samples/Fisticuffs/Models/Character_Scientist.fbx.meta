@@ -1,0 +1,166 @@
+fileFormatVersion: 2
+guid: cf2a4975f20434202bc6ad87192f5360
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: Clothes
+    100002: Nose
+    100004: Lens.2
+    100006: EyeRight
+    100008: Lens
+    100010: EyeLeft
+    100012: Moustache
+    100014: EyebrowRight
+    100016: EyebrowLeft
+    100018: Face
+    100022: Cap
+    100024: Rim.2
+    100026: Contents.2
+    100028: TestTubeLeft
+    100030: HandLeft
+    100032: Rim
+    100034: Contents
+    100036: TestTubeRight
+    100038: HandRight
+    100040: //RootNode
+    400000: Clothes
+    400002: Nose
+    400004: Lens.2
+    400006: EyeRight
+    400008: Lens
+    400010: EyeLeft
+    400012: Moustache
+    400014: EyebrowRight
+    400016: EyebrowLeft
+    400018: Face
+    400022: Cap
+    400024: Rim.2
+    400026: Contents.2
+    400028: TestTubeLeft
+    400030: HandLeft
+    400032: Rim
+    400034: Contents
+    400036: TestTubeRight
+    400038: HandRight
+    400040: //RootNode
+    2300000: Clothes
+    2300002: Nose
+    2300004: Lens.2
+    2300006: EyeRight
+    2300008: Lens
+    2300010: EyeLeft
+    2300012: Moustache
+    2300014: EyebrowRight
+    2300016: EyebrowLeft
+    2300018: Face
+    2300022: Cap
+    2300024: Rim.2
+    2300026: Contents.2
+    2300028: TestTubeLeft
+    2300030: HandLeft
+    2300032: Rim
+    2300034: Contents
+    2300036: TestTubeRight
+    2300038: HandRight
+    3300000: Clothes
+    3300002: Nose
+    3300004: Lens.2
+    3300006: EyeRight
+    3300008: Lens
+    3300010: EyeLeft
+    3300012: Moustache
+    3300014: EyebrowRight
+    3300016: EyebrowLeft
+    3300018: Face
+    3300022: Cap
+    3300024: Rim.2
+    3300026: Contents.2
+    3300028: TestTubeLeft
+    3300030: HandLeft
+    3300032: Rim
+    3300034: Contents
+    3300036: TestTubeRight
+    3300038: HandRight
+    4300000: HandRight
+    4300002: TestTubeRight
+    4300004: Contents
+    4300006: Rim
+    4300008: HandLeft
+    4300010: TestTubeLeft
+    4300012: Contents.2
+    4300014: Rim.2
+    4300016: Cap
+    4300018: HeadKnobs
+    4300020: Face
+    4300022: EyebrowLeft
+    4300024: EyebrowRight
+    4300026: Moustache
+    4300028: EyeLeft
+    4300030: Lens
+    4300032: EyeRight
+    4300034: Lens.2
+    4300036: Nose
+    4300038: Clothes
+    11100000: //RootNode
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: .00999999978
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+  tangentSpace:
+    normalSmoothAngle: 22
+    splitTangentsAcrossUV: 1
+    normalImportMode: 1
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 1
+  additionalBone: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
