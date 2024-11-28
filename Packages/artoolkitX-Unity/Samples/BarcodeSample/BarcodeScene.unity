@@ -311,6 +311,12 @@ MonoBehaviour:
   currentFilterSampleRate: 30
   currentFilterCutoffFreq: 15
   currentNFTScale: 1
+  OnTrackableFound:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTrackableLost:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &15
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -909,4 +915,6 @@ MonoBehaviour:
   OnTrackedObjectLost:
     m_PersistentCalls:
       m_Calls: []
+  OnTrackedObjectLostDeactivateChildren: 1
+  OnTrackedObjectFoundActivateChildren: 1
   eventReceiver: {fileID: 0}

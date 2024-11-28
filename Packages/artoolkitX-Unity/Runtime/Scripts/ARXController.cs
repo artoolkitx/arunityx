@@ -357,23 +357,17 @@ public class ARXController : MonoBehaviour
     //
     // MonoBehavior methods.
     //
-    void Awake()
-    {
-        //Log(LogTag + "ARXController.Awake())");
-    }
 
     void OnEnable()
     {
+        LogInfo(LogTag + "ARXController.OnEnable()");
+
         PluginFunctions = new PluginFunctionsARX();
         arvideoconfig = gameObject.GetComponent<ARXVideoConfig>();
-#if !UNITY_EDITOR
-#  if UNITY_IOS
+#if UNITY_IOS && !UNITY_EDITOR
         ARX_pinvoke.aruRequestCamera();
         System.Threading.Thread.Sleep(2000);
-#  endif
-#endif // !UNITY_EDITOR
-
-        LogInfo(LogTag + "ARXController.OnEnable()");
+#endif
         Application.runInBackground = true;
 
         // Register the log callback. This can be set irrespective of whether PluginFunctions.inited is true or false.
@@ -392,7 +386,6 @@ public class ARXController : MonoBehaviour
                 break;
             case RuntimePlatform.Android:                          // Unity Player on Android.
             case RuntimePlatform.IPhonePlayer:                     // Unity Player on iOS.
-                break;
             default:
                 break;
         }
@@ -419,8 +412,7 @@ public class ARXController : MonoBehaviour
             for (int i = 0; i < count; i++)
             {
                 ARVideoSourceInfoT si = new ARVideoSourceInfoT();
-                int flags;
-                bool ok = PluginFunctions.arwGetVideoSourceInfoListEntry(i, out si.name, out si.model, out si.UID, out flags, out si.open_token);
+                bool ok = PluginFunctions.arwGetVideoSourceInfoListEntry(i, out si.name, out si.model, out si.UID, out int flags, out si.open_token);
                 if (ok)
                 {
                     si.flags = (AR_VIDEO_SOURCE_INFO)flags; // Coerce type.
@@ -525,22 +517,17 @@ public class ARXController : MonoBehaviour
         {
             case RuntimePlatform.OSXEditor:
             case RuntimePlatform.OSXPlayer:
-                goto case RuntimePlatform.WindowsPlayer;
             case RuntimePlatform.WindowsEditor:
             case RuntimePlatform.WindowsPlayer:
-            //case RuntimePlatform.LinuxEditor:
+            case RuntimePlatform.LinuxEditor:
             case RuntimePlatform.LinuxPlayer:
-                PluginFunctions.arwRegisterLogCallback(null);
-                break;
-            case RuntimePlatform.Android:
-                break;
-            case RuntimePlatform.IPhonePlayer:
-                break;
             case RuntimePlatform.WSAPlayerX86:
             case RuntimePlatform.WSAPlayerX64:
             case RuntimePlatform.WSAPlayerARM:
                 PluginFunctions.arwRegisterLogCallback(null);
                 break;
+            case RuntimePlatform.Android:
+            case RuntimePlatform.IPhonePlayer:
             default:
                 break;
         }
@@ -676,7 +663,7 @@ public class ARXController : MonoBehaviour
                         if (videoConfiguration0.IndexOf("-device=Android") != -1) videoConfiguration1 += " -format=RGBA";
                     }
                     break;
-                //case RuntimePlatform.LinuxEditor:
+                case RuntimePlatform.LinuxEditor:
                 case RuntimePlatform.LinuxPlayer:
                 default:
                     break;
