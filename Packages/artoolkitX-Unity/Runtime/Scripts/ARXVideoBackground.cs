@@ -47,8 +47,7 @@ public class ARXVideoBackground : MonoBehaviour
     private int _videoHeight;
     private int _videoPixelSize;
     private string _videoPixelFormatString;
-    private Matrix4x4 _videoProjectionMatrix;
-    private GameObject _videoBackgroundMeshGO = null; // The GameObject which holds the MeshFilter and MeshRenderer for the background video, and also the Camera object(s) used to render them. 
+    private GameObject _videoBackgroundMeshGO = null; // The GameObject which holds the MeshFilter and MeshRenderer for the background video, and also the Camera object(s) used to render them.
     private Color32[] _videoColor32Array = null; // An array used to fetch pixels from the native side, only if not using native GL texturing.
     private Texture2D _videoTexture = null;  // Texture object with the video image.
     private Material _videoMaterial = null;  // Material which uses our "VideoPlaneNoLight" shader, and paints itself with _videoTexture.
@@ -95,26 +94,36 @@ public class ARXVideoBackground : MonoBehaviour
         // If there is only one video source, and we're the second (right) eye, we won't create or
         // update the video texture but instead just observe the one we assume has been created by the
         // left eye.
-        if (!arController.VideoIsStereo && _cameraStereoRightEye)
-        {
-            _videoTexture = null;
-            _videoMaterial = null;
-            _videoBackgroundMeshGO = null;
-            _videoColor32Array = null;
-        }
-        else
+        _videoTexture = null;
+        _videoMaterial = null;
+        _videoBackgroundMeshGO = null;
+        _videoColor32Array = null;
+        if (!_cameraStereoRightEye || arController.VideoIsStereo)
         {
             // Create a game object on which to draw the video.
-            // Invert flipV for texture because artoolkitX video frame is top-down, Unity's is bottom-up.
             string name = "Video source" + (arController.VideoIsStereo ? nameSuffix : "");
             ARXController.Log(LogTag + name + " size " + _videoWidth + "x" + _videoHeight + "@" + _videoPixelSize + "Bpp (" + _videoPixelFormatString + ")");
-
-            _videoBackgroundMeshGO = ARXUtilityFunctions.CreateVideoObject(name, _videoWidth, _videoHeight, 1000.0f, arCamera.ContentFlipH, !arCamera.ContentFlipV, BackgroundLayer, out _videoTexture, out _videoMaterial);  // 1000.0f is arbitrary distance, since we'll observe with camera using orthogonal projection. Just needs to be between near and far.
-            if (_videoBackgroundMeshGO == null || _videoTexture == null || _videoMaterial == null)
+            if (arController.UnityVideoSource != null)
             {
-                ARXController.Log(LogTag + "Error: unable to create video mesh.");
+                _videoBackgroundMeshGO = ARXUtilityFunctions.CreateVideoObject(name, arController.UnityVideoSource.GetTexture(), 1000.0f, arCamera.ContentFlipH, arCamera.ContentFlipV, BackgroundLayer, out _videoMaterial);  // 1000.0f is arbitrary distance, since we'll observe with camera using orthogonal projection. Just needs to be between near and far.
+                if (!_videoBackgroundMeshGO || !_videoMaterial)
+                {
+                    ARXController.Log(LogTag + "Error: unable to create video mesh.");
+                }
             }
-            _videoColor32Array = /*_useNativeGLTexturing ? null : */ new Color32[_videoWidth * _videoHeight];
+            else
+            {
+                // Invert flipV for texture because artoolkitX video frame is top-down, Unity's is bottom-up.
+                _videoBackgroundMeshGO = ARXUtilityFunctions.CreateVideoObject(name, _videoWidth, _videoHeight, 1000.0f, arCamera.ContentFlipH, !arCamera.ContentFlipV, BackgroundLayer, out _videoTexture, out _videoMaterial);  // 1000.0f is arbitrary distance, since we'll observe with camera using orthogonal projection. Just needs to be between near and far.
+                if (_videoBackgroundMeshGO == null || _videoTexture == null || _videoMaterial == null)
+                {
+                    ARXController.Log(LogTag + "Error: unable to create video mesh.");
+                }
+                else
+                {
+                    _videoColor32Array = /*_useNativeGLTexturing ? null : */ new Color32[_videoWidth * _videoHeight];
+                }
+            }
         }
 
         // Create an orthographic camera to observe it.
@@ -194,8 +203,7 @@ public class ARXVideoBackground : MonoBehaviour
 #endif
         _videoBackgroundCamera.pixelRect = cam.pixelRect;
         _videoBackgroundCamera.orthographic = true;
-        _videoBackgroundCamera.projectionMatrix = Matrix4x4.identity;
-        if (arCamera.ContentRotate90) _videoBackgroundCamera.projectionMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) * _videoBackgroundCamera.projectionMatrix;
+        _videoBackgroundCamera.projectionMatrix = arCamera.ContentRotate90 ? Matrix4x4.TRS(Vector3.zero, Quaternion.AngleAxis(90.0f, Vector3.back), Vector3.one) : Matrix4x4.identity;;
         _videoBackgroundCamera.projectionMatrix = Matrix4x4.Ortho(-w*0.5f, w*0.5f, -h*0.5f, h*0.5f, 0.0f, 2000.0f) * _videoBackgroundCamera.projectionMatrix;
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
         switch (Screen.orientation)
@@ -274,7 +282,7 @@ public class ARXVideoBackground : MonoBehaviour
     }
 
 
-    public float VideoAlpha 
+    public float VideoAlpha
     {
         get {
             if (_videoMaterial == null) return 1.0f;

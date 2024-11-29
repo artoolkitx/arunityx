@@ -540,7 +540,7 @@ public class PluginFunctionsARX : IPluginFunctions
     {
         GCHandle gch = GCHandle.FromIntPtr(userData);
         arwVideoPushReleaseCallbackStubData data = (arwVideoPushReleaseCallbackStubData)gch.Target;
-        data.releaseCallback.Invoke(data.releaseCallbackUserdata);
+        if (data.releaseCallback != null) data.releaseCallback.Invoke(data.releaseCallbackUserdata);
         gch.Free();
     }
 
@@ -564,6 +564,46 @@ public class PluginFunctionsARX : IPluginFunctions
                                         buf1.HasValue ? buf1.Value.GetIntPtr() : IntPtr.Zero, buf1.HasValue ? buf1.Value.Length : 0, buf1PixelStride, buf1RowStride,
                                         buf2.HasValue ? buf2.Value.GetIntPtr() : IntPtr.Zero, buf2.HasValue ? buf2.Value.Length : 0, buf2PixelStride, buf2RowStride,
                                         buf3.HasValue ? buf3.Value.GetIntPtr() : IntPtr.Zero, buf3.HasValue ? buf3.Value.Length : 0, buf3PixelStride, buf3RowStride,
+                                        callback, callbackUserdata);
+#else
+        return -1;
+#endif
+    }
+
+    private struct arwVideoPushReleaseCallbackStubData2
+    {
+        public GCHandle colors32GCH;
+        public PluginFunctionsVideoPushReleaseCallback releaseCallback;
+        public object releaseCallbackUserdata;
+    }
+
+    [AOT.MonoPInvokeCallback(typeof(ARX_pinvoke.arwVideoPushReleaseCallback))]
+    private static void arwVideoPushReleaseCallbackStub2(IntPtr userData)
+    {
+        GCHandle gch = GCHandle.FromIntPtr(userData);
+        arwVideoPushReleaseCallbackStubData2 data = (arwVideoPushReleaseCallbackStubData2)gch.Target;
+        data.colors32GCH.Free();
+        if (data.releaseCallback != null) data.releaseCallback.Invoke(data.releaseCallbackUserdata);
+        gch.Free();
+    }
+
+    override public int arwVideoPush(int videoSourceIndex,
+                Color32[] colors32, int width,
+                PluginFunctionsVideoPushReleaseCallback releaseCallback = null, object releaseCallbackUserdata = null)
+    {
+#if ARX_ALLOW_UNITY_VIDEO_PROVIDERS
+        GCHandle colors32GCH = GCHandle.Alloc(colors32, GCHandleType.Pinned);
+        IntPtr address = colors32GCH.AddrOfPinnedObject();
+        int length = colors32.Length * 4;
+        int pixelStride = 4;
+        int rowStride = width * 4;
+        ARX_pinvoke.arwVideoPushReleaseCallback callback = arwVideoPushReleaseCallbackStub2;
+        IntPtr callbackUserdata = GCHandle.ToIntPtr(GCHandle.Alloc(new arwVideoPushReleaseCallbackStubData2 { colors32GCH = colors32GCH, releaseCallback = releaseCallback, releaseCallbackUserdata = releaseCallbackUserdata }));
+        return ARX_pinvoke.arwVideoPush(videoSourceIndex,
+                                        address, length, pixelStride, rowStride,
+                                        IntPtr.Zero, 0, 0, 0,
+                                        IntPtr.Zero, 0, 0, 0,
+                                        IntPtr.Zero, 0, 0, 0,
                                         callback, callbackUserdata);
 #else
         return -1;

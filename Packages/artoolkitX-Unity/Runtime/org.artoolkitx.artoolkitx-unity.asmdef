@@ -9,6 +9,7 @@
         "LinuxStandalone64",
         "macOSStandalone",
         "WSA",
+        "WebGL",
         "WindowsStandalone64"
     ],
     "excludePlatforms": [],

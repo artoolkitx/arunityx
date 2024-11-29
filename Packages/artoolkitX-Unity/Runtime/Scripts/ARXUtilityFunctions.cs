@@ -157,35 +157,47 @@ public static class ARXUtilityFunctions
 	// Places references to the Color array (as required), the texture and the material into the out parameters.
 	public static GameObject CreateVideoObject(string name, int w, int h, float zPos, bool flipH, bool flipV, int layer, out Texture2D vt, out Material vm)
 	{
-		// Check parameters.
+		// Check parameters and create video texture.
 		if (w <= 0 || h <= 0)
 		{
-			ARXController.Log("Error: CreateVideoGameObject cannot configure video texture with invalid video size: " + w + "x" + h);
+			ARXController.Log($"Error: CreateVideoObject cannot configure video texture with invalid video size: {w}x{h}.");
+			vt = null; vm = null;
+			return null;
+		}
+		vt = CreateTexture(w, h, TextureFormat.ARGB32);
+		if (vt == null)
+		{
+			ARXController.Log("Error: CreateVideoObject cannot create video texture.");
 			vt = null; vm = null;
 			return null;
 		}
 
-		// Create new GameObject to hold mesh.
-		GameObject vbmgo = new GameObject(name);
+		return CreateVideoObject(name, vt, zPos, flipH, flipV, layer, out vm);
+	}
+
+	public static GameObject CreateVideoObject(string name, Texture vt, float zPos, bool flipH, bool flipV, int layer, out Material vm)
+	{
+		Shader shaderSource = Shader.Find("VideoPlaneNoLight"); //arunityX.Properties.Resources.VideoPlaneShader;
+        vm = new Material(shaderSource)
+        {
+            hideFlags = HideFlags.HideAndDontSave,
+            mainTexture = vt
+        };
+
+        // Create new GameObject to hold mesh.
+        GameObject vbmgo = new GameObject(name);
 		if (vbmgo == null)
 		{
 			ARXController.Log("Error: CreateVideoGameObject cannot create GameObject.");
-			vt = null; vm = null;
+			vm = null;
 			return null;
 		}
 		vbmgo.layer = layer; // Belongs in the background layer.
 
-		// Create an video texture, an array that can be used to update it and a material to display it.
-		vt = ARXUtilityFunctions.CreateTexture(w, h, TextureFormat.ARGB32);
-		Shader shaderSource = Shader.Find("VideoPlaneNoLight");
-		vm = new Material(shaderSource); //arunityX.Properties.Resources.VideoPlaneShader;
-		vm.hideFlags = HideFlags.HideAndDontSave;
-		vm.mainTexture = vt;
-
 		// Now create a mesh appropriate for displaying the video, a mesh filter to instantiate that mesh,
 		// and a mesh renderer to render the material on the instantiated mesh.
 		MeshFilter filter = vbmgo.AddComponent<MeshFilter>();
-		filter.mesh = ARXUtilityFunctions.CreateTextureMesh(1.0f, 1.0f, w, h, zPos, flipH, flipV);
+		filter.mesh = CreateTextureMesh(1.0f, 1.0f, vt.width, vt.height, zPos, flipH, flipV);
 		MeshRenderer meshRenderer = vbmgo.AddComponent<MeshRenderer>();
 		meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 		meshRenderer.receiveShadows = false;
@@ -193,7 +205,6 @@ public static class ARXUtilityFunctions
 
 		return vbmgo;
 	}
-
 
 	public static TextureFormat GetTextureFormatFromARPixelFormat(string pixelFormat)
 	{
@@ -228,14 +239,16 @@ public static class ARXUtilityFunctions
 			return null;
 		}
 
-		Texture2D vt = new Texture2D(width, height, format, false);
-		vt.hideFlags = HideFlags.HideAndDontSave;
-		vt.filterMode = FilterMode.Bilinear;
-		vt.wrapMode = TextureWrapMode.Clamp;
-		vt.anisoLevel = 0;
+        Texture2D vt = new Texture2D(width, height, format, false)
+        {
+            hideFlags = HideFlags.HideAndDontSave,
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp,
+            anisoLevel = 0
+        };
 
-		// Initialise the video texture to black.
-		Color32[] arr = new Color32[width * height];
+        // Initialise the video texture to black.
+        Color32[] arr = new Color32[width * height];
 		Color32 blackOpaque = new Color32(0, 0, 0, 255);
 		for (int i = 0; i < arr.Length; i++) arr[i] = blackOpaque;
 		vt.SetPixels32(arr);

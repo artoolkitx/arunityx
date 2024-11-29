@@ -49,7 +49,7 @@ using UnityEngine;
 public static class ARX_pinvoke
 {
 	// The name of the external library containing the native functions
-#if UNITY_IOS && !UNITY_EDITOR
+#if (UNITY_IOS || UNITY_WEBGL) && !UNITY_EDITOR
 	private const string LIBRARY_NAME = "__Internal";
 #else
 	private const string LIBRARY_NAME = "ARX";
