@@ -70,6 +70,7 @@ public class ARXVideoConfigEditor : Editor
                 case BuildTarget.StandaloneLinux64: p = RuntimePlatform.LinuxPlayer; break;
                 case BuildTarget.iOS: p = RuntimePlatform.IPhonePlayer; break;
                 case BuildTarget.Android: p = RuntimePlatform.Android; break;
+                case BuildTarget.WebGL: p = RuntimePlatform.WebGLPlayer; break;
                 default: p = (RuntimePlatform)(-1); break;
             }
 
@@ -90,6 +91,17 @@ public class ARXVideoConfigEditor : Editor
             showPlatformConfig[pci] = EditorGUILayout.Foldout(showPlatformConfig[pci], pc.name);
             if (!showPlatformConfig[pci]) continue;
 
+            bool tempUuvs = false;
+            if (pc.supportedUnityVideoSources.Contains(ARXVideoConfig.ARVideoUnityVideoSource.WebcamTexture))
+            {
+                tempUuvs = EditorGUILayout.Toggle("Use Unity Webcam", pc.isUsingUnityVideoSource);
+            }
+            if (tempUuvs != pc.isUsingUnityVideoSource)
+            {
+                pc.isUsingUnityVideoSource = tempUuvs;
+                if (tempUuvs) pc.unityVideoSource = ARXVideoConfig.ARVideoUnityVideoSource.WebcamTexture;
+                needSave = true;
+            }
 #if !ARX_ALLOW_UNITY_VIDEO_PROVIDERS
             if (pc.isUsingUnityVideoSource)
             {
@@ -131,7 +143,7 @@ public class ARXVideoConfigEditor : Editor
                 {
                     if (arvideoconfig.arcontroller != null)
                     {
-                        arvideoconfig.sourceInfoList = arvideoconfig.arcontroller.GetVideoSourceInfoList(ARXVideoConfig.modules[pc.module].moduleSelectionString);
+                        arvideoconfig.sourceInfoList = arvideoconfig.GetVideoSourceInfoList(ARXVideoConfig.modules[pc.module].moduleSelectionString);
                     }
                 }
                 if (arvideoconfig.sourceInfoList != null && arvideoconfig.sourceInfoList.Count > 0)
@@ -151,12 +163,12 @@ public class ARXVideoConfigEditor : Editor
             {
                 Func<Enum, bool> checkPosition = (e) =>
                 {
-                    ARXController.AR_VIDEO_POSITION p = (ARXController.AR_VIDEO_POSITION)e;
-                    if (p == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK || p == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) return true;
-                    else if (p == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER && pc.platform == RuntimePlatform.Android) return true;
+                    ARXVideoConfig.AR_VIDEO_POSITION p = (ARXVideoConfig.AR_VIDEO_POSITION)e;
+                    if (p == ARXVideoConfig.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK || p == ARXVideoConfig.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) return true;
+                    else if (p == ARXVideoConfig.AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER && pc.platform == RuntimePlatform.Android) return true;
                     return false;
                 };
-                ARXController.AR_VIDEO_POSITION tempPos = (ARXController.AR_VIDEO_POSITION)EditorGUILayout.EnumPopup(new GUIContent("Camera position"), pc.position, checkPosition, false);
+                ARXVideoConfig.AR_VIDEO_POSITION tempPos = (ARXVideoConfig.AR_VIDEO_POSITION)EditorGUILayout.EnumPopup(new GUIContent("Camera position"), pc.position, checkPosition, false);
                 if (tempPos != pc.position)
                 {
                     pc.position = tempPos;

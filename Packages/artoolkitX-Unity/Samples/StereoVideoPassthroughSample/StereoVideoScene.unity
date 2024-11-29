@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -38,13 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
-  m_GIWorkflowMode: 1
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -67,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 0
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 1024
     m_ReflectionCompression: 2
     m_MixedBakeMode: 1
     m_BakeBackend: 0
@@ -190,7 +186,6 @@ MonoBehaviour:
   QuitOnEscOrBack: 1
   AutoStartAR: 1
   videoCParamName0: 
-  videoConfigurationLinux0: 
   VideoIsStereo: 1
   transL2RName: transL2R
   videoCParamName1: 
@@ -229,13 +224,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5}
+  serializedVersion: 2
   m_LocalRotation: {x: -0.7071069, y: 0, z: 0, w: 0.70710677}
   m_LocalPosition: {x: 0, y: 0, z: -0.020000001}
   m_LocalScale: {x: 0.04, y: 0.040000003, z: 0.040000003}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2047598856}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &11
 Transform:
@@ -244,13 +239,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6}
+  serializedVersion: 2
   m_LocalRotation: {x: 0.48430634, y: 0.0962891, z: -0.61432767, w: 0.6154489}
   m_LocalPosition: {x: 0.0010511007, y: -0.03258413, z: -0.13985455}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 12}
-  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &12
 Transform:
@@ -259,6 +254,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7}
+  serializedVersion: 2
   m_LocalRotation: {x: 0.7071069, y: 0, z: 0, w: 0.70710677}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -269,7 +265,6 @@ Transform:
   - {fileID: 11}
   - {fileID: 2047598856}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &13
 Transform:
@@ -278,13 +273,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.037124142, y: 1.3689122, z: 0.19534296}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &14
 MonoBehaviour:
@@ -474,6 +469,12 @@ MonoBehaviour:
   currentFilterSampleRate: 30
   currentFilterCutoffFreq: 15
   currentNFTScale: 1
+  OnTrackableFound:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTrackableLost:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!20 &15
 Camera:
   m_ObjectHideFlags: 0
@@ -488,9 +489,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -534,6 +543,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -575,9 +587,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &19
@@ -602,9 +622,8 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6}
   m_Enabled: 1
-  serializedVersion: 10
+  serializedVersion: 11
   m_Type: 1
-  m_Shape: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 0.8064516
   m_Range: 10
@@ -654,14 +673,18 @@ Light:
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
 --- !u!196 &26
 NavMeshSettings:
   serializedVersion: 2
   m_ObjectHideFlags: 0
   m_BuildSettings:
-    serializedVersion: 2
+    serializedVersion: 3
     agentTypeID: 0
     agentRadius: 0.5
     agentHeight: 2
@@ -674,7 +697,7 @@ NavMeshSettings:
     cellSize: 0.16666666
     manualTileSize: 0
     tileSize: 256
-    accuratePlacement: 0
+    buildHeightMesh: 0
     maxJobWorkers: 0
     preserveTilesOutsideBounds: 0
     debug:
@@ -707,13 +730,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 188789579}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 12}
-  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &188789581
 MonoBehaviour:
@@ -763,9 +786,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -833,13 +864,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 276500837}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 12}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &276500839
 Camera:
@@ -855,9 +886,17 @@ Camera:
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
+  m_Iso: 200
+  m_ShutterSpeed: 0.005
+  m_Aperture: 16
+  m_FocusDistance: 10
+  m_FocalLength: 50
+  m_BladeCount: 5
+  m_Curvature: {x: 2, y: 11}
+  m_BarrelClipping: 0.25
+  m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 50
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -944,7 +983,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2aabcb9e1b2834681b717ff03624a181, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  arcontroller: {fileID: 9}
+  arcontroller: {fileID: 0}
   configs:
   - platform: 7
     name: Windows (Editor)
@@ -970,7 +1009,7 @@ MonoBehaviour:
     inputSelectionMethod: 4
     position: 8
     index: 0
-    VideoSourceInfoListOpenToken: -uid=0x8020000005ac8514
+    VideoSourceInfoListOpenToken: 
     width: 0
     height: 0
     AVFoundationPreset: 0
@@ -1065,6 +1104,40 @@ MonoBehaviour:
     supportedUnityVideoSources: 0000000001000000
     isUsingUnityVideoSource: 0
     unityVideoSource: 0
+  - platform: 16
+    name: Linux (Editor)
+    defaultModule: 2
+    module: 2
+    inputSelectionMethod: 0
+    position: 0
+    index: 0
+    VideoSourceInfoListOpenToken: 
+    width: 640
+    height: 480
+    AVFoundationPreset: 0
+    sizePreference: 0
+    isUsingManualConfig: 0
+    manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
+  - platform: 17
+    name: Web Player
+    defaultModule: 8
+    module: 8
+    inputSelectionMethod: 0
+    position: 0
+    index: 0
+    VideoSourceInfoListOpenToken: 
+    width: 640
+    height: 480
+    AVFoundationPreset: 0
+    sizePreference: 0
+    isUsingManualConfig: 0
+    manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 1
+    unityVideoSource: 1
   configsForStereoSecondInput:
   - platform: 7
     name: Windows (Editor)
@@ -1185,6 +1258,40 @@ MonoBehaviour:
     supportedUnityVideoSources: 0000000001000000
     isUsingUnityVideoSource: 0
     unityVideoSource: 0
+  - platform: 16
+    name: Linux (Editor)
+    defaultModule: 2
+    module: 2
+    inputSelectionMethod: 1
+    position: 0
+    index: 1
+    VideoSourceInfoListOpenToken: 
+    width: 640
+    height: 480
+    AVFoundationPreset: 0
+    sizePreference: 0
+    isUsingManualConfig: 0
+    manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 0
+    unityVideoSource: 0
+  - platform: 17
+    name: Web Player
+    defaultModule: 8
+    module: 8
+    inputSelectionMethod: 0
+    position: 0
+    index: 0
+    VideoSourceInfoListOpenToken: 
+    width: 640
+    height: 480
+    AVFoundationPreset: 0
+    sizePreference: 0
+    isUsingManualConfig: 0
+    manualConfig: 
+    supportedUnityVideoSources: 0000000001000000
+    isUsingUnityVideoSource: 1
+    unityVideoSource: 1
 --- !u!1 &2047598855
 GameObject:
   m_ObjectHideFlags: 0
@@ -1209,6 +1316,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2047598855}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -1216,7 +1324,6 @@ Transform:
   m_Children:
   - {fileID: 10}
   m_Father: {fileID: 12}
-  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2047598857
 MonoBehaviour:
@@ -1241,4 +1348,12 @@ MonoBehaviour:
   OnTrackedObjectLost:
     m_PersistentCalls:
       m_Calls: []
+  OnTrackedObjectLostDeactivateChildren: 1
+  OnTrackedObjectFoundActivateChildren: 1
   eventReceiver: {fileID: 0}
+--- !u!1660057539 &9223372036854775807
+SceneRoots:
+  m_ObjectHideFlags: 0
+  m_Roots:
+  - {fileID: 13}
+  - {fileID: 12}

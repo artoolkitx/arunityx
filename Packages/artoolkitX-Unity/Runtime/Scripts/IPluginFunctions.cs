@@ -141,5 +141,8 @@ public abstract class IPluginFunctions
                 NativeArray<byte>? buf2 = null, int buf2PixelStride = 0, int buf2RowStride = 0,
                 NativeArray<byte>? buf3 = null, int buf3PixelStride = 0, int buf3RowStride = 0,
                 PluginFunctionsVideoPushReleaseCallback releaseCallback = null, object releaseCallbackUserdata = null);
+    abstract public int arwVideoPush(int videoSourceIndex,
+                Color32[] colors32, int width,
+                PluginFunctionsVideoPushReleaseCallback releaseCallback = null, object releaseCallbackUserdata = null);
     abstract public int arwVideoPushFinal(int videoSourceIndex);
 }

@@ -381,7 +381,8 @@ public class ARXCamera : MonoBehaviour
 	// Note that [DefaultExecutionOrder] is used on ARXTrackable to ensure the base ARXTrackable has updated before we try and use the transformation.
 	protected virtual void Update()
 	{
-		// Update tracking if we are running in Player.
+		// If we are running in Player, and the scene has an ARXOrigin, update our
+		// pose relative to the base trackable.
 		if (Application.isPlaying && _origin != null) {
 			UpdateTracking();
 			ApplyTracking();

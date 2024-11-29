@@ -51,6 +51,70 @@ public class ARXVideoConfig : MonoBehaviour
         arcontroller = gameObject.GetComponent<ARXController>();
     }
 
+    ///
+    /// @brief Values for device position, as encoded in ARVideoSourceInfoT.flags & AR_VIDEO_SOURCE_INFO_POSITION_MASK.
+    ///
+    public enum AR_VIDEO_POSITION
+    {
+        AR_VIDEO_POSITION_UNKNOWN   = 0x0000, ///< Camera physical position on device unknown.
+        AR_VIDEO_POSITION_FRONT     = 0x0008, ///< Camera is on front of device pointing towards user.
+        AR_VIDEO_POSITION_BACK      = 0x0010, ///< Camera is on back of device pointing away from user.
+        AR_VIDEO_POSITION_LEFT      = 0x0018, ///< Camera is on left of device pointing to user's left.
+        AR_VIDEO_POSITION_RIGHT     = 0x0020, ///< Camera is on right of device pointing to user's right.
+        AR_VIDEO_POSITION_TOP       = 0x0028, ///< Camera is on top of device pointing toward ceiling when device is held upright.
+        AR_VIDEO_POSITION_BOTTOM    = 0x0030, ///< Camera is on bottom of device pointing towards floor when device is held upright.
+        AR_VIDEO_POSITION_OTHER     = 0x0038, ///< Camera physical position on device is known but none of the above.
+    }
+
+    ///
+    /// @brief Values for device stereo mode, as encoded in ARVideoSourceInfoT.flags & AR_VIDEO_SOURCE_INFO_STEREO_MODE_MASK.
+    ///
+    public enum AR_VIDEO_STEREO_MODE
+    {
+        AR_VIDEO_STEREO_MODE_MONO                      = 0x0000, ///< Device is monoscopic.
+        AR_VIDEO_STEREO_MODE_LEFT                      = 0x0040, ///< Device is left eye of a stereoscopic pair.
+        AR_VIDEO_STEREO_MODE_RIGHT                     = 0x0080, ///< Device is right eye of a stereoscopic pair.
+        AR_VIDEO_STEREO_MODE_FRAME_SEQUENTIAL          = 0x00C0, ///< Device is left and right stereo images in sequential frames.
+        AR_VIDEO_STEREO_MODE_SIDE_BY_SIDE              = 0x0100, ///< Device is left and right stereo images in a single frame, arranged horizontally with left eye on left.
+        AR_VIDEO_STEREO_MODE_OVER_UNDER                = 0x0140, ///< Device is left and right stereo images in a single frame, arranged vertically with left eye on top.
+        AR_VIDEO_STEREO_MODE_HALF_SIDE_BY_SIDE         = 0x0180, ///< Device is left and right stereo images in a single frame with the frames scaled to half-width, arranged horizontally with left eye on left.
+        AR_VIDEO_STEREO_MODE_OVER_UNDER_HALF_HEIGHT    = 0x01C0, ///< Device is left and right stereo images in a single frame with the frames scaled to half-height, arranged vertically with left eye on top.
+        AR_VIDEO_STEREO_MODE_ROW_INTERLACED            = 0x0200, ///< Device is left and right stereo images in a single frame with row interleaving, where pixels in even-numbered rows are sampled from the left eye, and pixels in odd-number rows from the right eye.
+        AR_VIDEO_STEREO_MODE_COLUMN_INTERLACED         = 0x0240, ///< Device is left and right stereo images in a single frame with column interleaving, where pixels in even-numbered columns are sampled from the left eye, and pixels in odd-number columns from the right eye.
+        AR_VIDEO_STEREO_MODE_ROW_AND_COLUMN_INTERLACED = 0x0280, ///< Device is left and right stereo images in a single frame with row and column interleaving, where pixels where the evenness/oddness of the row is the same as the column are sampled from the left eye, and the remaining pixels from the right eye.
+        AR_VIDEO_STEREO_MODE_ANAGLYPH_RG               = 0x02C0, ///< Device is left and right stereo images in a single frame, where both eyes are converted to mono and the left eye is carried in the red channel and the right eye in the green channel.
+        AR_VIDEO_STEREO_MODE_ANAGLYPH_RB               = 0x0300, ///< Device is left and right stereo images in a single frame, where both eyes are converted to mono and the left eye is carried in the red channel and the right eye in the blue channel.
+        AR_VIDEO_STEREO_MODE_RESERVED0                 = 0x0340, ///< Reserved for future use.
+        AR_VIDEO_STEREO_MODE_RESERVED1                 = 0x0380, ///< Reserved for future use.
+        AR_VIDEO_STEREO_MODE_RESERVED2                 = 0x03C0, ///< Reserved for future use.
+    }
+
+    ///
+    /// @brief Values for ARVideoSourceInfoT.flags.
+    ///
+    public enum AR_VIDEO_SOURCE_INFO
+    {
+        AR_VIDEO_SOURCE_INFO_FLAG_OFFLINE     = 0x0001,      ///< 0 = unknown or not offline, 1 = offline.
+        AR_VIDEO_SOURCE_INFO_FLAG_IN_USE      = 0x0002,      ///< 0 = unknown or not in use, 1 = in use.
+        AR_VIDEO_SOURCE_INFO_FLAG_OPEN_ASYNC  = 0x0004,      ///< 0 = open normally, 1 = open async.
+        AR_VIDEO_SOURCE_INFO_POSITION_MASK    = 0x0038,      ///< compare (value & AR_VIDEO_SOURCE_INFO_POSITION_MASK) against enums.
+        AR_VIDEO_SOURCE_INFO_STEREO_MODE_MASK = 0x03C0,      ///< compare (value & AR_VIDEO_SOURCE_INFO_STEREO_MODE_MASK) against enums.
+    }
+
+    ///
+    /// @brief Values describing a video source.
+    ///
+    public struct ARVideoSourceInfoT
+    {
+        public string name;             ///< UTF-8 encoded string representing the name of the source, in a form suitable for presentation to an end-user, e.g. in a list of inputs.
+        public string model;            ///< UTF-8 encoded string representing the model of the source, where this information is available. May be NULL if model information is not attainable.
+        public string UID;              ///< UTF-8 encoded string representing a unique ID for this source, and suitable for passing to arVideoOpen/ar2VideoOpen as a UID in the configuration. May be NULL if sources cannot be uniquely identified.
+        public AR_VIDEO_SOURCE_INFO flags;
+        public string open_token;       ///< UTF-8 encoded string containing the token that should be passed (in the space-separated list of tokens to arVideoOpen/ar2VideoOpen, in order to select this source to be opened. Note that this token is only valid so long as the underlying video hardware configuration does not change, so should not be stored between sessions.
+    }
+
+
+
     /// <summary>
     /// Video input modules.
     /// </summary>
@@ -169,6 +233,8 @@ public class ARXVideoConfig : MonoBehaviour
                     RuntimePlatform.Android,
                     RuntimePlatform.IPhonePlayer,
                     RuntimePlatform.LinuxPlayer,
+                    RuntimePlatform.LinuxEditor,
+                    RuntimePlatform.WebGLPlayer,
                 },
                 supportsSelectionByPosition = false,
                 positionSelectionString = null,
@@ -190,6 +256,8 @@ public class ARXVideoConfig : MonoBehaviour
                     RuntimePlatform.Android,
                     RuntimePlatform.IPhonePlayer,
                     RuntimePlatform.LinuxPlayer,
+                    RuntimePlatform.LinuxEditor,
+                    RuntimePlatform.WebGLPlayer,
                 },
                 supportsSelectionByPosition = false,
                 positionSelectionString = null,
@@ -205,6 +273,7 @@ public class ARXVideoConfig : MonoBehaviour
                 moduleSelectionString = "-module=V4L2",
                 runtimePlatforms = new RuntimePlatform[] {
                     RuntimePlatform.LinuxPlayer,
+                    RuntimePlatform.LinuxEditor,
                 },
                 supportsSelectionByPosition = false,
                 positionSelectionString = null,
@@ -220,6 +289,7 @@ public class ARXVideoConfig : MonoBehaviour
                 moduleSelectionString = "-module=GStreamer",
                 runtimePlatforms = new RuntimePlatform[] {
                     RuntimePlatform.LinuxPlayer,
+                    RuntimePlatform.LinuxEditor,
                 },
                 supportsSelectionByPosition = false,
                 positionSelectionString = null,
@@ -235,6 +305,7 @@ public class ARXVideoConfig : MonoBehaviour
                 moduleSelectionString = "-module=1394",
                 runtimePlatforms = new RuntimePlatform[] {
                     RuntimePlatform.LinuxPlayer,
+                    RuntimePlatform.LinuxEditor,
                     RuntimePlatform.OSXPlayer,
                 },
                 supportsSelectionByPosition = false,
@@ -304,6 +375,8 @@ public class ARXVideoConfig : MonoBehaviour
                     RuntimePlatform.Android,
                     RuntimePlatform.IPhonePlayer,
                     RuntimePlatform.LinuxPlayer,
+                    RuntimePlatform.LinuxEditor,
+                    RuntimePlatform.WebGLPlayer,
                 },
                 supportsSelectionByPosition = false,
                 positionSelectionString = null,
@@ -377,9 +450,9 @@ public class ARXVideoConfig : MonoBehaviour
         public ARVideoModule defaultModule; // Ought to be readonly or init-only setter, but latter not supported by Unity C# compiler (see https://docs.unity3d.com/Manual/CSharpCompiler.html and https://stackoverflow.com/a/64749403/316487).
         public ARVideoModule module;
         public ARVideoConfigInputSelectionMethod inputSelectionMethod;
-        public ARXController.AR_VIDEO_POSITION position;
+        public AR_VIDEO_POSITION position;
         public int index;
-        public string VideoSourceInfoListOpenToken;
+        public string VideoSourceInfoListOpenToken; // Token that will force the video module to show the user a list of sources at run-time.
         public int width;
         public int height;
         public ARVideoSizeSelectionStrategyAVFoundationPreset AVFoundationPreset;
@@ -399,7 +472,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.WinMF,
             module = ARVideoModule.WinMF,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.VideoSourceInfoList,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
             index = 0,
             VideoSourceInfoListOpenToken = "",
             width = 640,
@@ -418,7 +491,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.AVFoundation,
             module = ARVideoModule.AVFoundation,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.VideoSourceInfoList,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT,
             index = 0,
             VideoSourceInfoListOpenToken = "",
             width = 0,
@@ -437,7 +510,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.WinMF,
             module = ARVideoModule.WinMF,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.AnyCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
             index = 0,
             VideoSourceInfoListOpenToken = "",
             width = 640,
@@ -456,7 +529,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.AVFoundation,
             module = ARVideoModule.AVFoundation,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.AnyCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT,
             index = 0,
             VideoSourceInfoListOpenToken = "",
             width = 0,
@@ -475,7 +548,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.Android,
             module = ARVideoModule.Android,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.AnyCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK,
             index = 0,
             VideoSourceInfoListOpenToken = "",
             width = 1280,
@@ -494,7 +567,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.AVFoundation,
             module = ARVideoModule.AVFoundation,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.AnyCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK,
             index = 0,
             VideoSourceInfoListOpenToken = "",
             width = 0,
@@ -513,7 +586,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.V4L2,
             module = ARVideoModule.V4L2,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.AnyCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
             index = 0,
             VideoSourceInfoListOpenToken = "",
             width = 640,
@@ -525,6 +598,44 @@ public class ARXVideoConfig : MonoBehaviour
             supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
             isUsingUnityVideoSource = false,
             unityVideoSource = ARVideoUnityVideoSource.None,
+        },
+        new ARVideoPlatformConfig {
+            platform = RuntimePlatform.LinuxEditor,
+            name = "Linux (Editor)",
+            defaultModule = ARVideoModule.V4L2,
+            module = ARVideoModule.V4L2,
+            inputSelectionMethod = ARVideoConfigInputSelectionMethod.AnyCamera,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            index = 0,
+            VideoSourceInfoListOpenToken = "",
+            width = 640,
+            height = 480,
+            AVFoundationPreset = ARVideoSizeSelectionStrategyAVFoundationPreset.medium,
+            sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
+            isUsingManualConfig = false,
+            manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
+        },
+        new ARVideoPlatformConfig {
+            platform = RuntimePlatform.WebGLPlayer,
+            name = "Web Player",
+            defaultModule = ARVideoModule.External,
+            module = ARVideoModule.External,
+            inputSelectionMethod = ARVideoConfigInputSelectionMethod.AnyCamera,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            index = 0,
+            VideoSourceInfoListOpenToken = "",
+            width = 640,
+            height = 480,
+            AVFoundationPreset = ARVideoSizeSelectionStrategyAVFoundationPreset.medium,
+            sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
+            isUsingManualConfig = false,
+            manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = true,
+            unityVideoSource = ARVideoUnityVideoSource.WebcamTexture,
         }
     };
 
@@ -536,7 +647,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.WinMF,
             module = ARVideoModule.WinMF,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.VideoSourceInfoList,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
             index = 1,
             VideoSourceInfoListOpenToken = "",
             width = 640,
@@ -555,7 +666,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.AVFoundation,
             module = ARVideoModule.AVFoundation,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.VideoSourceInfoList,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT,
             index = 1,
             VideoSourceInfoListOpenToken = "",
             width = 0,
@@ -574,7 +685,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.WinMF,
             module = ARVideoModule.WinMF,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.NthCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
             index = 1,
             VideoSourceInfoListOpenToken = "",
             width = 640,
@@ -593,7 +704,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.AVFoundation,
             module = ARVideoModule.AVFoundation,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.NthCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT,
             index = 1,
             VideoSourceInfoListOpenToken = "",
             width = 0,
@@ -612,7 +723,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.Android,
             module = ARVideoModule.Android,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.NthCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK,
             index = 1,
             VideoSourceInfoListOpenToken = "",
             width = 1280,
@@ -631,7 +742,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.AVFoundation,
             module = ARVideoModule.AVFoundation,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.NthCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK,
             index = 1,
             VideoSourceInfoListOpenToken = "",
             width = 0,
@@ -650,7 +761,7 @@ public class ARXVideoConfig : MonoBehaviour
             defaultModule = ARVideoModule.V4L2,
             module = ARVideoModule.V4L2,
             inputSelectionMethod = ARVideoConfigInputSelectionMethod.NthCamera,
-            position = ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
             index = 1,
             VideoSourceInfoListOpenToken = "",
             width = 640,
@@ -662,10 +773,49 @@ public class ARXVideoConfig : MonoBehaviour
             supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
             isUsingUnityVideoSource = false,
             unityVideoSource = ARVideoUnityVideoSource.None,
+        },
+        new ARVideoPlatformConfig {
+            platform = RuntimePlatform.LinuxEditor,
+            name = "Linux (Editor)",
+            defaultModule = ARVideoModule.V4L2,
+            module = ARVideoModule.V4L2,
+            inputSelectionMethod = ARVideoConfigInputSelectionMethod.NthCamera,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            index = 1,
+            VideoSourceInfoListOpenToken = "",
+            width = 640,
+            height = 480,
+            AVFoundationPreset = ARVideoSizeSelectionStrategyAVFoundationPreset.medium,
+            sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
+            isUsingManualConfig = false,
+            manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = false,
+            unityVideoSource = ARVideoUnityVideoSource.None,
+        },
+        new ARVideoPlatformConfig {
+            platform = RuntimePlatform.WebGLPlayer,
+            name = "Web Player",
+            defaultModule = ARVideoModule.External,
+            module = ARVideoModule.External,
+            inputSelectionMethod = ARVideoConfigInputSelectionMethod.AnyCamera,
+            position = AR_VIDEO_POSITION.AR_VIDEO_POSITION_UNKNOWN,
+            index = 0,
+            VideoSourceInfoListOpenToken = "",
+            width = 640,
+            height = 480,
+            AVFoundationPreset = ARVideoSizeSelectionStrategyAVFoundationPreset.medium,
+            sizePreference = ARVideoSizeSelectionStrategySizePreference.any,
+            isUsingManualConfig = false,
+            manualConfig = "",
+            supportedUnityVideoSources = new List<ARVideoUnityVideoSource> { ARVideoUnityVideoSource.None, ARVideoUnityVideoSource.WebcamTexture},
+            isUsingUnityVideoSource = true,
+            unityVideoSource = ARVideoUnityVideoSource.WebcamTexture,
         }
+
     };
 
-    public List<ARXController.ARVideoSourceInfoT> sourceInfoList = null;
+    public List<ARVideoSourceInfoT> sourceInfoList = null;
 
     private ARVideoPlatformConfig? GetPlatformConfig(RuntimePlatform platform, bool stereoSecondInput = false)
     {
@@ -701,9 +851,9 @@ public class ARXVideoConfig : MonoBehaviour
                             if (modules[pc.module].supportsSelectionByPosition)
                             {
                                 string p = null;
-                                if (pc.position == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK) p = "back";
-                                else if (pc.position == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) p = "front";
-                                else if (platform == RuntimePlatform.Android && pc.position == ARXController.AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER) p = "external";
+                                if (pc.position == AR_VIDEO_POSITION.AR_VIDEO_POSITION_BACK) p = "back";
+                                else if (pc.position == AR_VIDEO_POSITION.AR_VIDEO_POSITION_FRONT) p = "front";
+                                else if (platform == RuntimePlatform.Android && pc.position == AR_VIDEO_POSITION.AR_VIDEO_POSITION_OTHER) p = "external";
                                 if (!string.IsNullOrEmpty(p))
                                 {
                                     config += " " + modules[pc.module].positionSelectionString + p;
@@ -755,8 +905,41 @@ public class ARXVideoConfig : MonoBehaviour
         return config;
     }
 
+    public List<ARVideoSourceInfoT> GetVideoSourceInfoList(string config)
+    {
+        List<ARVideoSourceInfoT> l = new List<ARVideoSourceInfoT>();
+        if (arcontroller.PluginFunctions == null)
+        {
+            return l;
+        }
+
+        int count = arcontroller.PluginFunctions.arwCreateVideoSourceInfoList(config);
+        if (count > 0)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                ARVideoSourceInfoT si = new ARVideoSourceInfoT();
+                bool ok = arcontroller.PluginFunctions.arwGetVideoSourceInfoListEntry(i, out si.name, out si.model, out si.UID, out int flags, out si.open_token);
+                if (ok)
+                {
+                    si.flags = (AR_VIDEO_SOURCE_INFO)flags; // Coerce type.
+                    l.Add(si);
+                }
+            }
+            arcontroller.PluginFunctions.arwDeleteVideoSourceInfoList();
+        }
+        return l;
+    }
+
     public string GetVideoConfigString(bool stereoSecondInput = false)
     {
         return GetVideoConfigStringForPlatform(Application.platform, stereoSecondInput);
+    }
+
+    public bool IsUsingUnityVideoSource()
+    {
+        ARVideoPlatformConfig? pcb = GetPlatformConfig(Application.platform);
+        if (!pcb.HasValue) return false;
+        return pcb.Value.isUsingUnityVideoSource;
     }
 }
