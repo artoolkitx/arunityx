@@ -36,9 +36,11 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 
 /// <summary>
 /// ARXTrackable objects represent a native ARXTrackable, even when the native artoolkitX is not
@@ -118,11 +120,6 @@ public class ARXTrackable : MonoBehaviour
             return uid;
         }
     }
-    /// <summary>
-    /// Will be set to true if a load failed.
-    /// </summary>
-    private bool loadError = false;
-
     [field: SerializeField]
     public TrackableType Type { get; private set; } = TrackableType.TwoD;
 
@@ -140,7 +137,7 @@ public class ARXTrackable : MonoBehaviour
         Type = TrackableType.TwoD;
         if (!string.IsNullOrEmpty(imageFilePath)) TwoDImageFile = imageFilePath;
         if (imageWidth > 0.0f) TwoDImageWidth = imageWidth;
-        loadError = false;
+        _loadError = false;
         Load();
     }
 
@@ -163,10 +160,10 @@ public class ARXTrackable : MonoBehaviour
         if (!string.IsNullOrEmpty(patternFilePath))
         {
             PatternFileName = Path.GetFileName(patternFilePath);
-            PatternContents = String.Join(" ", System.IO.File.ReadAllLines(patternFilePath));
+            PatternContents = String.Join(" ", File.ReadAllLines(patternFilePath));
         }
         if (width > 0.0f) PatternWidth = width;
-        loadError = false;
+        _loadError = false;
         Load();
     }
     public void ConfigureAsSquareBarcode(ulong barcodeID, float width)
@@ -175,7 +172,7 @@ public class ARXTrackable : MonoBehaviour
         Type = TrackableType.SquareBarcode;
         if (barcodeID >= 0) BarcodeID = barcodeID;
         if (width > 0.0f) PatternWidth = width;
-        loadError = false;
+        _loadError = false;
         Load();
     }
 
@@ -187,7 +184,7 @@ public class ARXTrackable : MonoBehaviour
         Unload();
         Type = TrackableType.Multimarker;
         if (!string.IsNullOrEmpty(multiConfigFilePath)) MultiConfigFile = multiConfigFilePath;
-        loadError = false;
+        _loadError = false;
         Load();
     }
 
@@ -195,15 +192,14 @@ public class ARXTrackable : MonoBehaviour
     // Also, we need a list of the file extensions that make up an NFT dataset.
     [field: SerializeField]
     public string NFTDataName { get; private set; } = "";
-#if !UNITY_METRO
-    private readonly string[] NFTDataExts = { "iset", "fset", "fset3" };
-#endif
+    public static readonly string[] NFTDataExts = { "iset", "fset", "fset3" };
+
     public void ConfigureAsNFT(string nftDataName)
     {
         Unload();
         Type = TrackableType.NFT;
         if (!string.IsNullOrEmpty(nftDataName)) NFTDataName = nftDataName;
-        loadError = false;
+        _loadError = false;
         Load();
     }
 
@@ -233,7 +229,22 @@ public class ARXTrackable : MonoBehaviour
     [Tooltip("Register to receive an event that fires when a trackable is no longer detected.")]
     public ARXUnityEventUnityObject OnTrackableLost = new ARXUnityEventUnityObject();
 
-    private object loadLock = new object();
+    /// <summary>
+    /// Set to true in Start on platforms where assets in StreamingAssets are not directly accessible
+    /// in the file system and must be unpacked first. On Android StreamingAssets are in a .jar file,
+    /// and on Web Player, they are at a URL.
+    /// </summary>
+    private bool _mustUnpackAssets = false;
+    /// <summary>
+    /// As loading may take some time, this is set to true during a load.
+    /// While true, no calls to native trackable operations should be made.
+    /// </summary>
+    private bool _loading = false;
+    /// <summary>
+    /// Will be set to true if a load failed.
+    /// </summary>
+    private bool _loadError = false;
+
 
     /// <summary>
     /// Factory method to add a 2D image trackable to same GameObject as ARXController.
@@ -333,7 +344,7 @@ public class ARXTrackable : MonoBehaviour
                 break;
             case ARW_TRACKABLE_EVENT_TYPE.ARW_TRACKABLE_EVENT_TYPE_AUTOREMOVED:
                 if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) return;
-                ARXTrackable[] ts = FindObjectsOfType<ARXTrackable>();
+                ARXTrackable[] ts = FindObjectsByType<ARXTrackable>(FindObjectsSortMode.None);
                 foreach (ARXTrackable t1 in ts)
                 {
                     if (t1.UID == UID)
@@ -349,180 +360,190 @@ public class ARXTrackable : MonoBehaviour
         }
     }
 
-    public void OnDisable()
+    private void OnDisable()
     {
         //ARXController.Log(LogTag + "ARXTrackable.OnDisable()");
         Unload();
     }
 
-#if !UNITY_METRO
-    private bool unpackStreamingAssetToCacheDir(string basename)
+    private void Start()
+    {
+        _mustUnpackAssets = Application.streamingAssetsPath.Contains("://");
+    }
+
+    private bool FileIsCached(string basename)
     {
         if (string.IsNullOrEmpty(basename)) return false;
-        try
+        return File.Exists(Path.Combine(Application.temporaryCachePath, basename));
+    }
+
+    private IEnumerator UnpackFilesFromStreamingAssetToCache(List<string> files, Action<List<string>> onFilesCachedAtPath, Action<string, bool> onError)
+    {
+        if (files == null || files.Count == 0)
         {
-            if (!File.Exists(System.IO.Path.Combine(Application.temporaryCachePath, basename)))
+            onError("No files specified.", true);
+            yield break;
+        }
+        List<string> cachedFilePaths = new List<string>();
+        foreach (string basename in files)
+        {
+            string cachedPath = Path.Combine(Application.temporaryCachePath, basename);
+            if (!File.Exists(cachedPath))
             {
-                string file = System.IO.Path.Combine(Application.streamingAssetsPath, basename); // E.g. "jar:file://" + Application.dataPath + "!/assets/" + basename;
-#pragma warning disable CS0618 // Keep using WWW for 'jar:' method support.
-                WWW unpackerWWW = new WWW(file);
-#pragma warning restore CS0618
-                while (!unpackerWWW.isDone) { } // This will block in the webplayer. TODO: switch to co-routine.
-                if (!string.IsNullOrEmpty(unpackerWWW.error))
+                string file = Path.Combine(Application.streamingAssetsPath, basename); // E.g. Android "jar:file://" + Application.dataPath + "!/assets/" + basename, or Web: "http://localhost:8000/".
+                using UnityWebRequest www = new UnityWebRequest(file);
+                www.downloadHandler = new DownloadHandlerFile(cachedPath);
+                yield return www.SendWebRequest();
+                if (www.result != UnityWebRequest.Result.Success)
                 {
-                    ARXController.Log(LogTag + "Error unpacking '" + file + "'");
-                    return (false);
+                    onError($"Could not fetch resource. Error: {www.error}.", false);
+                    yield break;
                 }
-                File.WriteAllBytes(System.IO.Path.Combine(Application.temporaryCachePath, basename), unpackerWWW.bytes); // 64MB limit on File.WriteAllBytes.
+                cachedFilePaths.Add(cachedPath);
             }
         }
-        catch (Exception e)
-        {
-            Debug.LogError("Could not load streaming asset data '" + System.IO.Path.Combine(Application.temporaryCachePath, basename) + "': " + e);
-            return false;
-        }
-        return true;
+        onFilesCachedAtPath(cachedFilePaths);
     }
-    #endif
 
     // Load the native ARXTrackable structure(s) and set the UID.
     public void Load()
     {
-        lock (loadLock) {
-            if (this.enabled == false) {
-                return;
-            }
+        //ARXController.Log(LogTag + "ARXTrackable.Load()");
+        if (UID != NO_ID) {
+            return;
+        }
 
-            //ARXController.Log(LogTag + "ARXTrackable.Load()");
-            if (UID != NO_ID) {
-                return;
-            }
+        if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) {
+            // If arwInitialiseAR() has not yet been called, we can't load the native trackable yet.
+            // Load will be retried next Update.
+            return;
+        }
 
-            if (!ARXController.Instance || ARXController.Instance.PluginFunctions == null || !ARXController.Instance.PluginFunctions.IsInited()) {
-                // If arwInitialiseAR() has not yet been called, we can't load the native trackable yet.
-                // ARXController.InitialiseAR() will trigger this again when arwInitialiseAR() has been called.
-                return;
-            }
+        if (_loading)
+        {
+            return;
+        }
+        _loading = true;
 
-            // Work out the configuration string to pass to the native side.
-            string dir = Application.streamingAssetsPath;
-            string cfg = "";
+        switch (Type) {
 
-            switch (Type) {
-
-                case TrackableType.Square:
-                    // Multiply width by 1000 to convert from metres to artoolkitX's millimetres.
-                    cfg = "single_buffer;" + PatternWidth*1000.0f + ";buffer=" + PatternContents;
-                    break;
-
-                case TrackableType.SquareBarcode:
-                    // Multiply width by 1000 to convert from metres to artoolkitX's millimetres.
-                    cfg = "single_barcode;" + BarcodeID + ";" + PatternWidth*1000.0f;
-                    break;
-
-                case TrackableType.Multimarker:
-                    #if !UNITY_METRO
-                    if (dir.Contains("://")) {
-                        // On Android, we need to unpack the StreamingAssets from the .jar file in which
-                        // they're archived into the native file system.
-                        dir = Application.temporaryCachePath;
-                        if (!unpackStreamingAssetToCacheDir(MultiConfigFile)) {
-                            dir = "";
-                        } else {
-
-                            //string[] unpackFiles = getPatternFiles;
-                            //foreach (string patternFile in patternFiles) {
-                            //if (!unpackStreamingAssetToCacheDir(patternFile)) {
-                            //    dir = "";
-                            //    break;
-                            //}
-                        }
-                    }
-                    #endif
-
-                    if (!string.IsNullOrEmpty(dir) && !string.IsNullOrEmpty(MultiConfigFile)) {
-                        cfg = "multi;" + System.IO.Path.Combine(dir, MultiConfigFile);
-                    }
-                    break;
-
-
-                case TrackableType.NFT:
-                    #if !UNITY_METRO
-                    if (dir.Contains("://")) {
-                        // On Android, we need to unpack the StreamingAssets from the .jar file in which
-                        // they're archived into the native file system.
-                        dir = Application.temporaryCachePath;
-                        foreach (string ext in NFTDataExts) {
-                            string basename = NFTDataName + "." + ext;
-                            if (!unpackStreamingAssetToCacheDir(basename)) {
-                                dir = "";
-                                break;
-                            }
-                        }
-                    }
-                    #endif
-
-                    if (!string.IsNullOrEmpty(dir) && !string.IsNullOrEmpty(NFTDataName)) {
-                        cfg = "nft;" + System.IO.Path.Combine(dir, NFTDataName);
-                    }
-                    break;
-
-            case TrackableType.TwoD:
-                #if !UNITY_METRO
-                if (dir.Contains("://")) {
-                    // On Android, we need to unpack the StreamingAssets from the .jar file in which
-                    // they're archived into the native file system.
-                    dir = Application.temporaryCachePath;
-                    if (!unpackStreamingAssetToCacheDir(TwoDImageFile)) {
-                        dir = "";
-                    }
+            case TrackableType.Square:
+                if (string.IsNullOrEmpty(PatternContents))
+                {
+                    LoadFailed("Request to load square marker but no pattern specified.", true);
+                    return;
                 }
-                #endif
-
-                if (!string.IsNullOrEmpty(dir) && !string.IsNullOrEmpty(TwoDImageFile)) {
-                    cfg = "2d;" + System.IO.Path.Combine(dir, TwoDImageFile) + ";" + TwoDImageWidth * 1000.0f;
-                }
+                // Multiply width by 1000 to convert from metres to artoolkitX's millimetres.
+                LoadNative($"single_buffer;{PatternWidth*1000.0};buffer={PatternContents}");
                 break;
 
-                default:
-                    // Unknown marker type?
-                    break;
+            case TrackableType.SquareBarcode:
+                // Multiply width by 1000 to convert from metres to artoolkitX's millimetres.
+                LoadNative($"single_barcode;{BarcodeID};{PatternWidth*1000.0f}");
+                break;
 
-            }
+            case TrackableType.Multimarker:
+                if (string.IsNullOrEmpty(MultiConfigFile))
+                {
+                    LoadFailed("Request to load multi-square marker but no config file specified.", true);
+                    return;
+                }
+                if (_mustUnpackAssets && !FileIsCached(MultiConfigFile))
+                {
+                    StartCoroutine(UnpackFilesFromStreamingAssetToCache(new List<string> {MultiConfigFile}, (paths) => LoadNative($"multi;{paths[0]}"), LoadFailed));
+                    return;
+                }
+                LoadNative($"multi;{Path.Combine(Application.streamingAssetsPath, MultiConfigFile)}");
+                break;
 
-            // If a valid config. could be assembled, get the native side to process it, and assign the resulting ARXTrackable UID.
-            if (!string.IsNullOrEmpty(cfg)) {
-                uid = ARXController.Instance.PluginFunctions.arwAddTrackable(cfg);
-                if (UID == NO_ID) {
-                    ARXController.Log(LogTag + "Error loading marker.");
-                    loadError = true;
-                } else {
-                    loadError = false;
-                    // Trackable loaded. Do any additional configuration.
-                    //ARXController.Log("Added marker with cfg='" + cfg + "'");
-
-                    // Any additional trackable-type-specific config not included in the trackable config string used at load time.
-                    if (Type == TrackableType.Square || Type == TrackableType.SquareBarcode) UseContPoseEstimation = currentUseContPoseEstimation;
-                    if (Type == TrackableType.NFT) NFTScale = currentNFTScale;
-
-                    // Any additional config.
-                    Filtered = currentFiltered;
-                    FilterSampleRate = currentFilterSampleRate;
-                    FilterCutoffFreq = currentFilterCutoffFreq;
-
-                    // Create array of patterns. A single marker will have array length 1.
-                    int numPatterns = ARXController.Instance.PluginFunctions.arwGetTrackablePatternCount(UID);
-                    //ARXController.Log("Trackable with UID=" + UID + " has " + numPatterns + " patterns.");
-                    if (numPatterns > 0) {
-                        patterns = new ARXPattern[numPatterns];
-                        for (int i = 0; i < numPatterns; i++) {
-                            patterns[i] = new ARXPattern(UID, i);
+            case TrackableType.NFT:
+                if (string.IsNullOrEmpty(NFTDataName))
+                {
+                    LoadFailed("Request to load legacy NFT marker but no data file name specified.", true);
+                    return;
+                }
+                if (_mustUnpackAssets)
+                {
+                    List<string> toUnpack = new List<string>();
+                    foreach (string ext in NFTDataExts)
+                    {
+                        string basename = $"{NFTDataName}.{ext}";
+                        if (!FileIsCached(basename))
+                        {
+                            toUnpack.Add(basename);
                         }
                     }
-
+                    if (toUnpack.Count > 0)
+                    {
+                        StartCoroutine(UnpackFilesFromStreamingAssetToCache(toUnpack, (paths) => LoadNative($"nft;{Path.Combine(Application.temporaryCachePath, NFTDataName)}"), LoadFailed));
+                        return;
+                    }
+                    LoadNative($"nft;{Path.Combine(Application.temporaryCachePath, NFTDataName)}");
+                    return;
                 }
+                LoadNative($"nft;{Path.Combine(Application.streamingAssetsPath, NFTDataName)}");
+                break;
+
+            case TrackableType.TwoD:
+                if (string.IsNullOrEmpty(TwoDImageFile))
+                {
+                    LoadFailed("Request to load 2D trackable but no image file specified.", true);
+                    return;
+                }
+                if (_mustUnpackAssets && !FileIsCached(TwoDImageFile))
+                {
+                    StartCoroutine(UnpackFilesFromStreamingAssetToCache(new List<string> {TwoDImageFile}, (paths) => LoadNative($"2d;{paths[0]};{TwoDImageWidth * 1000.0f}"), LoadFailed));
+                    return;
+                }
+                LoadNative($"2d;{Path.Combine(Application.streamingAssetsPath, TwoDImageFile)};{TwoDImageWidth * 1000.0f}");
+                break;
+
+            default:
+                LoadFailed($"Unknown trackable type {Type}.");
+                break;
+        }
+    }
+
+    private void LoadNative(string cfg)
+    {
+        // Get the native side to process it, and assign the resulting ARXTrackable UID.
+        uid = ARXController.Instance.PluginFunctions.arwAddTrackable(cfg);
+        if (UID == NO_ID) {
+            LoadFailed("Error loading marker.");
+            return;
+        }
+
+        // Trackable loaded. Do any additional configuration.
+        //ARXController.Log("Added marker with cfg='" + cfg + "'");
+
+        // Any additional trackable-type-specific config not included in the trackable config string used at load time.
+        if (Type == TrackableType.Square || Type == TrackableType.SquareBarcode) UseContPoseEstimation = currentUseContPoseEstimation;
+        if (Type == TrackableType.NFT) NFTScale = currentNFTScale;
+
+        // Any additional config.
+        Filtered = currentFiltered;
+        FilterSampleRate = currentFilterSampleRate;
+        FilterCutoffFreq = currentFilterCutoffFreq;
+
+        // Create array of patterns. A single marker will have array length 1.
+        int numPatterns = ARXController.Instance.PluginFunctions.arwGetTrackablePatternCount(UID);
+        //ARXController.Log("Trackable with UID=" + UID + " has " + numPatterns + " patterns.");
+        if (numPatterns > 0) {
+            patterns = new ARXPattern[numPatterns];
+            for (int i = 0; i < numPatterns; i++) {
+                patterns[i] = new ARXPattern(UID, i);
             }
         }
+
+        _loadError = false;
+        _loading = false;
+    }
+
+    private void LoadFailed(string errorMessage, bool hideInEditorMode = false)
+    {
+        if (!hideInEditorMode || Application.isPlaying) ARXController.LogError("${LogTag}{errorMessage}");
+        _loadError = true;
+        _loading = false;
     }
 
     // Note that [DefaultExecutionOrder] is used on ARXController to ensure that a tracking update has completed before we try
@@ -535,15 +556,14 @@ public class ARXTrackable : MonoBehaviour
             return;
         }
 
-        lock (loadLock)
+        //ARXController.Log(LogTag + "ARXTrackable.Update()");
+        if (!_loading)
         {
             bool v = false;
-            //ARXController.Log(LogTag + "ARXTrackable.Update()");
-
             if (ARXController.Instance && ARXController.Instance.PluginFunctions != null && ARXController.Instance.PluginFunctions.IsInited()) {
 
                 // Lazy loading, provided we didn't already try to load and get an error.
-                if (UID == NO_ID && !loadError)
+                if (UID == NO_ID && !_loadError)
                 {
                     Load();
                 }
@@ -603,20 +623,19 @@ public class ARXTrackable : MonoBehaviour
     // Unload any native ARXTrackable structures, and clear the UID.
     public void Unload()
     {
-        lock (loadLock) {
-            //ARXController.Log(LogTag + "ARXTrackable.Unload()");
+        //ARXController.Log(LogTag + "ARXTrackable.Unload()");
+        if (UID == NO_ID) {
+            return;
+        }
 
-            if (UID == NO_ID) {
-                return;
-            }
-
+        if (!_loading) {
             // Remove the native trackable, unless arwShutdownAR() has already been called (as it will already have been removed.)
             if (ARXController.Instance && ARXController.Instance.PluginFunctions != null && ARXController.Instance.PluginFunctions.IsInited()) {
                 ARXController.Instance.PluginFunctions.arwRemoveTrackable(UID);
             }
 
             uid = NO_ID;
-            loadError = false;
+            _loadError = false;
             patterns = null; // Delete the patterns too.
             visible = false;
         }
@@ -665,10 +684,8 @@ public class ARXTrackable : MonoBehaviour
         set
         {
             currentFiltered = value;
-            lock (loadLock) {
-                if (UID != NO_ID) {
-                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionBool(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTERED, value);
-                }
+            if (UID != NO_ID && !_loading) {
+                ARXController.Instance.PluginFunctions.arwSetTrackableOptionBool(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTERED, value);
             }
         }
     }
@@ -683,10 +700,8 @@ public class ARXTrackable : MonoBehaviour
         set
         {
             currentFilterSampleRate = value;
-            lock (loadLock) {
-                if (UID != NO_ID) {
-                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTER_SAMPLE_RATE, value);
-                }
+            if (UID != NO_ID && !_loading) {
+                ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTER_SAMPLE_RATE, value);
             }
         }
     }
@@ -701,10 +716,8 @@ public class ARXTrackable : MonoBehaviour
         set
         {
             currentFilterCutoffFreq = value;
-            lock (loadLock) {
-                if (UID != NO_ID) {
-                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTER_CUTOFF_FREQ, value);
-                }
+            if (UID != NO_ID && !_loading) {
+                ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_FILTER_CUTOFF_FREQ, value);
             }
         }
     }
@@ -719,10 +732,8 @@ public class ARXTrackable : MonoBehaviour
         set
         {
             currentUseContPoseEstimation = value;
-            lock (loadLock) {
-                if (UID != NO_ID && (Type == TrackableType.Square || Type == TrackableType.SquareBarcode)) {
-                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionBool(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_SQUARE_USE_CONT_POSE_ESTIMATION, value);
-                }
+            if (UID != NO_ID && !_loading && (Type == TrackableType.Square || Type == TrackableType.SquareBarcode)) {
+                 ARXController.Instance.PluginFunctions.arwSetTrackableOptionBool(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_SQUARE_USE_CONT_POSE_ESTIMATION, value);
             }
         }
     }
@@ -737,13 +748,10 @@ public class ARXTrackable : MonoBehaviour
         set
         {
             currentNFTScale = value;
-            lock (loadLock) {
-                if (UID != NO_ID && (Type == TrackableType.NFT)) {
-                    ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_NFT_SCALE, value);
-                }
+            if (UID != NO_ID && !_loading && (Type == TrackableType.NFT)) {
+                 ARXController.Instance.PluginFunctions.arwSetTrackableOptionFloat(UID, (int)ARWTrackableOption.ARW_TRACKABLE_OPTION_NFT_SCALE, value);
             }
         }
     }
-
 
 }

@@ -691,7 +691,7 @@ MonoBehaviour:
   currentPatternDetectionMode: 0
   currentMatrixCodeType: 3
   currentImageProcMode: 0
-  currentNFTMultiMode: 1
+  currentNFTMultiMode: 0
   currentTwoDMaxMarkersToTrack: 1
   currentTwoDThreaded: 1
   currentLogLevel: 1
@@ -737,7 +737,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2aabcb9e1b2834681b717ff03624a181, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  arcontroller: {fileID: 0}
+  arcontroller: {fileID: 583775447}
   configs:
   - platform: 7
     name: Windows (Editor)

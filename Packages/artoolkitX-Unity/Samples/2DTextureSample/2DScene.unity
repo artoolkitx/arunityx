@@ -637,7 +637,7 @@ MonoBehaviour:
   currentMatrixCodeType: 3
   currentImageProcMode: 0
   currentNFTMultiMode: 0
-  currentTwoDMaxMarkersToTrack: 2
+  currentTwoDMaxMarkersToTrack: 1
   currentTwoDThreaded: 1
   currentLogLevel: 1
   currentSquareMatrixModeAutocreateNewTrackables: 0

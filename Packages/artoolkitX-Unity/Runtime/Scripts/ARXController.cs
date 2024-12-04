@@ -74,7 +74,7 @@ public class ARXController : MonoBehaviour
         get {
             if (_instance == null)
             {
-                ARXController[] c = FindObjectsOfType<ARXController>();
+                ARXController[] c = FindObjectsByType<ARXController>(FindObjectsSortMode.None);
                 if (c.Length == 0)
                 {
                     LogError("There are no instances of " + typeof(ARXController) + " in the scene.");
@@ -299,7 +299,7 @@ public class ARXController : MonoBehaviour
 
     void OnEnable()
     {
-        LogInfo($"{LogTag}OnEnable()");
+        //LogInfo($"{LogTag}OnEnable()");
 
         PluginFunctions = new PluginFunctionsARX();
         arvideoconfig = gameObject.GetComponent<ARXVideoConfig>();
@@ -420,7 +420,7 @@ public class ARXController : MonoBehaviour
 
     void OnDisable()
     {
-        LogInfo($"{LogTag}OnDisable()");
+        //LogInfo($"{LogTag}OnDisable()");
 
         if (PluginFunctions.IsInited())
         {
@@ -1280,11 +1280,9 @@ public class ARXController : MonoBehaviour
 
 
         int y = 350;
-
-        ARXTrackable[] trackables = Component.FindObjectsOfType(typeof(ARXTrackable)) as ARXTrackable[];
-        foreach (ARXTrackable m in trackables)
+        foreach (ARXTrackable m in FindObjectsByType<ARXTrackable>(FindObjectsSortMode.None))
         {
-            GUI.Label(new Rect(10, y, 500, 25), "Marker: " + m.UID + ", " + m.Visible);
+            GUI.Label(new Rect(10, y, 500, 25), "Trackable: " + m.UID + ", " + m.Visible);
             y += 25;
         }
     }

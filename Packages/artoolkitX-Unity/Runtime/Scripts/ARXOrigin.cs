@@ -105,7 +105,7 @@ public class ARXOrigin : MonoBehaviour
 	{
 		RemoveAllTrackables();
 		if (findTrackableMode != FindMode.Manual) {
-			ARXTrackable[] ms = FindObjectsOfType<ARXTrackable>(); // Does not find inactive objects.
+			ARXTrackable[] ms = FindObjectsByType<ARXTrackable>(FindObjectsSortMode.None); // Does not find inactive objects.
 			foreach (ARXTrackable m in ms) {
 				if (findTrackableMode == FindMode.AutoAll || (findTrackableMode == FindMode.AutoByTags && findTrackableTags.Contains(m.Tag))) {
                     trackablesEligibleForBaseTrackable.Add(m);
