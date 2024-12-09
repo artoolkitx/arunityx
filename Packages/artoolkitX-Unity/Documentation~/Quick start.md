@@ -6,9 +6,9 @@ The easiest way to get started with Unity and artoolkitX is to use one of the sa
 
 - mac OS or Windows
 
-- [Xcode](http://developer.apple.com/xcode/) - Required for the mac OS version of the Unity Editor to target Apple macOS and iOS platforms with Unity. Xcode 14 was used at the time of this writing.
+- [Xcode](http://developer.apple.com/xcode/) - Required for the mac OS version of the Unity Editor to target Apple macOS and iOS platforms with Unity. Xcode 15.4 was used at the time of this writing.
 
-- [Unity](https://store.unity.com/) - the free, Personal Edition, is sufficient for a start. Version 2021.3 was used at the time of this writing. The Unity Editor is supported on the desktop platforms of macOS and Windows.
+- [Unity](https://store.unity.com/) - the free, Personal Edition, is sufficient for a start. Version 6000.0.28f1 (i.e. Unity "6") was used at the time of this writing. The Unity Editor is supported on the desktop platforms of macOS and Windows.
 
 ### Installation
 

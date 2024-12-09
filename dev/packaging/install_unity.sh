@@ -89,7 +89,7 @@ then
     sudo installer -pkg Unity.pkg -target / -verbose
     sudo installer -pkg UnitySetup-Mac-IL2CPP-Support-for-Editor-${UNITY_VERSION}.pkg -target / -verbose
     if [[ -n $WITH_ANDROID ]]; then
-        sudo installer -pkg UnitySetup-Android-Support-for-Editor-${UNITY_VERSION}.pkg -target / -verbose
+    	sudo installer -pkg UnitySetup-Android-Support-for-Editor-${UNITY_VERSION}.pkg -target / -verbose
     fi
     #sudo installer -pkg UnitySetup-Windows-Mono-Support-for-Editor-${UNITY_VERSION}.pkg -target / -verbose
 fi

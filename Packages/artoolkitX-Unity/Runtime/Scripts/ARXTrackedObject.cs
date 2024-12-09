@@ -92,7 +92,7 @@ public class ARXTrackedObject : MonoBehaviour
 	{
 		if (_trackable == null) {
             // Locate the trackable identified by the tag
-			ARXTrackable[] ms = FindObjectsOfType<ARXTrackable>();
+			ARXTrackable[] ms = FindObjectsByType<ARXTrackable>(FindObjectsSortMode.None);
 			foreach (ARXTrackable m in ms) {
 				if (m.Tag == _trackableTag) {
 					_trackable = m;
@@ -120,7 +120,7 @@ public class ARXTrackedObject : MonoBehaviour
 	{
 		if (_camera == null)
 		{
-			ARXCamera[] cs = FindObjectsOfType<ARXCamera>();
+			ARXCamera[] cs = FindObjectsByType<ARXCamera>(FindObjectsSortMode.None);
 			foreach (ARXCamera c in cs)
 			{
 				if (!c.Stereo || c.StereoEye == ARXCamera.ViewEye.Left)
@@ -140,12 +140,12 @@ public class ARXTrackedObject : MonoBehaviour
 		if (Application.isPlaying)
 		{
 			// In Player, set initial visibility to not visible.
-			for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(false);
+			for (int i = 0; i < transform.childCount; i++) transform.GetChild(i).gameObject.SetActive(false);
 		}
 		else
 		{
 			// In Editor, set initial visibility to visible.
-			for (int i = 0; i < this.transform.childCount; i++) this.transform.GetChild(i).gameObject.SetActive(true);
+			for (int i = 0; i < transform.childCount; i++) transform.GetChild(i).gameObject.SetActive(true);
 		}
 	}
 
@@ -245,7 +245,7 @@ public class ARXTrackedObject : MonoBehaviour
 			{
 			    for (int i = 0; i < this.transform.childCount; i++)
 			    {
-			        this.transform.GetChild(i).gameObject.SetActive(false);
+			        transform.GetChild(i).gameObject.SetActive(false);
 			    }
 			}
 		}

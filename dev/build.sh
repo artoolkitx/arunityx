@@ -56,6 +56,8 @@ do
             ;;
         windows) BUILD_WINDOWS=1
             ;;
+        emscripten) BUILD_EMSCRIPTEN=1
+            ;;
         --debug) DEBUG=
             ;;
         --no-config) NO_CONFIG=1
@@ -73,12 +75,12 @@ do
 done
 
 # Set OS-dependent variables.
-OS=`uname -s`
-ARCH=`uname -m`
+OS=$(uname -s)
+ARCH=$(uname -m)
 TAR='/usr/bin/tar'
 if [ "$OS" = "Linux" ]
 then
-    CPUS=`/usr/bin/nproc`
+    CPUS=$(/usr/bin/nproc)
     TAR='/bin/tar'
     # Identify Linux OS. Sets useful variables: ID, ID_LIKE, VERSION, NAME, PRETTY_NAME.
     source /etc/os-release
@@ -88,16 +90,16 @@ then
     fi
 elif [ "$OS" = "Darwin" ]
 then
-    CPUS=`/usr/sbin/sysctl -n hw.ncpu`
+    CPUS=$(/usr/sbin/sysctl -n hw.ncpu)
 elif [[ "$OS" == "CYGWIN_NT-"* ]]
 then
     # bash on Cygwin.
-    CPUS=`/usr/bin/nproc`
+    CPUS=$(/usr/bin/nproc)
     OS='Windows'
 elif [[ "$OS" == "MINGW64_NT-"* ]]
 then
     # git-bash on Windows
-    CPUS=`/usr/bin/nproc`
+    CPUS=$(/usr/bin/nproc)
     OS='Windows'
 else
     CPUS=1
@@ -148,6 +150,9 @@ refresh_plugin_for_platform_from_source() {
     elif [ "$PLATFORM" = "Windows" ] ; then
         rm -f "${PLUGINS_BASE}/x86_64/ARX.dll"
         cp "${SOURCE}/SDK/bin/ARX.dll" "${PLUGINS_BASE}/x86_64/"
+    elif [ "$PLATFORM" = "Emscripten" ] ; then
+        rm -f "${PLUGINS_BASE}/Web/libARX.a" "${PLUGINS_BASE}/Web/libjpeg.a" "${PLUGINS_BASE}/Web/libz.a"
+        cp "${SOURCE}/SDK/lib/libARX.a" "${SOURCE}/SDK/lib/libjpeg.a" "${SOURCE}/SDK/lib/libz.a" "${PLUGINS_BASE}/Web/"
     fi
 }
 
@@ -186,6 +191,11 @@ if [ $DEV ] ; then
             ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} macos
             refresh_plugin_for_platform_from_source macOS "${ARTOOLKITX_HOME}"
         fi
+        if [ $BUILD_EMSCRIPTEN ] ; then
+            cd "${ARTOOLKITX_HOME}/Source"
+            ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} emscripten
+            refresh_plugin_for_platform_from_source Emscripten "${ARTOOLKITX_HOME}"
+        fi
     fi
 
     if [ "$OS" = "Windows" ] ; then
@@ -205,10 +215,15 @@ if [ $DEV ] ; then
             ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} windows
             refresh_plugin_for_platform_from_source Windows "${ARTOOLKITX_HOME}"
         fi
+        if [ $BUILD_EMSCRIPTEN ] ; then
+            cd "${ARTOOLKITX_HOME}/Source"
+            ./build.sh ${DEBUG+--debug} ${NO_CONFIG+--no-config} emscripten
+            refresh_plugin_for_platform_from_source Emscripten "${ARTOOLKITX_HOME}"
+        fi
     fi
 else
     # ======================================================================
-    #  Download plugins (Android, iOS, macOS, Windows)
+    #  Download plugins (Android, iOS, macOS, Windows, Emscripten)
     # ======================================================================
 
     if [ $BUILD_ANDROID ] ; then
@@ -251,4 +266,14 @@ else
         refresh_plugin_for_platform_from_source Windows "${MOUNTPOINT}/artoolkitX"
         rm -rf "${MOUNTPOINT}"
     fi
+    if [ $BUILD_EMSCRIPTEN ] ; then
+        cd "${OURDIR}"
+        MOUNTPOINT=mnt$$
+        IMAGE="artoolkitX-${ARTOOLKITX_VERSION}-Emscripten.zip"
+        find_or_fetch_artoolkitx "${IMAGE}"
+        unzip -q -o "${IMAGE}" -d "${MOUNTPOINT}"
+        refresh_plugin_for_platform_from_source Emscripten "${MOUNTPOINT}/artoolkitX"
+        rm -rf "${MOUNTPOINT}"
+    fi
+
 fi

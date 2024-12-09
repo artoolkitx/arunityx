@@ -96,7 +96,7 @@ public class ARXTrackedCamera : ARXCamera
 	{
 		if (_trackable == null) {
 			// Locate the marker identified by the tag
-			ARXTrackable[] ms = FindObjectsOfType<ARXTrackable>();
+			ARXTrackable[] ms = FindObjectsByType<ARXTrackable>(FindObjectsSortMode.None);
 			foreach (ARXTrackable m in ms) {
 				if (m.Tag == _trackableTag) {
 					_trackable = m;
@@ -113,7 +113,7 @@ public class ARXTrackedCamera : ARXCamera
 		// so that the virtual objects are rendered. When tracking is lost, 0 will be used, so that no
 		// objects are displayed.
 		if (cullingMask == -1) {
-			cullingMask = this.gameObject.GetComponent<Camera>().cullingMask;
+			cullingMask = gameObject.GetComponent<Camera>().cullingMask;
 		}
 	}
 

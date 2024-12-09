@@ -72,7 +72,7 @@ public class PluginFunctionsARX : IPluginFunctions
                        ARW_TRACKER_OPTION_SQUARE_DEBUG_MODE = 8,                      ///< Enables or disable state of debug mode in the tracker. When enabled, a black and white debug image is generated during marker detection. The debug image is useful for visualising the binarization process and choosing a threshold value. bool.
                        ARW_TRACKER_OPTION_SQUARE_PATTERN_SIZE = 9,                    ///< Number of rows and columns in square template (pattern) markers. Defaults to AR_PATT_SIZE1, which is 16 in all versions of ARToolKit prior to 5.3. int.
                        ARW_TRACKER_OPTION_SQUARE_PATTERN_COUNT_MAX = 10,              ///< Maximum number of square template (pattern) markers that may be loaded at once. Defaults to AR_PATT_NUM_MAX, which is at least 25 in all versions of ARToolKit prior to 5.3. int.
-                       /*ARW_TRACKER_OPTION_2D_TRACKER_FEATURE_TYPE = 11,*/           ///< Feature detector type used in the 2d Tracker - 0 AKAZE, 1 ORB, 2 BRISK, 3 KAZE
+                       /*ARW_TRACKER_OPTION_2D_TRACKER_FEATURE_TYPE = 11,*/           ///< Feature detector type used in the 2d Tracker - 0 AKAZE, 1 ORB, 2 BRISK, 3 KAZE, 4 SIFT
                        ARW_TRACKER_OPTION_2D_MAXIMUM_MARKERS_TO_TRACK = 12,           ///< Maximum number of markers able to be tracked simultaneously. Defaults to 1. Should not be set higher than the number of 2D markers loaded.
                        ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES = 13, ///< If true, when the square tracker is detecting matrix (barcode) markers, new trackables will be created for unmatched markers. Defaults to false. bool.
                        ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES_DEFAULT_WIDTH = 14, ///< If ARW_TRACKER_OPTION_SQUARE_MATRIX_MODE_AUTOCREATE_NEW_TRACKABLES is true, this value will be used for the initial width of new trackables for unmatched markers. Defaults to 80.0f. float.
@@ -540,7 +540,7 @@ public class PluginFunctionsARX : IPluginFunctions
     {
         GCHandle gch = GCHandle.FromIntPtr(userData);
         arwVideoPushReleaseCallbackStubData data = (arwVideoPushReleaseCallbackStubData)gch.Target;
-        data.releaseCallback.Invoke(data.releaseCallbackUserdata);
+        if (data.releaseCallback != null) data.releaseCallback.Invoke(data.releaseCallbackUserdata);
         gch.Free();
     }
 
@@ -564,6 +564,46 @@ public class PluginFunctionsARX : IPluginFunctions
                                         buf1.HasValue ? buf1.Value.GetIntPtr() : IntPtr.Zero, buf1.HasValue ? buf1.Value.Length : 0, buf1PixelStride, buf1RowStride,
                                         buf2.HasValue ? buf2.Value.GetIntPtr() : IntPtr.Zero, buf2.HasValue ? buf2.Value.Length : 0, buf2PixelStride, buf2RowStride,
                                         buf3.HasValue ? buf3.Value.GetIntPtr() : IntPtr.Zero, buf3.HasValue ? buf3.Value.Length : 0, buf3PixelStride, buf3RowStride,
+                                        callback, callbackUserdata);
+#else
+        return -1;
+#endif
+    }
+
+    private struct arwVideoPushReleaseCallbackStubData2
+    {
+        public GCHandle colors32GCH;
+        public PluginFunctionsVideoPushReleaseCallback releaseCallback;
+        public object releaseCallbackUserdata;
+    }
+
+    [AOT.MonoPInvokeCallback(typeof(ARX_pinvoke.arwVideoPushReleaseCallback))]
+    private static void arwVideoPushReleaseCallbackStub2(IntPtr userData)
+    {
+        GCHandle gch = GCHandle.FromIntPtr(userData);
+        arwVideoPushReleaseCallbackStubData2 data = (arwVideoPushReleaseCallbackStubData2)gch.Target;
+        data.colors32GCH.Free();
+        if (data.releaseCallback != null) data.releaseCallback.Invoke(data.releaseCallbackUserdata);
+        gch.Free();
+    }
+
+    override public int arwVideoPush(int videoSourceIndex,
+                Color32[] colors32, int width,
+                PluginFunctionsVideoPushReleaseCallback releaseCallback = null, object releaseCallbackUserdata = null)
+    {
+#if ARX_ALLOW_UNITY_VIDEO_PROVIDERS
+        GCHandle colors32GCH = GCHandle.Alloc(colors32, GCHandleType.Pinned);
+        IntPtr address = colors32GCH.AddrOfPinnedObject();
+        int length = colors32.Length * 4;
+        int pixelStride = 4;
+        int rowStride = width * 4;
+        ARX_pinvoke.arwVideoPushReleaseCallback callback = arwVideoPushReleaseCallbackStub2;
+        IntPtr callbackUserdata = GCHandle.ToIntPtr(GCHandle.Alloc(new arwVideoPushReleaseCallbackStubData2 { colors32GCH = colors32GCH, releaseCallback = releaseCallback, releaseCallbackUserdata = releaseCallbackUserdata }));
+        return ARX_pinvoke.arwVideoPush(videoSourceIndex,
+                                        address, length, pixelStride, rowStride,
+                                        IntPtr.Zero, 0, 0, 0,
+                                        IntPtr.Zero, 0, 0, 0,
+                                        IntPtr.Zero, 0, 0, 0,
                                         callback, callbackUserdata);
 #else
         return -1;

@@ -100,28 +100,28 @@ public class ARXControllerEditor : Editor
         using (new EditorGUI.DisabledScope(true))
             EditorGUILayout.ObjectField("Script", MonoScript.FromMonoBehaviour((MonoBehaviour)target), GetType(), false);
 
-        EditorGUILayout.LabelField("Version", "artoolkitX " + arcontroller.Version);
+        EditorGUILayout.LabelField("Native plugin version", "artoolkitX " + arcontroller.Version);
 
         EditorGUILayout.Separator();
 
         showVideoOptions = EditorGUILayout.Foldout(showVideoOptions, "Video Options");
         if (showVideoOptions)
         {
-            EditorGUILayout.PropertyField(videoCParamName0, new GUIContent("Camera parameters" + (VideoIsStereo.boolValue ? " (L)" : "")));
+            EditorGUILayout.PropertyField(videoCParamName0, new GUIContent("Camera calibration override file" + (VideoIsStereo.boolValue ? " (L)" : "")));
             if (!string.IsNullOrEmpty(videoCParamName0.stringValue))
             {
-                EditorGUILayout.HelpBox("Automatic camera parameters (if available) will be overridden.", MessageType.Info);
+                EditorGUILayout.HelpBox("Automatic camera calibration parameters (if available) will be overridden by the parameters contained in this file.", MessageType.Info);
             }
 
             EditorGUILayout.PropertyField(VideoIsStereo, new GUIContent("Video source is stereo"));
             if (VideoIsStereo.boolValue)
             {
-                EditorGUILayout.PropertyField(videoCParamName1, new GUIContent("Camera parameters (R)"));
+                EditorGUILayout.PropertyField(videoCParamName1, new GUIContent("Camera calibration override file (R)"));
                 if (!string.IsNullOrEmpty(videoCParamName1.stringValue))
                 {
-                    EditorGUILayout.HelpBox("Automatic camera parameters (if available) will be overridden.", MessageType.Info);
+                    EditorGUILayout.HelpBox("Automatic camera calibration  parameters (if available) will be overridden by the parameters contained in this file.", MessageType.Info);
                 }
-                EditorGUILayout.PropertyField(transL2RName, new GUIContent("Stereo parameters"));
+                EditorGUILayout.PropertyField(transL2RName, new GUIContent("Stereo calibration parameters file"));
             }
 
             // Commented-out, as native GL texturing is currently unsupported.
@@ -282,7 +282,7 @@ public class ARXControllerEditor : Editor
 
         EditorGUILayout.Separator();
 
-        showNFTTrackingOptions = EditorGUILayout.Foldout(showNFTTrackingOptions, "NFT Tracking Options");
+        showNFTTrackingOptions = EditorGUILayout.Foldout(showNFTTrackingOptions, "Legacy Natural Feature Tracking Options");
         if (showNFTTrackingOptions)
         {
             EditorGUILayout.PropertyField(NFTMultiMode, new GUIContent("Multi - page mode"), null);

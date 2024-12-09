@@ -24,7 +24,7 @@ After checking out this repository, you'll need to fetch the binary artoolkitX p
 cd dev
 ./build.sh platforms
 ```
-where `platforms` is a space-separted list of one or more of: `macos`, `windows`, `ios`, or `android`. Note that to fetch the plugins for mac OS or iOS requires the command to be executed on a Mac.
+where `platforms` is a space-separted list of one or more of: `macos`, `windows`, `ios`, `android`, or `emscripten`. Note that to fetch the plugins for mac OS or iOS requires the command to be executed on a Mac.
 
 Alternately, if you wish to make modifications to the plugins, you can check out and use artoolkitX directly as a git submodule:
 

@@ -69,6 +69,7 @@ sysinfo.txt
 /Packages/artoolkitX-Unity/Runtime/Plugins/iOS/*.a
 /Packages/artoolkitX-Unity/Runtime/Plugins/x86/*.dll
 /Packages/artoolkitX-Unity/Runtime/Plugins/x86_64/*.dll
+/Packages/artoolkitX-Unity/Runtime/Plugins/Web/*.a
 
 #### User-side settings
 ARToolKitEditorSettings.asset*
