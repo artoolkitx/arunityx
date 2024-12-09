@@ -125,7 +125,8 @@ if [ ! -f "${PLUGINS_BASE}/Android/libs/arm64-v8a/libARX.so" ] && \
    [ ! -f "${PLUGINS_BASE}/Android/libs/x86_64/libARX.so" ] && \
    [ ! -f "${PLUGINS_BASE}/iOS/libARX.a" ] && \
    [ ! -f "${PLUGINS_BASE}/x86_64/ARX.dll" ] && \
-   [ ! -f "${PLUGINS_BASE}/ARX.bundle" ] ; then
+   [ ! -f "${PLUGINS_BASE}/ARX.bundle" ] && \
+   [ ! -f "${PLUGINS_BASE}/Web/libARX.a" ] ; then
     echo "You need to run ./build.sh <platform> before packaging."
     exit 1
 fi

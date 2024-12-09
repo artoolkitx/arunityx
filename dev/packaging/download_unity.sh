@@ -26,8 +26,8 @@
 set -x
 
 # Set OS-dependent variables.
-OS=`uname -s`
-ARCH=`uname -m`
+OS=$(uname -s)
+ARCH=$(uname -m)
 if [ "$OS" = "Linux" ]
 then
     # Identify Linux OS. Sets useful variables: ID, ID_LIKE, VERSION, NAME, PRETTY_NAME.
@@ -66,8 +66,8 @@ done
 
 
 # If user didn't specify a version, use a default.
-UNITY_VERSION=${UNITY_VERSION:-2022.3.20f1}
-UNITY_DOWNLOAD_HASH=${UNITY_DOWNLOAD_HASH:-61c2feb0970d}
+UNITY_VERSION=${UNITY_VERSION:-6000.0.28f1}
+UNITY_DOWNLOAD_HASH=${UNITY_DOWNLOAD_HASH:-f336aca0cab5}
 
 mkdir -p "unity_installers" && cd "unity_installers"
 downloads=()
@@ -108,7 +108,35 @@ fi
 
 if [[ -n $WITH_ANDROID ]]; then
     # Android tools. See https://docs.unity3d.com/Manual/android-sdksetup.html#supported-dependency-versions.
-    if [[ "$UNITY_VERSION" =~ 2022\.3\..* ]]; then
+    if [[ "$UNITY_VERSION" =~ 6000\.0\..* ]]; then
+        if [ "$OS" = "Windows" ]; then
+            downloads+=(
+                https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.9%2B9.1/OpenJDK17U-jdk_x64_windows_hotspot_17.0.9_9.zip
+                https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip
+                https://dl.google.com/android/repository/build-tools_r34-windows.zip
+                https://dl.google.com/android/repository/platform-tools_r34.0.5-windows.zip
+                https://dl.google.com/android/repository/android-ndk-r23b-windows.zip
+                https://dl.google.com/android/repository/commandlinetools-win-8092744_latest.zip
+                https://dl.google.com/android/repository/cmake-3.22.1-windows.zip
+            )
+            #
+        elif [ "$OS" = "Darwin" ]; then
+            downloads+=(
+                https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.9%2B9/OpenJDK17U-jdk_x64_mac_hotspot_17.0.9_9.tar.gz
+                https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
+                https://dl.google.com/android/repository/build-tools_r34-macosx.zip
+                https://dl.google.com/android/repository/platform-tools_r34.0.5-darwin.zip
+				https://dl.google.com/android/repository/android-ndk-r23b-darwin.zip
+				https://dl.google.com/android/repository/commandlinetools-mac-8092744_latest.zip
+                https://dl.google.com/android/repository/cmake-3.22.1-darwin.zip
+            )
+        fi
+        downloads+=(
+            https://dl.google.com/android/repository/platform-33-ext3_r03.zip
+            https://dl.google.com/android/repository/platform-34-ext7_r02.zip
+            https://dl.google.com/android/repository/platform-35_r01.zip
+        )
+    elif [[ "$UNITY_VERSION" =~ 2022\.3\..* ]]; then
         if [ "$OS" = "Windows" ]; then
             downloads+=(
                 https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.14.1%2B1/OpenJDK11U-jdk_x64_windows_hotspot_11.0.14.1_1.zip

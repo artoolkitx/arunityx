@@ -28,8 +28,8 @@ set -x
 export MSYS_NO_PATHCONV=1
 
 # Set OS-dependent variables.
-OS=`uname -s`
-ARCH=`uname -m`
+OS=$(uname -s)
+ARCH=$(uname -m)
 WINPATH=cygpath
 if [ "$OS" = "Linux" ]
 then
@@ -70,7 +70,7 @@ done
 
 
 # If user didn't specify a version, use a default.
-UNITY_VERSION=${UNITY_VERSION:-2022.3.20f1}
+UNITY_VERSION=${UNITY_VERSION:-6000.0.28f1}
 
 cd "unity_installers"
 
@@ -89,13 +89,54 @@ then
     sudo installer -pkg Unity.pkg -target / -verbose
     sudo installer -pkg UnitySetup-Mac-IL2CPP-Support-for-Editor-${UNITY_VERSION}.pkg -target / -verbose
     if [[ -n $WITH_ANDROID ]]; then
-        sudo installer -pkg UnitySetup-Android-Support-for-Editor-${UNITY_VERSION}.pkg -target / -verbose
+    	sudo installer -pkg UnitySetup-Android-Support-for-Editor-${UNITY_VERSION}.pkg -target / -verbose
     fi
     #sudo installer -pkg UnitySetup-Windows-Mono-Support-for-Editor-${UNITY_VERSION}.pkg -target / -verbose
 fi
 
 if [[ -n $WITH_ANDROID ]]; then
-    if [[ "$UNITY_VERSION" =~ 2022\.3\..* ]]; then
+    if [[ "$UNITY_VERSION" =~ 6000\.0\..* ]]; then
+        if [ "$OS" = "Windows" ]; then
+            sdkInstallRoot=$(${WINPATH} -u C:\\Program\ Files\\Unity\ ${UNITY_VERSION}\\Editor\\Data\\PlaybackEngines\\AndroidPlayer)
+            # JDK
+            unzip "OpenJDK17U-jdk_x64_windows_hotspot_17.0.9_9.zip" -d "${sdkInstallRoot}"
+            mv "${sdkInstallRoot}/jdk-17.0.9+9" "${sdkInstallRoot}/OpenJDK"
+            # SDK
+            unzip -q "sdk-tools-windows-4333796.zip" -d "${sdkInstallRoot}/SDK"
+            unzip -q "build-tools_r34-windows.zip" -d "${sdkInstallRoot}/SDK/build-tools"
+            mv "${sdkInstallRoot}/SDK/build-tools/android-14" "${sdkInstallRoot}/SDK/build-tools/34.0.0"
+            unzip -q "platform-tools_r34.0.5-windows.zip" -d "${sdkInstallRoot}/SDK"
+            unzip -q "android-ndk-r23b-windows.zip" -d "${sdkInstallRoot}"
+            mv "${sdkInstallRoot}/android-ndk-r23b" "${sdkInstallRoot}/NDK"
+            mkdir "${sdkInstallRoot}/SDK/cmdline-tools"
+            unzip -q "commandlinetools-win-8092744_latest.zip" -d "${sdkInstallRoot}/SDK/cmdline-tools"
+            mv "${sdkInstallRoot}/SDK/cmdline-tools/cmdline-tools" "${sdkInstallRoot}/SDK/cmdline-tools/6.0"
+            mkdir "${sdkInstallRoot}/SDK/cmake"
+            unzip -q "cmake-3.22.1-windows.zip" -d "${sdkInstallRoot}/SDK/cmake/3.22.1"
+        elif [ "$OS" = "Darwin" ]; then
+            sdkInstallRoot='/Applications/Unity/Editor/PlaybackEngines/AndroidPlayer'
+            # JDK. Mac package layout differs.
+            tar xzf "OpenJDK17U-jdk_x64_mac_hotspot_17.0.9_9.tar.gz" -C "${sdkInstallRoot}"
+            mv "${sdkInstallRoot}/jdk-17.0.9+9/Contents/Home" "${sdkInstallRoot}/OpenJDK"
+            rm -rf "${sdkInstallRoot}/jdk-17.0.9+9"
+            # SDK
+            unzip -q "sdk-tools-darwin-4333796.zip" -d "${sdkInstallRoot}/SDK"
+            unzip -q "build-tools_r34-macosx.zip" -d "${sdkInstallRoot}/SDK/build-tools"
+            mv "${sdkInstallRoot}/SDK/build-tools/android-14" "${sdkInstallRoot}/SDK/build-tools/34.0.0"
+            unzip -q "platform-tools_r34.0.5-darwin.zip" -d "${sdkInstallRoot}/SDK"
+            unzip -q "android-ndk-r23b-darwin.zip" -d "${sdkInstallRoot}"
+            mv "${sdkInstallRoot}/android-ndk-r23b" "${sdkInstallRoot}/NDK"
+            mkdir "${sdkInstallRoot}/SDK/cmdline-tools"
+            unzip -q "commandlinetools-mac-8092744_latest.zip" -d "${sdkInstallRoot}/SDK/cmdline-tools"
+            mv "${sdkInstallRoot}/SDK/cmdline-tools/cmdline-tools" "${sdkInstallRoot}/SDK/cmdline-tools/6.0"
+            mkdir "${sdkInstallRoot}/SDK/cmake"
+            unzip -q "cmake-3.22.1-darwin.zip" -d "${sdkInstallRoot}/SDK/cmake/3.22.1"
+        fi
+        unzip -q "platform-33-ext3_r03.zip" -d "${sdkInstallRoot}/SDK/platforms"
+        mv "${sdkInstallRoot}/SDK/platforms/android-13" "${sdkInstallRoot}/SDK/platforms/android-33"
+        unzip -q "platform-34-ext7_r02.zip" -d "${sdkInstallRoot}/SDK/platforms"
+        unzip -q "platform-35_r01.zip" -d "${sdkInstallRoot}/SDK/platforms"
+    elif [[ "$UNITY_VERSION" =~ 2022\.3\..* ]]; then
         if [ "$OS" = "Windows" ]; then
             sdkInstallRoot=$(${WINPATH} -u C:\\Program\ Files\\Unity\ ${UNITY_VERSION}\\Editor\\Data\\PlaybackEngines\\AndroidPlayer)
             # JDK
