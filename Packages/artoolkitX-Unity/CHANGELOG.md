@@ -1,6 +1,13 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.3.0
+### 2024-12-09
+
+ * New support for Unity WebCamTexture as an external video source.
+ * Update artoolkitX to v1.1.21 with support for Emscripten platform.
+ * Experimental support for Unity Web Player builds.
+
 ## Version 1.2.12
 ### 2024-06-25
 

@@ -48,7 +48,7 @@ public class ARToolKitMenuEditor : MonoBehaviour {
     private const string SOURCE_URL            = "https://github.com/artoolkitx/artoolkitx";
     private const string PLUGIN_SOURCE_URL     = "https://github.com/artoolkitx/arunityx";
     private const string TOOLS_URL             = "https://github.com/artoolkitx/artoolkitx/releases/latest";
-    private const string VERSION               = "artoolkitX for Unity Version 1.2.12";
+    private const string VERSION               = "artoolkitX for Unity Version 1.3.0";
     private const string VERSION_MENU          = MENU_PATH_BASE + "/" + VERSION;
     private const string WELCOME_MESSAGE       = "Welcome to " + VERSION + ".";
     private static bool showDownloadTools = false;
