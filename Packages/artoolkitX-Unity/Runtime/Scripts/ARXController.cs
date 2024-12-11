@@ -44,6 +44,7 @@ using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Android;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 
 
@@ -393,8 +394,15 @@ public class ARXController : MonoBehaviour
         if (!Application.isPlaying) return; // Editor update.
 
         // Player update.
-        if (Input.GetKeyDown(KeyCode.Menu) || Input.GetKeyDown(KeyCode.Return)) showGUIDebug = !showGUIDebug;
-        if (QuitOnEscOrBack && Input.GetKeyDown(KeyCode.Escape)) // On Android, maps to "back" button.
+#if ENABLE_LEGACY_INPUT_MANAGER
+        bool toggleDebugGUI = Input.GetKeyDown(KeyCode.Menu) || Input.GetKeyDown(KeyCode.Return);
+        bool quit = Input.GetKeyDown(KeyCode.Escape);
+#elif ENABLE_INPUT_SYSTEM
+        bool toggleDebugGUI = Keyboard.current[Key.ContextMenu].wasPressedThisFrame;
+        bool quit = Keyboard.current[Key.Escape].wasPressedThisFrame;
+#endif
+        if (toggleDebugGUI) showGUIDebug = !showGUIDebug;
+        if (QuitOnEscOrBack && quit) // On Android, maps to "back" button.
         {
             Application.Quit();
 #if UNITY_EDITOR
@@ -404,7 +412,7 @@ public class ARXController : MonoBehaviour
 
         CalculateFPS();
 
-        if (_running)
+        if (_running && (UnityVideoSource == null || !UnityVideoSource.WillCallUpdateAR()))
         {
             UpdateAR();
         }
@@ -492,7 +500,7 @@ public class ARXController : MonoBehaviour
         StartCoroutine(StartARCo());
     }
 
-    public IEnumerator StartARCo()
+    private IEnumerator StartARCo()
     {
         // Catch attempts to inadvertently call StartAR() twice.
         if (_running)
@@ -588,8 +596,15 @@ public class ARXController : MonoBehaviour
             // If using a Unity video source, start it now.
             if (arvideoconfig.IsUsingUnityVideoSource())
             {
-                UnityVideoSource = new ARXUnityVideoSourceWebCamTexture();
-                UnityVideoSource.OnVideoStart(this);
+                switch (arvideoconfig.GetUnityVideoSource())
+                {
+                    case ARXVideoConfig.ARVideoUnityVideoSource.WebcamTexture:
+                        UnityVideoSource = new ARXUnityVideoSourceWebCamTexture();
+                        break;
+                    default:
+                        break;
+                }
+                UnityVideoSource?.OnVideoStart(this);
             }
 
             // Load the default camera parameters.
@@ -681,7 +696,7 @@ public class ARXController : MonoBehaviour
         // Remaining Unity setup happens in UpdateAR().
     }
 
-    bool UpdateAR()
+    public bool UpdateAR()
     {
         if (!_running)
         {

@@ -102,13 +102,21 @@ public class ARXVideoBackground : MonoBehaviour
         {
             // Create a game object on which to draw the video.
             string name = "Video source" + (arController.VideoIsStereo ? nameSuffix : "");
-            ARXController.Log(LogTag + name + " size " + _videoWidth + "x" + _videoHeight + "@" + _videoPixelSize + "Bpp (" + _videoPixelFormatString + ")");
+            ARXController.Log($"{LogTag} {name} size {_videoWidth}x{_videoHeight}@{_videoPixelSize}Bpp ({_videoPixelFormatString})");
             if (arController.UnityVideoSource != null)
             {
                 _videoBackgroundMeshGO = ARXUtilityFunctions.CreateVideoObject(name, arController.UnityVideoSource.GetTexture(), 1000.0f, arCamera.ContentFlipH, arCamera.ContentFlipV, BackgroundLayer, out _videoMaterial);  // 1000.0f is arbitrary distance, since we'll observe with camera using orthogonal projection. Just needs to be between near and far.
                 if (!_videoBackgroundMeshGO || !_videoMaterial)
                 {
-                    ARXController.Log(LogTag + "Error: unable to create video mesh.");
+                    ARXController.LogError($"{LogTag}Error: Unity video source cannot supply a texture.");
+                }
+                else
+                {
+                    _videoBackgroundMeshGO = ARXUtilityFunctions.CreateVideoObject(name, arController.UnityVideoSource.GetTexture(), 1000.0f, arCamera.ContentFlipH, arCamera.ContentFlipV, BackgroundLayer, out _videoMaterial);  // 1000.0f is arbitrary distance, since we'll observe with camera using orthogonal projection. Just needs to be between near and far.
+                    if (!_videoBackgroundMeshGO || !_videoMaterial)
+                    {
+                        ARXController.LogError($"{LogTag}Error: unable to create video mesh.");
+                    }
                 }
             }
             else
@@ -117,7 +125,7 @@ public class ARXVideoBackground : MonoBehaviour
                 _videoBackgroundMeshGO = ARXUtilityFunctions.CreateVideoObject(name, _videoWidth, _videoHeight, 1000.0f, arCamera.ContentFlipH, !arCamera.ContentFlipV, BackgroundLayer, out _videoTexture, out _videoMaterial);  // 1000.0f is arbitrary distance, since we'll observe with camera using orthogonal projection. Just needs to be between near and far.
                 if (_videoBackgroundMeshGO == null || _videoTexture == null || _videoMaterial == null)
                 {
-                    ARXController.Log(LogTag + "Error: unable to create video mesh.");
+                    ARXController.LogError($"{LogTag}Error: unable to create video mesh.");
                 }
                 else
                 {
@@ -131,13 +139,13 @@ public class ARXVideoBackground : MonoBehaviour
         _videoBackgroundCameraGO = new GameObject($"Video background{nameSuffix}");
         if (_videoBackgroundCameraGO == null)
         {
-            ARXController.Log(LogTag + "Error: CreateVideoBackgroundCamera cannot create GameObject.");
+            ARXController.LogError($"{LogTag}CreateVideoBackgroundCamera cannot create GameObject.");
             return;
         }
         _videoBackgroundCamera = _videoBackgroundCameraGO.AddComponent<Camera>();
         if (_videoBackgroundCamera == null)
         {
-            ARXController.Log(LogTag + "Error: CreateVideoBackgroundCamera cannot add Camera to GameObject.");
+            ARXController.LogError($"{LogTag}CreateVideoBackgroundCamera cannot add Camera to GameObject.");
             Destroy(_videoBackgroundCameraGO);
             return;
         }
@@ -271,7 +279,7 @@ public class ARXVideoBackground : MonoBehaviour
             }
             else
             {
-                ARXController.Log(LogTag + "Error: No video color array to update.");
+                ARXController.LogError($"{LogTag}Error: No video color array to update.");
             }
         }
     }

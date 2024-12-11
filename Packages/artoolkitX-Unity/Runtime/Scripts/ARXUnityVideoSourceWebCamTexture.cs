@@ -74,6 +74,11 @@ public class ARXUnityVideoSourceWebCamTexture : IARXUnityVideoSource
         return true;
     }
 
+    public bool WillCallUpdateAR()
+    {
+        return false;
+    }
+
     public bool OnVideoUpdate()
     {
         if (!_arController || !_webcamTexture)

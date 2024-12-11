@@ -40,6 +40,7 @@ using System.Collections;//.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Transform))]   // A Transform is required to update the position and orientation from tracking
 [ExecuteInEditMode]                     // Run in the editor so we can keep the scale at 1
@@ -122,21 +123,29 @@ public class ARXTransitionalCamera : ARXTrackedCamera
     {
         base.Update();
 
-        if (Input.GetKeyDown(KeyCode.I)) {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        bool keyIn = Input.GetKeyDown(KeyCode.I);
+        bool keyOut = Input.GetKeyDown(KeyCode.O);
+#elif ENABLE_INPUT_SYSTEM
+        bool keyIn = Keyboard.current[Key.I].wasPressedThisFrame;
+        bool keyOut = Keyboard.current[Key.O].wasPressedThisFrame;
+#endif
+        if (keyIn)
+        {
             transitionIn();
         }
-
-        if (Input.GetKeyDown(KeyCode.O)) {
+        if (keyOut)
+        {
             transitionOut();
         }
 
-        if (automaticTransition) {
-            if (arVisible) {
-
-                if (arPosition.magnitude < automaticTransitionDistance) {
-
+        if (automaticTransition)
+        {
+            if (arVisible)
+            {
+                if (arPosition.magnitude < automaticTransitionDistance)
+                {
                     if (transitionAmount != 1) transitionIn();
-
                 }
             }
         }

@@ -45,6 +45,7 @@ using UnityEngine;
 public interface IARXUnityVideoSource
 {
     public bool OnVideoStart(ARXController arController);
+    public bool WillCallUpdateAR();
     public bool OnVideoUpdate();
     public Texture GetTexture();
     public void OnVideoStop();

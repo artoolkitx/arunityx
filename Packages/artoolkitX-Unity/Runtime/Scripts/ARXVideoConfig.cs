@@ -942,4 +942,12 @@ public class ARXVideoConfig : MonoBehaviour
         if (!pcb.HasValue) return false;
         return pcb.Value.isUsingUnityVideoSource;
     }
+    
+    public ARVideoUnityVideoSource GetUnityVideoSource()
+    {
+        ARVideoPlatformConfig? pcb = GetPlatformConfig(Application.platform);
+        if (!pcb.HasValue || !pcb.Value.isUsingUnityVideoSource) return ARVideoUnityVideoSource.None;
+        return pcb.Value.unityVideoSource;
+    }
+
 }

@@ -80,7 +80,7 @@ public class ARToolKitMenuEditor : MonoBehaviour {
 	private static void HomePage() {
         Application.OpenURL(HOME_PAGE_URL);
     }
-    
+
     [MenuItem (MENU_PATH_BASE + "/Support/Documentation", false, 61)]
 	private static void Documentation() {
         Application.OpenURL(DOCUMENTATION_URL);
@@ -90,12 +90,12 @@ public class ARToolKitMenuEditor : MonoBehaviour {
 	private static void Community() {
         Application.OpenURL(COMMUNITY_URL);
     }
-    
+
     [MenuItem (MENU_PATH_BASE + "/Source Code/View artoolkitX Source", false, 70)]
 	private static void Source() {
         Application.OpenURL(SOURCE_URL);
     }
-    
+
     [MenuItem (MENU_PATH_BASE + "/Source Code/View Unity Plugin Source", false, 71)]
 	private static void PluginSource() {
         Application.OpenURL(PLUGIN_SOURCE_URL);

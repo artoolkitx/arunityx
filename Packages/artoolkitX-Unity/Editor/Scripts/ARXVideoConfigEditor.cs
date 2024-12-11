@@ -91,15 +91,22 @@ public class ARXVideoConfigEditor : Editor
             showPlatformConfig[pci] = EditorGUILayout.Foldout(showPlatformConfig[pci], pc.name);
             if (!showPlatformConfig[pci]) continue;
 
-            bool tempUuvs = false;
+            bool tempUuvs = pc.isUsingUnityVideoSource;
+            ARXVideoConfig.ARVideoUnityVideoSource tempUvs = pc.unityVideoSource;
             if (pc.supportedUnityVideoSources.Contains(ARXVideoConfig.ARVideoUnityVideoSource.WebcamTexture))
             {
-                tempUuvs = EditorGUILayout.Toggle("Use Unity Webcam", pc.isUsingUnityVideoSource);
+                bool currentUuwc = pc.isUsingUnityVideoSource && pc.unityVideoSource == ARXVideoConfig.ARVideoUnityVideoSource.WebcamTexture;
+                bool tempUuwc = EditorGUILayout.Toggle("Use Unity Webcam", currentUuwc);
+                if (tempUuwc && !currentUuwc)
+                {
+                    tempUuvs = true;
+                    tempUvs = ARXVideoConfig.ARVideoUnityVideoSource.WebcamTexture;
+                }
             }
-            if (tempUuvs != pc.isUsingUnityVideoSource)
+            if (pc.isUsingUnityVideoSource != tempUuvs || pc.unityVideoSource != tempUvs)
             {
                 pc.isUsingUnityVideoSource = tempUuvs;
-                if (tempUuvs) pc.unityVideoSource = ARXVideoConfig.ARVideoUnityVideoSource.WebcamTexture;
+                pc.unityVideoSource = tempUvs;
                 needSave = true;
             }
 #if !ARX_ALLOW_UNITY_VIDEO_PROVIDERS

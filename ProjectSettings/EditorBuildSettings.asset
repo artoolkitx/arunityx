@@ -12,6 +12,16 @@ EditorBuildSettings:
     path: Packages/org.artoolkitx.artoolkitx-unity/Samples/2DTextureSample/2DScene.unity
     guid: 6d39e3ec99d754e5d813bf88f69c6e9e
   - enabled: 0
+    path: Packages/org.artoolkitx.artoolkitx-unity/Samples/BarcodeSample/BarcodeScene.unity
+    guid: a22883dbab7d84ef3972bdd06b9e589d
+  - enabled: 0
+    path: Packages/org.artoolkitx.artoolkitx-unity/Samples/CubeSample/CubeScene.unity
+    guid: 91e0064a3efe34200aa60dba3775ddbf
+  - enabled: 0
     path: Packages/org.artoolkitx.artoolkitx-unity/Samples/LegacyNFTSample/LegacyNFTScene.unity
     guid: 5abbb77b415fb4033ad460f5774496dd
+  - enabled: 0
+    path: Packages/org.artoolkitx.artoolkitx-unity/Samples/MultimarkerSheetSample/MultimarkerSheetScene.unity
+    guid: 240fd65e106ba44b6b794b5cec7c04be
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0
