@@ -1,6 +1,12 @@
 # artoolkitX for Unity Release Notes
 ------------------------------------
 
+## Version 1.3.1
+### 2024-12-13
+
+ * Update artoolkitX to v1.1.22 with fix for 2D tracker scaling.
+ * Add support for InputSystem to framework and examples.
+
 ## Version 1.3.0
 ### 2024-12-09
 
